@@ -1,6 +1,6 @@
 import os
 
-import discord
+from discord.ext import commands
 from dotenv import load_dotenv
 
 from actions import move, register, get_teams
@@ -9,71 +9,55 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 CONTROL_ROLE = "CONTROL"
 
-client = discord.Client()
+bot = commands.Bot(command_prefix="!")
 
-@client.event
-async def on_ready():
-    print(f'{client.user} has connected to Discord!')
-
-@client.event
-async def on_message(message):
-    if message.author == client.user or message.content[0] != "!":
-        return
-    if to_run = get_command(message):
-        # status is either None or something to do.
-        status = to_run(get_team(message))
-
-def get_command(message):
+@bot.command(name="move")
+async def player_move(ctx, direction):
     """
-    Get the command (!xxx ...) from a message's content.
+    `move direction` sets the direction of the user's submarine to the compass direction `direction`.
     """
-    content = message.content
-    commands = {"!move": control_acts(move),
-                "!register": control_only(register)}
-    for command in commands:
-        if args = get_arguments(command, content):
-            return lambda x: commands[command](args, x)
-    return None
+    await perform(move, ctx, direction, get_team(ctx.author))
 
-def get_arguments(prefix, content):
-    parts = content.split(" ")
-    if parts[0] == prefix:
-        return parts[1:]
-    return None
+@bot.command(name="force_move")
+@commands.has_role(CONTROL_ROLE)
+async def control_move(ctx, team, direction):
+    """
+    `force_move team direction` moves `team`'s submarine in compass direction `direction`.
+    """
+    await perform(move, ctx, direction, team)
 
-def control_only(fn):
+@bot.command(name="register")
+@commands.has_role(CONTROL_ROLE)
+async def register_team(ctx, name):
     """
-    control_only() functions can only be run by members of team CONTROL_ROLE.
-    As such, we check that the team running them is CONTROL_ROLE.
-    On failure, we return None.
+    `register name` registers a team with the name `name`.
     """
-    def safe(args, x):
-        if x == CONTROL_ROLE:
-            return fn(args, x)
-        return None
-    return safe
+    await perform(register, ctx, name)
 
-def control_acts(fn):
-    """
-    control_acts() functions allow members of team CONTROL_ROLE to pretend to
-    be another team. These functions, when run by a member of control, consider
-    the last argument of those functions to be the team running them.
-    """
-    def pretend(args, x):
-        if x == CONTROL_ROLE:
-            return fn(args[:-1], args[-1])
-        return fn(args, x)
-    return pretend
-
-def get_team(message):
+def get_team(author):
     """
     Gets the first role that has a submarine associated with it, or None.
     """
-    roles = message.author.roles
+    roles = list(map(lambda x: x.name, author.roles))
     for team in get_teams():
         if team in roles:
             return team
     return None
 
-client.run(TOKEN)
+async def perform(fn, ctx, *args):
+    """
+    Performs an action fn with *args and then performs the Discord action
+    returned by fn using the context ctx.
+    """
+    print(fn.__name__, args)
+    status = fn(*args)
+    if status: await status.do_status(ctx)
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.errors.CheckFailure):
+        await ctx.send('You do not have the correct role for this command.')
+
+print("ALTANTIS READY")
+bot.run(TOKEN)
 

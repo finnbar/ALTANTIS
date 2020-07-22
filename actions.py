@@ -12,23 +12,23 @@ state = {}
 def get_teams():
     return state.keys()
 
-def move(args, team):
+def move(direction, team):
     """
-    Takes arguments and a team identifier, and records the team's current
-    direction from args as that direction.
+    Records the team's direction.
     We then react to the message accordingly.
     """
-    direction = args[0]
+    print("Setting direction of", team, "to", direction)
     if team in state.keys():
         # Store the move and return the correct emoji.
         return state[team].set_direction(direction)
     return None
 
-def register(name, _):
+def register(name):
     """
     Registers a team, setting them up with everything they could need.
     ONLY RUNNABLE BY CONTROL.
     """
+    print("Registering", name)
     state[name] = Submarine(name)
     return React(OKAY_REACT)
 
