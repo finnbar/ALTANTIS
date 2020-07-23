@@ -1,13 +1,22 @@
+"""
+The main entry point for our bot, which tells Discord what commands the bot can
+perform and how to do so.
+"""
+
 import os
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
 from actions import move, register, get_teams
+from game import perform_timestep
+from utils import OKAY_REACT
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 CONTROL_ROLE = "CONTROL"
+
+# SERIAL COMMANDS
 
 bot = commands.Bot(command_prefix="!")
 
@@ -30,9 +39,10 @@ async def control_move(ctx, team, direction):
 @commands.has_role(CONTROL_ROLE)
 async def register_team(ctx, name):
     """
-    `register name` registers a team with the name `name`.
+    `register name` registers a team with the name `name` to the channel this
+    message was received from.
     """
-    await perform(register, ctx, name)
+    await perform(register, ctx, name, ctx.message.channel)
 
 def get_team(author):
     """
@@ -53,6 +63,26 @@ async def perform(fn, ctx, *args):
     status = fn(*args)
     if status: await status.do_status(ctx)
 
+# LOOP HANDLING
+
+@tasks.loop(seconds=3)
+async def main_loop():
+    await perform_timestep()
+
+@bot.command(name="startloop")
+@commands.has_role(CONTROL_ROLE)
+async def startloop(ctx):
+    main_loop.start()
+    await OKAY_REACT.do_status(ctx)
+
+@bot.command(name="stoploop")
+@commands.has_role(CONTROL_ROLE)
+async def stoploop(ctx):
+    main_loop.stop()
+    await OKAY_REACT.do_status(ctx)
+
+# ERROR HANDLING AND BOT STARTUP
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
@@ -60,4 +90,3 @@ async def on_command_error(ctx, error):
 
 print("ALTANTIS READY")
 bot.run(TOKEN)
-
