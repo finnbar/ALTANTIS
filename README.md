@@ -3,8 +3,9 @@ A possible bot for an upcoming Megagame run by Warwick Tabletop.
 
 Important features:
 [x] Can have submarines, which move.
-[ ] Obstacles on the map.
-[ ] Can turn the sub off and on. (Allowing players to dock.)
+[ ] Has a map with obstacles.
+[x] Can turn the sub off and on. (Allowing players to dock.)
+[ ] Submarines can travel at multiple speeds.
 [ ] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
 [ ] Full power management. Can power systems, but has a power cap (which can be increased by control).
 [ ] Can activate scanners, and inform players when they hover over things.

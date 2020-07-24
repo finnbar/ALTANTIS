@@ -3,7 +3,7 @@ The backend for all Discord actions, which allow players to control their sub.
 """
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT
-from state import get_teams, get_sub, add_team
+from sub import get_teams, get_sub, add_team
 
 direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
                    "W": "⬅", "NE": "↗",

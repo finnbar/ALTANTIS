@@ -2,7 +2,7 @@
 Runs the game, performing the right actions at fixed time intervals.
 """
 
-from state import get_teams, get_sub
+from sub import get_teams, get_sub
 
 async def perform_timestep():
     """

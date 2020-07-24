@@ -1,12 +1,11 @@
 """
-Manage the state dictionary and the individual submarines within it.
+Manages the submarines as a whole and the individual submarines within it.
 """
+
+from world import move_on_map, possible_directions
 
 # State dictionary, filled with submarines.
 state = {}
-# Map size.
-X_LIMIT = 50
-Y_LIMIT = 50
 
 def get_teams():
     """
@@ -29,9 +28,6 @@ def add_team(name, channel):
         return True
     return False
 
-directions = {"N": (0, -1), "NE": (1, -1), "E": (1, 0), "SE": (1, 1),
-              "S": (0, 1), "SW": (-1, 1), "W": (-1, 0), "NW": (-1, -1)}
-
 class Submarine():
     def __init__(self, name, channel):
         self.name = name
@@ -43,7 +39,7 @@ class Submarine():
         self.is_on = False
 
     def set_direction(self, direction):
-        if direction in directions:
+        if direction in possible_directions():
             self.direction = direction
             return True
         return False
@@ -62,11 +58,7 @@ class Submarine():
         return self.is_on
 
     def move(self):
-        motion = directions[self.direction]
-        self.x += motion[0]
-        self.y += motion[1]
-        self.x = self.x % X_LIMIT
-        self.y = self.y % Y_LIMIT
+        self.x, self.y = move_on_map(self.direction, self.x, self.y)
 
     async def send_message(self, content):
         await self.channel.send(content)
