@@ -17,13 +17,14 @@ async def perform_timestep():
             break
 
         # Actions!
+        direction = sub.get_direction() # since sub.get_direction() may change.
         move_message = sub.move()
         if move_message:
             await sub.send_message(move_message)
 
         # Status report!
         message = (
-            f"Moved **{subname}** in direction **{sub.get_direction()}**!\n"
+            f"Moved **{subname}** in direction **{direction}**!\n"
             f"**{subname}** is now at position **{sub.get_position()}**."
         )
         await sub.send_message(message)

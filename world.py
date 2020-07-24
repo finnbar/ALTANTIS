@@ -2,6 +2,11 @@
 Deals with the world map, which submarines explore.
 """
 
+directions = {"N": (0, -1), "NE": (1, -1), "E": (1, 0), "SE": (1, 1),
+              "S": (0, 1), "SW": (-1, 1), "W": (-1, 0), "NW": (-1, -1)}
+reverse_dir = {"N": "S", "NE": "SW", "E": "W", "SE": "NW", "S": "N",
+               "SW": "NE", "W": "E", "NW": "SE"}
+
 class Empty():
     def __init__(self):
         pass
@@ -27,6 +32,7 @@ class Wall(Empty):
     
     def on_entry(self, sub):
         sub.damage(self.damaging)
+        sub.set_direction(reverse_dir[sub.get_direction()])
         return f"The submarine hit a wall and took {self.damaging} damage!"
     
     def to_char(self):
@@ -68,9 +74,6 @@ Y_LIMIT = 40
 undersea_map = [[Empty() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
 # TODO: Remove and replace with actual map.
 undersea_map[0][39] = DockingStation("The Docking Station", "E")
-
-directions = {"N": (0, -1), "NE": (1, -1), "E": (1, 0), "SE": (1, 1),
-              "S": (0, 1), "SW": (-1, 1), "W": (-1, 0), "NW": (-1, -1)}
 
 def possible_directions():
     return directions.keys()
