@@ -8,7 +8,7 @@ import os
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from actions import move, register, get_teams
+from actions import move, register, get_teams, toggle_power
 from game import perform_timestep
 from utils import OKAY_REACT
 
@@ -43,6 +43,10 @@ async def register_team(ctx, name):
     message was received from.
     """
     await perform(register, ctx, name, ctx.message.channel)
+
+@bot.command(name="power")
+async def power(ctx):
+    await perform(toggle_power, ctx, get_team(ctx.author))
 
 def get_team(author):
     """

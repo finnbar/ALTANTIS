@@ -2,7 +2,7 @@
 The backend for all Discord actions, which allow players to control their sub.
 """
 
-from utils import React, OKAY_REACT, FAIL_REACT
+from utils import React, Message, OKAY_REACT, FAIL_REACT
 from state import get_teams, get_sub, add_team
 
 direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
@@ -30,4 +30,17 @@ def register(name, channel):
     print("Registering", name)
     if add_team(name, channel):
         return OKAY_REACT
+    return FAIL_REACT
+
+def toggle_power(team):
+    """
+    Toggles a submarine between off and on.
+    """
+    sub = get_sub(team)
+    if sub:
+        sub.power()
+        print("Setting power of", team, "to", sub.powered())
+        if sub.powered():
+            return Message(f"{team} is now **ON** and running! Current direction: {direction_emoji[sub.get_direction()]}")
+        return Message(f"{team} is now **OFF** and halted!")
     return FAIL_REACT

@@ -40,18 +40,26 @@ class Submarine():
         self.speed = 1
         self.x = 0
         self.y = 0
+        self.is_on = False
 
     def set_direction(self, direction):
         if direction in directions:
             self.direction = direction
             return True
         return False
-    
+
     def get_direction(self):
         return self.direction
-    
+
     def get_position(self):
         return (self.x, self.y)
+
+    def power(self):
+        self.is_on = not self.is_on
+        return True
+
+    def powered(self):
+        return self.is_on
 
     def move(self):
         motion = directions[self.direction]

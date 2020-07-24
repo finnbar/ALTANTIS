@@ -12,10 +12,13 @@ async def perform_timestep():
     print("Running turn!")
     for subname in get_teams():
         sub = get_sub(subname)
-        
+
+        if not sub.powered():
+            break
+
         # Actions!
         sub.move()
-        
+
         # Status report!
         message = (
             f"Moved **{subname}** in direction **{sub.get_direction()}**!\n"
