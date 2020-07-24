@@ -50,15 +50,20 @@ class Submarine():
     def get_position(self):
         return (self.x, self.y)
 
-    def power(self):
-        self.is_on = not self.is_on
+    def power(self, value):
+        self.is_on = value
         return True
 
     def powered(self):
         return self.is_on
 
     def move(self):
-        self.x, self.y = move_on_map(self.direction, self.x, self.y)
+        self.x, self.y, message = move_on_map(self, self.direction, self.x, self.y)
+        return message
+    
+    def damage(self, amount):
+        # TODO: implement damage.
+        pass
 
     async def send_message(self, content):
         await self.channel.send(content)

@@ -17,7 +17,9 @@ async def perform_timestep():
             break
 
         # Actions!
-        sub.move()
+        move_message = sub.move()
+        if move_message:
+            await sub.send_message(move_message)
 
         # Status report!
         message = (

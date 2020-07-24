@@ -4,6 +4,7 @@ The backend for all Discord actions, which allow players to control their sub.
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT
 from sub import get_teams, get_sub, add_team
+from world import ascii_map
 
 direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
                    "W": "⬅", "NE": "↗",
@@ -32,15 +33,39 @@ def register(name, channel):
         return OKAY_REACT
     return FAIL_REACT
 
-def toggle_power(team):
+def set_power(team, value):
     """
-    Toggles a submarine between off and on.
+    Sets the submarine's power to `value`.
     """
     sub = get_sub(team)
     if sub:
-        sub.power()
-        print("Setting power of", team, "to", sub.powered())
+        print("Setting power of", team, "to", value)
+        if sub.powered() == value:
+            return Message(f"{team} unchanged.")
+        sub.power(value)
         if sub.powered():
-            return Message(f"{team} is now **ON** and running! Current direction: {direction_emoji[sub.get_direction()]}")
-        return Message(f"{team} is now **OFF** and halted!")
+            return Message(f"{team} is **ON** and running! Current direction: **{sub.get_direction()}**.")
+        return Message(f"{team} is **OFF** and halted!")
     return FAIL_REACT
+
+def print_map(team):
+    """
+    Prints the map from the perspective of one submarine, or all if team is None.
+    """
+    subs = []
+    if team is None:
+        subs = [get_sub(sub) for sub in get_teams()]
+    else:
+        sub = get_sub(team)
+        if sub is None:
+            return FAIL_REACT
+        subs = [sub]
+    print("Printing map for", subs)
+    formatted = f"```\n"
+    map_string = ascii_map(subs)
+    formatted += map_string + "\n```\n"
+    subs_string = "With submarines: "
+    for i in range(len(subs)):
+        subs_string += f"{i}: {subs[i].name}, "
+    formatted += subs_string[:-2]
+    return Message(formatted)
