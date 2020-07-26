@@ -15,6 +15,9 @@ from utils import OKAY_REACT
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 CONTROL_ROLE = "CONTROL"
+# The speed of the game, in _seconds_. Remember that most submarines will start
+# moving every four "turns", so really you should think about 4*GAME_SPEED.
+GAME_SPEED = 1
 
 # SERIAL COMMANDS
 
@@ -82,9 +85,9 @@ async def perform(fn, ctx, *args):
 
 # LOOP HANDLING
 
-@tasks.loop(seconds=3)
+@tasks.loop(seconds=GAME_SPEED)
 async def main_loop():
-    await perform_timestep()
+    await perform_timestep(main_loop.current_loop)
 
 @bot.command(name="startloop")
 @commands.has_role(CONTROL_ROLE)

@@ -28,6 +28,8 @@ def add_team(name, channel):
         return True
     return False
 
+MAX_SPEED = 4
+
 class Submarine():
     def __init__(self, name, channel):
         self.name = name
@@ -37,6 +39,13 @@ class Submarine():
         self.x = 0
         self.y = 0
         self.is_on = False
+    
+    def activation_divisor(self):
+        """
+        Returns the "activation divisor" - that is, what division of loops this
+        submarine should activate during. Lower number => activates more.
+        """
+        return MAX_SPEED - self.speed + 1
 
     def set_direction(self, direction):
         if direction in possible_directions():

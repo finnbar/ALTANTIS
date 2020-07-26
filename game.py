@@ -4,16 +4,17 @@ Runs the game, performing the right actions at fixed time intervals.
 
 from sub import get_teams, get_sub
 
-async def perform_timestep():
+async def perform_timestep(counter):
     """
     Does all time-related stuff, including movement, power changes and so on.
     Called at a time interval, when allowed.
     """
-    print("Running turn!")
+    print(f"Running turn {counter}.")
     for subname in get_teams():
         sub = get_sub(subname)
 
-        if not sub.powered():
+        # The sub should only activate if it is its turn.
+        if (not sub.powered()) or counter % sub.activation_divisor() != 0:
             break
 
         # Actions!
