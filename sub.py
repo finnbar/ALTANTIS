@@ -161,19 +161,32 @@ class Submarine():
 
     def status_message(self):
         message = (
-            f"STATUS FOR **{self.name}**\n"
-            f"Currently moving **{self.direction}** and in position ({self.x}, {self.y}).\n\n"
-            f"Power status ({self.power_use()}/{self.power_cap} used):\n"
+            f"Status for **{self.name}**\n"
+            f"------------------------------------\n"
         )
+        
+        if self.activated():
+            message += f"Currently moving **{self.direction}** and in position ({self.x}, {self.y}).\n\n"
+        else:
+            message += f"Submarine is currently offline.\n\n"
+
+        message += f"**Power status** ({self.power_use()}/{self.power_cap} used):\n"
 
         for system in self.power:
-            power_line = f"* {system.capitalize()}"
             (use, maxi) = self.power[system]
-            innate = ""
+            innate = 0
             if system in self.innate_power:
-                innate = f" with {self.innate_power[system]} innate"
-            power_line += f" ({use}/{maxi}{innate})\n"
-            message += power_line
+                innate = self.innate_power[system]
+            
+            power_status = f"({use}/{maxi}"
+            if innate > 0:
+                power_status += f" with {innate} innate"
+            power_status += ")"
+
+            system_status = "offline"
+            if use + innate > 0:
+                system_status = "online"
+            message += f"* **{system.capitalize()}** is {system_status} {power_status}\n"
 
         # TODO: add inventory here.
         return message + "\nNo more to report."
