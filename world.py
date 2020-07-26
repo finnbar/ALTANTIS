@@ -21,7 +21,7 @@ class Empty():
         return None
 
     def to_char(self):
-        return " "
+        return "."
 
 class Wall(Empty):
     def __init__(self, damaging):
@@ -51,7 +51,7 @@ class Treasure(Empty):
     def to_char(self):
         if self.visible:
             return "T"
-        return " "
+        return "."
 
 class DockingStation(Empty):
     def __init__(self, name, direction):
@@ -60,7 +60,7 @@ class DockingStation(Empty):
     
     def on_entry(self, sub):
         sub.set_direction(self.direction)
-        sub.power(False)
+        sub.activate(False)
         (x, y) = sub.get_position()
         return f"Docked at **{self.name}** at position ({x}, {y})! The power has been stopped."
     

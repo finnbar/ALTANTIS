@@ -14,7 +14,7 @@ async def perform_timestep(counter):
         sub = get_sub(subname)
 
         # The sub should only activate if it is its turn.
-        if (not sub.powered()) or counter % sub.activation_divisor() != 0:
+        if (not sub.activated()) or counter % sub.activation_divisor() != 0:
             break
 
         # Actions!

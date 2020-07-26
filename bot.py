@@ -8,7 +8,7 @@ import os
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from actions import move, register, get_teams, set_power, print_map
+from actions import move, register, get_teams, set_activation, print_map
 from game import perform_timestep
 from utils import OKAY_REACT
 
@@ -47,13 +47,13 @@ async def register_team(ctx, name):
     """
     await perform(register, ctx, name, ctx.message.channel)
 
-@bot.command(name="on")
+@bot.command(name="activate")
 async def on(ctx):
-    await perform(set_power, ctx, get_team(ctx.author), True)
+    await perform(set_activation, ctx, get_team(ctx.author), True)
 
-@bot.command(name="off")
+@bot.command(name="deactivate")
 async def off(ctx):
-    await perform(set_power, ctx, get_team(ctx.author), False)
+    await perform(set_activation, ctx, get_team(ctx.author), False)
 
 @bot.command(name="map")
 async def player_map(ctx):

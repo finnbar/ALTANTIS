@@ -33,17 +33,17 @@ def register(name, channel):
         return OKAY_REACT
     return FAIL_REACT
 
-def set_power(team, value):
+def set_activation(team, value):
     """
     Sets the submarine's power to `value`.
     """
     sub = get_sub(team)
     if sub:
         print("Setting power of", team, "to", value)
-        if sub.powered() == value:
+        if sub.activated() == value:
             return Message(f"{team} unchanged.")
-        sub.power(value)
-        if sub.powered():
+        sub.activate(value)
+        if sub.activated():
             return Message(f"{team} is **ON** and running! Current direction: **{sub.get_direction()}**.")
         return Message(f"{team} is **OFF** and halted!")
     return FAIL_REACT
