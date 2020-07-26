@@ -6,8 +6,8 @@ Important features:
 [x] Has a map with obstacles.
 [x] Can turn the sub off and on. (Allowing players to dock.)
 [x] Submarines can travel at multiple speeds.
+[x] Full power management. Can power systems, but has a power cap (which can be increased by control).
 [ ] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
-[ ] Full power management. Can power systems, but has a power cap (which can be increased by control).
 [ ] Can activate scanners, and inform players when they hover over things.
 [ ] Control can drop items on the seafloor, along with players if they so wish.
 [ ] Basic inventory management. (!give for control.)

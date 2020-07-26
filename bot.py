@@ -8,7 +8,7 @@ import os
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from actions import move, register, get_teams, set_activation, print_map
+from actions import *
 from game import perform_timestep
 from utils import OKAY_REACT
 
@@ -19,7 +19,7 @@ CONTROL_ROLE = "CONTROL"
 # moving every four "turns", so really you should think about 4*GAME_SPEED.
 GAME_SPEED = 1
 
-# SERIAL COMMANDS
+# GENERAL COMMANDS
 
 bot = commands.Bot(command_prefix="!")
 
@@ -64,24 +64,27 @@ async def player_map(ctx):
 async def control_map(ctx):
     await perform(print_map, ctx, None)
 
-def get_team(author):
-    """
-    Gets the first role that has a submarine associated with it, or None.
-    """
-    roles = list(map(lambda x: x.name, author.roles))
-    for team in get_teams():
-        if team in roles:
-            return team
-    return None
+@bot.command(name="power")
+async def power(ctx, *systems):
+    await perform(power_systems, ctx, get_team(ctx.author), list(systems))
 
-async def perform(fn, ctx, *args):
-    """
-    Performs an action fn with *args and then performs the Discord action
-    returned by fn using the context ctx.
-    """
-    print(fn.__name__, args)
-    status = fn(*args)
-    if status: await status.do_status(ctx)
+@bot.command(name="force_power")
+@commands.has_role(CONTROL_ROLE)
+async def control_power(ctx, team, *systems):
+    await perform(power_systems, ctx, team, list(systems))
+
+@bot.command(name="unpower")
+async def unpower(ctx, *systems):
+    await perform(unpower_systems, ctx, get_team(ctx.author), list(systems))
+
+@bot.command(name="force_unpower")
+@commands.has_role(CONTROL_ROLE)
+async def control_unpower(ctx, team, *systems):
+    await perform(unpower_systems, ctx, team, list(systems))
+
+@bot.command(name="status")
+async def status(ctx):
+    await perform(get_status, ctx, get_team(ctx.author))
 
 # LOOP HANDLING
 
@@ -100,6 +103,51 @@ async def startloop(ctx):
 async def stoploop(ctx):
     main_loop.stop()
     await OKAY_REACT.do_status(ctx)
+
+# USEFUL CONTROL FUNCTIONALITY
+
+@bot.command(name="message")
+@commands.has_role(CONTROL_ROLE)
+async def message_team(ctx, team, message):
+    await perform_async(shout_at_team, ctx, team, message)
+
+@bot.command(name="damage")
+@commands.has_role(CONTROL_ROLE)
+async def damage(ctx, team, amount : int, reason=""):
+    await perform_async(deal_damage, ctx, team, amount, reason)
+
+@bot.command(name="upgrade")
+@commands.has_role(CONTROL_ROLE)
+async def upgrade(ctx, team, amount : int):
+    await perform_async(upgrade_sub, ctx, team, amount)
+
+# HELPER FUNCTIONS
+
+def get_team(author):
+    """
+    Gets the first role that has a submarine associated with it, or None.
+    """
+    roles = list(map(lambda x: x.name, author.roles))
+    for team in get_teams():
+        if team in roles:
+            return team
+    return None
+
+async def perform(fn, ctx, *args):
+    """
+    Performs an action fn with *args and then performs the Discord action
+    returned by fn using the context ctx.
+    """
+    status = fn(*args)
+    if status: await status.do_status(ctx)
+
+async def perform_async(fn, ctx, *args):
+    """
+    Performs an async fn with *args and then the Discord action returned
+    by fn using the context ctx.
+    """
+    status = await fn(*args)
+    if status: await status.do_status(ctx)
 
 # ERROR HANDLING AND BOT STARTUP
 

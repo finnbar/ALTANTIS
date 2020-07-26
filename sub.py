@@ -159,5 +159,24 @@ class Submarine():
         message = self.damage(amount - 1)
         return f"Damage taken to {system}!\n" + message
 
+    def status_message(self):
+        message = (
+            f"STATUS FOR **{self.name}**\n"
+            f"Currently moving **{self.direction}** and in position ({self.x}, {self.y}).\n\n"
+            f"Power status ({self.power_use()}/{self.power_cap} used):\n"
+        )
+
+        for system in self.power:
+            power_line = f"* {system.capitalize()}"
+            (use, maxi) = self.power[system]
+            innate = ""
+            if system in self.innate_power:
+                innate = f" with {self.innate_power[system]} innate"
+            power_line += f" ({use}/{maxi}{innate})\n"
+            message += power_line
+
+        # TODO: add inventory here.
+        return message + "\nNo more to report."
+
     async def send_message(self, content):
         await self.channel.send(content)

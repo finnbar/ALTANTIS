@@ -48,6 +48,30 @@ def set_activation(team, value):
         return Message(f"{team} is **OFF** and halted!")
     return FAIL_REACT
 
+def power_systems(team, systems):
+    """
+    Powers `systems` of the submarine `team` if able.
+    """
+    sub = get_sub(team)
+    if sub:
+        print("Applying power increases of", team, "to", systems)
+        if sub.power_systems(systems):
+            return Message(f"Increased power of systems {systems} for {team}!")
+        return Message(f"Could not power all of {systems} so did not change anything.")
+    return FAIL_REACT
+
+def unpower_systems(team, systems):
+    """
+    Unpowers `systems` of the submarine `team` if able.
+    """
+    sub = get_sub(team)
+    if sub:
+        print("Applying power decreases of", team, "to", systems)
+        if sub.unpower_systems(systems):
+            return Message(f"Reduced power of systems {systems} for {team}!")
+        return Message(f"Could not unpower all of {systems} so did not change anything.")
+    return FAIL_REACT
+
 def print_map(team):
     """
     Prints the map from the perspective of one submarine, or all if team is None.
@@ -69,3 +93,34 @@ def print_map(team):
         subs_string += f"{i}: {subs[i].name}, "
     formatted += subs_string[:-2]
     return Message(formatted)
+
+def get_status(team):
+    sub = get_sub(team)
+    if sub:
+        status_message = sub.status_message()
+        return Message(status_message)
+    return FAIL_REACT
+
+async def deal_damage(team, amount, reason):
+    sub = get_sub(team)
+    if sub:
+        damage_message = sub.damage(amount)
+        if reason: await sub.send_message(reason)
+        await sub.send_message(damage_message)
+        return OKAY_REACT
+    return FAIL_REACT
+
+async def shout_at_team(team, message):
+    sub = get_sub(team)
+    if sub:
+        await sub.send_message(message)
+        return OKAY_REACT
+    return FAIL_REACT
+
+async def upgrade_sub(team, amount):
+    sub = get_sub(team)
+    if sub:
+        sub.power_cap += amount
+        await sub.send_message(f"Submarine {team} was upgraded! Power cap increased by {amount}.")
+        return OKAY_REACT
+    return FAIL_REACT
