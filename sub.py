@@ -2,7 +2,8 @@
 Manages the submarines as a whole and the individual submarines within it.
 """
 
-from random import choice
+from random import choice, random
+from time import time as now
 
 from world import move_on_map, possible_directions, get_square
 
@@ -31,6 +32,8 @@ def add_team(name, channel):
     return False
 
 MAX_SPEED = 4
+GARBLE = 10
+COMMS_COOLDOWN = 30
 
 class Submarine():
     def __init__(self, name, channel):
@@ -38,24 +41,26 @@ class Submarine():
         self.channel = channel
         self.direction = "N"
         # power is a dictionary mapping systems to their current power.
-        self.power = {"engine": 0, "scanner": 1, "comms": 1, "crane": 0, "weapons": 1}
+        self.power = {"engines": 0, "scanners": 1, "comms": 1, "crane": 0, "weapons": 1}
         # power_max is the maximum power for each system.
-        self.power_max = {"engine": 1, "scanner": 1, "comms": 2, "crane": 1, "weapons": 1}
+        self.power_max = {"engines": 1, "scanners": 1, "comms": 2, "crane": 1, "weapons": 1}
         # total_power acts as health - if your total_power would go _below_ zero, you explode.
         self.total_power = 3
         # total_power_max allows for healing up until that cap.
         self.total_power_max = 3
         # innate power is power that you're not allowed to change.
         # Control can use this to provide a mandatory upgrade.
-        self.innate_power = {"engine": 1}
+        self.innate_power = {"engines": 1}
         # Power only updates at game tick, so we need to keep track of the changes made.
         self.scheduled_power = self.power.copy()
         self.x = 0
         self.y = 0
         self.active = False
         # movement_progress is how much energy has been put towards a move.
-        # Once it reaches a value determined by the engine, we move!
+        # Once it reaches a value determined by the engines, we move!
         self.movement_progress = 0
+        # last_comms is the time when the Comms were last used.
+        self.last_comms = 0
 
     def get_power(self, system):
         """
@@ -68,15 +73,12 @@ class Submarine():
             used += self.innate_power[system]
         return used
     
-    def required_movement(self):
-        return MAX_SPEED + 1 - self.get_power("engine")
-
     def movement_tick(self):
         """
         Updates internal state and moves if it is time to do so.
         """
-        self.movement_progress += get_square(self.x, self.y).difficulty()
-        threshold = self.required_movement()
+        self.movement_progress += self.get_power("engines")
+        threshold = get_square(self.x, self.y).difficulty()
         if self.movement_progress >= threshold:
             self.movement_progress -= threshold
             direction = self.direction # Direction can change as result of movement.
@@ -203,16 +205,23 @@ class Submarine():
         self.total_power = min(self.total_power + amount, self.total_power_max)
         return f"Healed back up to {self.total_power} power!"
 
-    def get_message_error(self, distance):
+    def garble(self, content, distance):
         """
         We define the message error as the proportion of incorrect characters
         in a message. This error increases with distance between two subs.
-        We (arbitrarily) define this error as 5%/comms per point of distance.
+        We define this error as GARBLE/comms per point of distance.
         The error never goes above 100%. Messages with 100% are not received.
         """
         if self.power["comms"] == 0:
-            return 100
-        return max(distance * 5 / self.power["comms"], 100)
+            return None
+        message_error = max(distance * GARBLE / self.power["comms"], 100)
+        if message_error == 100:
+            return None
+        new_content = content
+        for i in len(content):
+            if new_content[i] != " " and random() < message_error:
+                new_content[i] = "_"
+        return new_content
 
     def status_message(self):
         message = (
@@ -261,3 +270,21 @@ class Submarine():
 
     async def send_message(self, content):
         await self.channel.send(content)
+    
+    async def broadcast(self, content):
+        if self.last_comms + COMMS_COOLDOWN > now():
+            return False
+        for sub in state:
+            if sub.name != self.name:
+                # Send them a message.
+                # First, get manhattan distance with diagonals.
+                # I don't know what this is called, but the fastest route is
+                # to take the diagonal and then do any excess.
+                # TODO: This distance doesn't take wraparound into consideration.
+                xdist = abs(sub.x - self.x)
+                ydist = abs(sub.y - self.y)
+                dist = min(xdist, ydist) + abs(xdist - ydist)
+                garbled = self.garble(content, dist)
+                await sub.send_message(f"**Message received from {self.name}**:\n{garbled}\n**END MESSAGE**")
+        self.last_comms = now()
+        return True

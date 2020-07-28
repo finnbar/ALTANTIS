@@ -26,9 +26,10 @@ class Empty():
     def difficulty(self):
         """
         Defines how difficult it is to leave a square.
-        1 = normal, lower numbers make it harder, higher makes it easier.
+        4 is the normal (takes a one-engine sub four turns).
+        8 is difficult terrain, 2 is easy and so on.
         """
-        return 1
+        return 4
 
 class Stormy(Empty):
     def __init__(self, difficulty):

@@ -56,7 +56,7 @@ def power_systems(team, systems):
     if sub:
         print("Applying power increases of", team, "to", systems)
         if sub.power_systems(systems):
-            return Message(f"Increased power of systems {systems} for {team}!")
+            return Message(f"Scheduled power increase of systems {systems} for {team}!")
         return Message(f"Could not power all of {systems} so did not change anything.")
     return FAIL_REACT
 
@@ -68,7 +68,7 @@ def unpower_systems(team, systems):
     if sub:
         print("Applying power decreases of", team, "to", systems)
         if sub.unpower_systems(systems):
-            return Message(f"Reduced power of systems {systems} for {team}!")
+            return Message(f"Scheduled power decrease of systems {systems} for {team}!")
         return Message(f"Could not unpower all of {systems} so did not change anything.")
     return FAIL_REACT
 
@@ -99,6 +99,16 @@ def get_status(team):
     if sub:
         status_message = sub.status_message()
         return Message(status_message)
+    return FAIL_REACT
+
+async def broadcast(team, message):
+    sub = get_sub(team)
+    if sub and sub.activated():
+        result = await sub.broadcast(message)
+        if result:
+            return OKAY_REACT
+        else:
+            return Message("The radio is still in use! (It has a thirty second cooldown.)")
     return FAIL_REACT
 
 async def deal_damage(team, amount, reason):

@@ -17,7 +17,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 CONTROL_ROLE = "CONTROL"
 # The speed of the game, in _seconds_. Remember that most submarines will start
 # moving every four "turns", so really you should think about 4*GAME_SPEED.
-GAME_SPEED = 5
+GAME_SPEED = 1
 
 # GENERAL COMMANDS
 
@@ -170,6 +170,13 @@ async def upgrade(ctx, team, amount : int):
     You can specify a negative number, but this will not check that the resulting state makes sense (that is, the team is not using more power than they have) - in general you should use !damage instead.
     """
     await perform_async(upgrade_sub, ctx, team, amount)
+
+@bot.command(name="broadcast")
+async def do_broadcast(ctx, message):
+    """
+    Broadcasts a <message> to all in range. Requires the sub to be activated.
+    """
+    await perform_async(broadcast, ctx, get_team(ctx.author), message)
 
 # HELPER FUNCTIONS
 
