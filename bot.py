@@ -22,6 +22,7 @@ GAME_SPEED = 1
 # GENERAL COMMANDS
 
 # TODO: CREATE COGS FOR THE DIFFERENT SETS OF COMMANDS (e.g. one for movement, one for power etc)
+# TODO: CURRENTLY POWER CHANGES ARE INSTANTANEOUS, but should be after a game tick.
 
 bot = commands.Bot(command_prefix="!")
 

@@ -38,9 +38,11 @@ class Submarine():
         self.channel = channel
         self.direction = "N"
         # power is a dictionary mapping systems to (current power, total power possible).
-        self.power = {"engine": (0,1), "scanner": (1,1), "comms": (1,2), "crane": (0,1), "stun": (1,1)}
+        self.power = {"engine": (0,1), "scanner": (1,1), "comms": (1,2), "crane": (0,1), "weapons": (1,1)}
         # power_cap acts as health - if your power_cap would go _below_ zero, you explode.
         self.power_cap = 3
+        # max_power_cap allows for healing up until that cap.
+        self.max_power_cap = 3
         # innate power is power that you're not allowed to change.
         # Control can use this to provide a mandatory upgrade.
         self.innate_power = {"engine": 1}
@@ -158,6 +160,21 @@ class Submarine():
         # Else continue taking damage.
         message = self.damage(amount - 1)
         return f"Damage taken to {system}!\n" + message
+
+    def heal(self, amount):
+        self.power_cap = min(self.power_cap + amount, self.max_power_cap)
+        return f"Healed back up to {self.power_cap} power!"
+
+    def get_message_error(self, distance):
+        """
+        We define the message error as the proportion of incorrect characters
+        in a message. This error increases with distance between two subs.
+        We (arbitrarily) define this error as 5%/comms per point of distance.
+        The error never goes above 100%. Messages with 100% are not received.
+        """
+        if self.power["comms"] == 0:
+            return 100
+        return max(distance * 5 / self.power["comms"], 100)
 
     def status_message(self):
         message = (
