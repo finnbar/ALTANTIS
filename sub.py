@@ -231,12 +231,24 @@ class Submarine():
             use = self.power[system]
             maxi = self.power_max[system]
             innate = 0
+            scheduled = self.scheduled_power[system]
+            difference = scheduled - use
+
             if system in self.innate_power:
                 innate = self.innate_power[system]
             
             power_status = f"({use}/{maxi}"
+            if innate > 0 or difference != 0:
+                power_status += " with"
             if innate > 0:
-                power_status += f" with {innate} innate"
+                power_status += f" {innate} innate"
+                if difference != 0:
+                    power_status += ","
+            if difference != 0:
+                plusminus = "+"
+                if difference < 0:
+                    plusminus = "-"
+                power_status += f" {plusminus}{abs(difference)} scheduled"
             power_status += ")"
 
             system_status = "offline"
