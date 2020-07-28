@@ -48,6 +48,8 @@ class Submarine():
         # innate power is power that you're not allowed to change.
         # Control can use this to provide a mandatory upgrade.
         self.innate_power = {"engine": 1}
+        # Power only updates at game tick, so we need to keep track of the changes made.
+        self.scheduled_power = self.power.copy()
         self.x = 0
         self.y = 0
         self.active = False
@@ -74,27 +76,41 @@ class Submarine():
         Updates internal state and moves if it is time to do so.
         """
         self.movement_progress += get_square(self.x, self.y).difficulty()
-        message = None
         threshold = self.required_movement()
         if self.movement_progress >= threshold:
-            # Move!
             self.movement_progress -= threshold
             direction = self.direction # Direction can change as result of movement.
-            message = self.move() or ""
-            message += (
-                f"\n\nMoved **{self.name}** in direction **{direction}**!\n"
+            message = self.move()
+            move_status = (
+                f"Moved **{self.name}** in direction **{direction}**!\n"
                 f"**{self.name}** is now at position **{self.get_position()}**."
             )
-        return message
+            if message:
+                return f"{message}\n{move_status}"
+            return move_status
+        return None
     
-    def power_use(self):
+    def power_use(self, power):
         use = 0
-        for system in self.power:
-            use += self.power[system]
+        for system in power:
+            use += power[system]
         return use
     
-    # TODO: WILL HAVE TO REWRITE BIG TIME TO WORK WITH THE SCHEDULED POWER.
-    # this should be okay though.
+    def apply_power_schedule(self):
+        # Check for changes and add these to the string.
+        message = ""
+        for system in self.power:
+            difference = self.scheduled_power[system] - self.power[system]
+            connective = "increased"
+            if difference < 0:
+                connective = "decreased"
+            if difference != 0:
+                message += f"Power to **{system}** {connective} by {abs(difference)}.\n"
+        self.power = self.scheduled_power
+        if message == "":
+            return None
+        return message
+    
     def power_systems(self, systems):
         """
         Attempts to give power to the list of things to power `systems`.
@@ -103,9 +119,9 @@ class Submarine():
         whether we have enough power to perform the operation (if we do but it
         looks like we don't due to an unknown system being named, tough).
         """
-        if len(systems) > self.total_power - self.power_use():
+        if len(systems) > self.total_power - self.power_use(self.scheduled_power):
             return False
-        power_copy = self.power.copy()
+        power_copy = self.scheduled_power.copy()
         for system in systems:
             if system in power_copy:
                 use = power_copy[system]
@@ -114,7 +130,7 @@ class Submarine():
                 if use > maxi:
                     return False
                 power_copy[system] = use
-        self.power = power_copy
+        self.scheduled_power = power_copy
         return True
     
     def unpower_systems(self, systems):
@@ -122,7 +138,7 @@ class Submarine():
         Attempts to remove power from all of the named systems in `systems`.
         Will ignore systems that do not already exist.
         """
-        power_copy = self.power.copy()
+        power_copy = self.scheduled_power.copy()
         for system in systems:
             if system in power_copy:
                 use = power_copy[system]
@@ -130,7 +146,7 @@ class Submarine():
                 if use < 0:
                     return False
                 power_copy[system] = use
-        self.power = power_copy
+        self.scheduled_power = power_copy
         return True
 
     def set_direction(self, direction):
@@ -166,7 +182,7 @@ class Submarine():
             return "**SUBMARINE DESTROYED. PLEASE SPEAK TO CONTROL.**"
         # Otherwise, if there is unused power, damage that first.
         system = ""
-        if self.power_use() < self.total_power:
+        if self.power_use(self.power) < self.total_power:
             system = "reserves"
         else:
             # Pick a system at random to lose power.
@@ -209,7 +225,7 @@ class Submarine():
         else:
             message += f"Submarine is currently offline.\n\n"
 
-        message += f"**Power status** ({self.power_use()}/{self.total_power}/{self.total_power_max} used/available/max):\n"
+        message += f"**Power status** ({self.power_use(self.power)}/{self.total_power}/{self.total_power_max} used/available/max):\n"
 
         for system in self.power:
             use = self.power[system]

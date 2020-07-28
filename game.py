@@ -19,11 +19,17 @@ async def perform_timestep(counter):
             break
 
         # Power manipulation:
+        power_message = sub.apply_power_schedule()
+        if power_message:
+            message += f"{power_message}\n"
 
         # Actions that aren't moving:
 
         # Movement:
-        move_message = sub.movement_tick() or ""
-        message += f"{move_message}\n"
+        move_message = sub.movement_tick()
+        if move_message:
+            message += f"{move_message}\n"
         
-        await sub.send_message(f"{message}\nTurn completed.")
+        if message == "":
+            message = "Nothing to report.\n"
+        await sub.send_message(f"---------**TURN {counter}**----------\n{message[:-1]}")
