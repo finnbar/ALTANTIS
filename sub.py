@@ -4,7 +4,7 @@ Manages the submarines as a whole and the individual submarines within it.
 
 from random import choice
 
-from world import move_on_map, possible_directions
+from world import move_on_map, possible_directions, get_square
 
 # State dictionary, filled with submarines.
 state = {}
@@ -37,18 +37,23 @@ class Submarine():
         self.name = name
         self.channel = channel
         self.direction = "N"
-        # power is a dictionary mapping systems to (current power, total power possible).
-        self.power = {"engine": (0,1), "scanner": (1,1), "comms": (1,2), "crane": (0,1), "weapons": (1,1)}
-        # power_cap acts as health - if your power_cap would go _below_ zero, you explode.
-        self.power_cap = 3
-        # max_power_cap allows for healing up until that cap.
-        self.max_power_cap = 3
+        # power is a dictionary mapping systems to their current power.
+        self.power = {"engine": 0, "scanner": 1, "comms": 1, "crane": 0, "weapons": 1}
+        # power_max is the maximum power for each system.
+        self.power_max = {"engine": 1, "scanner": 1, "comms": 2, "crane": 1, "weapons": 1}
+        # total_power acts as health - if your total_power would go _below_ zero, you explode.
+        self.total_power = 3
+        # total_power_max allows for healing up until that cap.
+        self.total_power_max = 3
         # innate power is power that you're not allowed to change.
         # Control can use this to provide a mandatory upgrade.
         self.innate_power = {"engine": 1}
         self.x = 0
         self.y = 0
         self.active = False
+        # movement_progress is how much energy has been put towards a move.
+        # Once it reaches a value determined by the engine, we move!
+        self.movement_progress = 0
 
     def get_power(self, system):
         """
@@ -56,24 +61,40 @@ class Submarine():
         """
         used = 0
         if system in self.power:
-            used += self.power[system][0]
+            used += self.power[system]
         if system in self.innate_power:
             used += self.innate_power[system]
         return used
     
-    def activation_divisor(self):
+    def required_movement(self):
+        return MAX_SPEED + 1 - self.get_power("engine")
+
+    def movement_tick(self):
         """
-        Returns the "activation divisor" - that is, what division of loops this
-        submarine should activate during. Lower number => activates more.
+        Updates internal state and moves if it is time to do so.
         """
-        return MAX_SPEED - self.get_power("engine") + 1
+        self.movement_progress += get_square(self.x, self.y).difficulty()
+        message = None
+        threshold = self.required_movement()
+        if self.movement_progress >= threshold:
+            # Move!
+            self.movement_progress -= threshold
+            direction = self.direction # Direction can change as result of movement.
+            message = self.move() or ""
+            message += (
+                f"\n\nMoved **{self.name}** in direction **{direction}**!\n"
+                f"**{self.name}** is now at position **{self.get_position()}**."
+            )
+        return message
     
     def power_use(self):
         use = 0
         for system in self.power:
-            use += self.power[system][0]
+            use += self.power[system]
         return use
     
+    # TODO: WILL HAVE TO REWRITE BIG TIME TO WORK WITH THE SCHEDULED POWER.
+    # this should be okay though.
     def power_systems(self, systems):
         """
         Attempts to give power to the list of things to power `systems`.
@@ -82,16 +103,17 @@ class Submarine():
         whether we have enough power to perform the operation (if we do but it
         looks like we don't due to an unknown system being named, tough).
         """
-        if len(systems) > self.power_cap - self.power_use():
+        if len(systems) > self.total_power - self.power_use():
             return False
         power_copy = self.power.copy()
         for system in systems:
             if system in power_copy:
-                (use, maxi) = power_copy[system]
+                use = power_copy[system]
+                maxi = self.power_max[system]
                 use += 1
                 if use > maxi:
                     return False
-                power_copy[system] = (use, maxi)
+                power_copy[system] = use
         self.power = power_copy
         return True
     
@@ -103,11 +125,11 @@ class Submarine():
         power_copy = self.power.copy()
         for system in systems:
             if system in power_copy:
-                (use, maxi) = power_copy[system]
+                use = power_copy[system]
                 use -= 1
                 if use < 0:
                     return False
-                power_copy[system] = (use, maxi)
+                power_copy[system] = use
         self.power = power_copy
         return True
 
@@ -137,22 +159,22 @@ class Submarine():
     def damage(self, amount):
         if amount <= 0:
             return ""
-        self.power_cap -= 1
+        self.total_power -= 1
         # If the submarine is now below zero power, it explodes.
-        if self.power_cap < 0:
+        if self.total_power < 0:
             self.activate(False)
             return "**SUBMARINE DESTROYED. PLEASE SPEAK TO CONTROL.**"
         # Otherwise, if there is unused power, damage that first.
         system = ""
-        if self.power_use() < self.power_cap:
+        if self.power_use() < self.total_power:
             system = "reserves"
         else:
             # Pick a system at random to lose power.
-            available_systems = filter(lambda system: self.power[system][0] > 0, self.power)
+            available_systems = filter(lambda system: self.power[system] > 0, self.power)
             system = choice(list(available_systems))
             self.unpower_systems([system])
         # If the submarine hits zero, soak up all remaining damage.
-        if self.power_cap == 0:
+        if self.total_power == 0:
             return (
                 f"Damage taken to {system}!\n"
                 "**EMERGENCY SUBMARINE POWER INITIATED!!! ONLY BASIC ENGINE FUNCTIONALITY AVAILABLE!!!**"
@@ -162,8 +184,8 @@ class Submarine():
         return f"Damage taken to {system}!\n" + message
 
     def heal(self, amount):
-        self.power_cap = min(self.power_cap + amount, self.max_power_cap)
-        return f"Healed back up to {self.power_cap} power!"
+        self.total_power = min(self.total_power + amount, self.total_power_max)
+        return f"Healed back up to {self.total_power} power!"
 
     def get_message_error(self, distance):
         """
@@ -187,10 +209,11 @@ class Submarine():
         else:
             message += f"Submarine is currently offline.\n\n"
 
-        message += f"**Power status** ({self.power_use()}/{self.power_cap} used):\n"
+        message += f"**Power status** ({self.power_use()}/{self.total_power}/{self.total_power_max} used/available/max):\n"
 
         for system in self.power:
-            (use, maxi) = self.power[system]
+            use = self.power[system]
+            maxi = self.power_max[system]
             innate = 0
             if system in self.innate_power:
                 innate = self.innate_power[system]

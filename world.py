@@ -22,6 +22,23 @@ class Empty():
 
     def to_char(self):
         return "."
+    
+    def difficulty(self):
+        """
+        Defines how difficult it is to leave a square.
+        1 = normal, lower numbers make it harder, higher makes it easier.
+        """
+        return 1
+
+class Stormy(Empty):
+    def __init__(self, difficulty):
+        self.diff = difficulty
+    
+    def to_char(self):
+        return "!"
+    
+    def difficulty(self):
+        return self.diff
 
 class Wall(Empty):
     def __init__(self, damaging):
@@ -77,6 +94,9 @@ undersea_map[0][39] = DockingStation("The Docking Station", "E")
 
 def possible_directions():
     return directions.keys()
+
+def get_square(x, y):
+    return undersea_map[x][y]
 
 def move_on_map(sub, direction, x, y):
     motion = directions[direction]
