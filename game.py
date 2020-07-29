@@ -16,7 +16,7 @@ async def perform_timestep(counter):
 
         # The sub should only activate if it is active. I know, novel.
         if not sub.activated():
-            break
+            continue
 
         # Power manipulation:
         power_message = sub.apply_power_schedule()

@@ -104,6 +104,7 @@ def get_status(team):
 async def broadcast(team, message):
     sub = get_sub(team)
     if sub and sub.activated():
+        print(f"Going to broadcast {message}!")
         result = await sub.broadcast(message)
         if result:
             return OKAY_REACT

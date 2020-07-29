@@ -5,7 +5,7 @@ Manages the submarines as a whole and the individual submarines within it.
 from random import choice, random
 from time import time as now
 
-from world import move_on_map, possible_directions, get_square
+from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT
 
 # State dictionary, filled with submarines.
 state = {}
@@ -14,7 +14,7 @@ def get_teams():
     """
     Gets all possible teams.
     """
-    return state.keys()
+    return list(state.keys())
 
 def get_sub(name):
     """
@@ -214,14 +214,14 @@ class Submarine():
         """
         if self.power["comms"] == 0:
             return None
-        message_error = max(distance * GARBLE / self.power["comms"], 100)
+        message_error = min(distance * GARBLE / self.power["comms"], 100)
         if message_error == 100:
             return None
-        new_content = content
-        for i in len(content):
-            if new_content[i] != " " and random() < message_error:
+        new_content = list(content)
+        for i in range(len(new_content)):
+            if new_content[i] not in [" ", "\n", "\r"] and random() < message_error / 100:
                 new_content[i] = "_"
-        return new_content
+        return "".join(new_content)
 
     def status_message(self):
         message = (
@@ -274,17 +274,26 @@ class Submarine():
     async def broadcast(self, content):
         if self.last_comms + COMMS_COOLDOWN > now():
             return False
-        for sub in state:
-            if sub.name != self.name:
-                # Send them a message.
-                # First, get manhattan distance with diagonals.
-                # I don't know what this is called, but the fastest route is
-                # to take the diagonal and then do any excess.
-                # TODO: This distance doesn't take wraparound into consideration.
-                xdist = abs(sub.x - self.x)
-                ydist = abs(sub.y - self.y)
-                dist = min(xdist, ydist) + abs(xdist - ydist)
-                garbled = self.garble(content, dist)
-                await sub.send_message(f"**Message received from {self.name}**:\n{garbled}\n**END MESSAGE**")
+        # For some reason, subs has two elements but the loop only happens once. Why????
+        subnames = get_teams()
+        for subname in subnames:
+            if subname == self.name:
+                continue
+
+            sub = get_sub(subname)
+
+            # First, get manhattan distance with diagonals.
+            # I don't know what this is called, but the fastest route is
+            # to take the diagonal and then do any excess.
+            # To do wraparound, we consider both distances, so |x1-x2| and
+            # X_LIMIT - |x1-x2| (and the same for y).
+            xdist = abs(sub.x - self.x)
+            xdist = min(40 - xdist, xdist)
+            ydist = abs(sub.y - self.y)
+            ydist = min(40 - ydist, ydist)
+            dist = min(xdist, ydist) + abs(xdist - ydist)
+            garbled = self.garble(content, dist)
+            if garbled is not None:
+                await sub.send_message(f"**Message received from {self.name}**:\n`{garbled}`\n**END MESSAGE**")
         self.last_comms = now()
         return True

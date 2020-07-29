@@ -210,6 +210,7 @@ async def perform_async(fn, ctx, *args):
 
 @bot.event
 async def on_command_error(ctx, error):
+    print(error)
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
 
