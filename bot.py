@@ -15,6 +15,10 @@ from utils import OKAY_REACT
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 CONTROL_ROLE = "CONTROL"
+ENGINEER = "engineer"
+SCIENTIST = "scientist"
+CAPTAIN = "captain"
+NAVIGATOR = "navigator"
 # The speed of the game, in _seconds_. Remember that most submarines will start
 # moving every four "turns", so really you should think about 4*GAME_SPEED.
 GAME_SPEED = 1
@@ -26,6 +30,7 @@ GAME_SPEED = 1
 bot = commands.Bot(command_prefix="!")
 
 @bot.command(name="move")
+@commands.has_any_role(CAPTAIN, NAVIGATOR)
 async def player_move(ctx, direction):
     """
     Sets the direction of your submarine to <direction>.
@@ -42,14 +47,15 @@ async def control_move(ctx, team, direction):
 
 @bot.command(name="register")
 @commands.has_role(CONTROL_ROLE)
-async def register_team(ctx, name):
+async def register_team(ctx):
     """
-    (CONTROL) Registers a new team with <name> to the channel this was called in.
-    This means that all messages sent by this submarine will be sent to this channel.
+    (CONTROL) Registers a new team to the parent channel category.
+    Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #navigator, #captain and #scientist.
     """
-    await perform(register, ctx, name, ctx.message.channel)
+    await perform_async(register, ctx, ctx.message.channel.category)
 
 @bot.command(name="activate")
+@commands.has_any_role(CAPTAIN, NAVIGATOR)
 async def on(ctx):
     """
     Activates your submarine, allowing it to move and do actions in real-time.
@@ -57,6 +63,7 @@ async def on(ctx):
     await perform(set_activation, ctx, get_team(ctx.author), True)
 
 @bot.command(name="deactivate")
+@commands.has_any_role(CAPTAIN, NAVIGATOR)
 async def off(ctx):
     """
     Deactivates your submarine, stopping it from moving and performing actions.
@@ -80,6 +87,7 @@ async def control_map(ctx):
     await perform(print_map, ctx, None)
 
 @bot.command(name="power")
+@commands.has_any_role(CAPTAIN, ENGINEER)
 async def power(ctx, *systems):
     """
     Gives one power to all of <systems> (any number of systems, can repeat).
@@ -96,6 +104,7 @@ async def control_power(ctx, team, *systems):
     await perform(power_systems, ctx, team, list(systems))
 
 @bot.command(name="unpower")
+@commands.has_any_role(CAPTAIN, ENGINEER)
 async def unpower(ctx, *systems):
     """
     Removes one power from all of <systems> (any number of systems, can repeat).
@@ -172,6 +181,7 @@ async def upgrade(ctx, team, amount : int):
     await perform_async(upgrade_sub, ctx, team, amount)
 
 @bot.command(name="broadcast")
+@commands.has_any_role(CAPTAIN, NAVIGATOR)
 async def do_broadcast(ctx, message):
     """
     Broadcasts a <message> to all in range. Requires the sub to be activated.

@@ -8,7 +8,8 @@ Important features:
 [x] Submarines can travel at multiple speeds.
 [x] Full power management. Can power systems, but has a power cap (which can be increased by control).
 [x] Pretty power management (!status will tell you about upcoming power changes.)
-[ ] Can broadcast messages to all in range (via Comms system, which garbles longer-distance messages). Messages have a cooldown.
+[x] Can broadcast messages to all in range (via Comms system, which garbles longer-distance messages). Messages have a cooldown.
+[ ] A channel per person, so that role-specific info can be broadcast (engineers only get puzzles, navigator only gets end-of-turn, scientists only gets scanners).
 [ ] Can activate scanners, and inform players when they hover over things (level 1), are near things and other named subs (level 2), and further afield (level 3). Identify things via distance (0 moves away... 5 moves away).
 [ ] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
 [ ] Control can drop items on the seafloor, along with players if they so wish.

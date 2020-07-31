@@ -20,14 +20,19 @@ def get_sub(name):
     """
     Gets the Submarine object associated with `name`.
     """
-    return state[name]
+    if name in state:
+        return state[name]
 
-def add_team(name, channel):
+def add_team(name, category):
     """
     Adds a team with the name, if able.
     """
     if name not in get_teams():
-        state[name] = Submarine(name, channel)
+        child_channels = category.text_channels
+        channel_dict = {}
+        for channel in child_channels:
+            channel_dict[channel.name] = channel
+        state[name] = Submarine(name, channel_dict)
         return True
     return False
 
@@ -36,9 +41,9 @@ GARBLE = 10
 COMMS_COOLDOWN = 30
 
 class Submarine():
-    def __init__(self, name, channel):
+    def __init__(self, name, channels):
         self.name = name
-        self.channel = channel
+        self.channels = channels
         self.direction = "N"
         # power is a dictionary mapping systems to their current power.
         self.power = {"engines": 0, "scanners": 1, "comms": 1, "crane": 0, "weapons": 1}
@@ -268,13 +273,20 @@ class Submarine():
         # TODO: add inventory here.
         return message + "\nNo more to report."
 
-    async def send_message(self, content):
-        await self.channel.send(content)
+    async def send_message(self, content, channel):
+        if self.channels[channel]:
+            await self.channels[channel].send(content)
+            return True
+        return False
+    
+    async def send_to_all(self, content):
+        for channel in self.channels:
+            await self.channels[channel].send(content)
+        return True
     
     async def broadcast(self, content):
         if self.last_comms + COMMS_COOLDOWN > now():
             return False
-        # For some reason, subs has two elements but the loop only happens once. Why????
         subnames = get_teams()
         for subname in subnames:
             if subname == self.name:

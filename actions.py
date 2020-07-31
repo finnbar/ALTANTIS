@@ -23,14 +23,18 @@ def move(direction, team):
             return React(direction_emoji[direction])
     return FAIL_REACT
 
-def register(name, channel):
+async def register(category):
     """
     Registers a team, setting them up with everything they could need.
+    Requires a category with the required subchannels.
     ONLY RUNNABLE BY CONTROL.
     """
-    print("Registering", name)
-    if add_team(name, channel):
-        return OKAY_REACT
+    print("Registering", category.name)
+    if add_team(category.name, category):
+        sub = get_sub(category.name)
+        if sub:
+            await sub.send_to_all(f"Channel registered for sub **{category.name}**.")
+            return OKAY_REACT
     return FAIL_REACT
 
 def set_activation(team, value):
@@ -116,15 +120,15 @@ async def deal_damage(team, amount, reason):
     sub = get_sub(team)
     if sub:
         damage_message = sub.damage(amount)
-        if reason: await sub.send_message(reason)
-        await sub.send_message(damage_message)
+        if reason: await sub.send_to_all(reason)
+        await sub.send_to_all(damage_message)
         return OKAY_REACT
     return FAIL_REACT
 
 async def shout_at_team(team, message):
     sub = get_sub(team)
     if sub:
-        await sub.send_message(message)
+        await sub.send_to_all(message)
         return OKAY_REACT
     return FAIL_REACT
 
@@ -132,6 +136,6 @@ async def upgrade_sub(team, amount):
     sub = get_sub(team)
     if sub:
         sub.power_cap += amount
-        await sub.send_message(f"Submarine {team} was upgraded! Power cap increased by {amount}.")
+        await sub.send_message(f"Submarine {team} was upgraded! Power cap increased by {amount}.", "engineer")
         return OKAY_REACT
     return FAIL_REACT
