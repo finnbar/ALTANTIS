@@ -9,7 +9,7 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
 from actions import *
-from game import perform_timestep
+from game import perform_timestep, load_game
 from utils import OKAY_REACT
 
 load_dotenv()
@@ -143,6 +143,11 @@ async def startloop(ctx):
     main_loop.start()
     await OKAY_REACT.do_status(ctx)
 
+# TODO: replace stop with cancel, but only after introducing a lock that prevents cancellation during the running of the loop.
+# in fact, have a lock just so that the loop bit runs without issue.
+# you can do this with asyncio.Lock - although it's slightly more complex than that.
+# do we want a reader-writer lock?
+
 @bot.command(name="stoploop")
 @commands.has_role(CONTROL_ROLE)
 async def stoploop(ctx):
@@ -187,6 +192,14 @@ async def do_broadcast(ctx, message):
     Broadcasts a <message> to all in range. Requires the sub to be activated.
     """
     await perform_async(broadcast, ctx, get_team(ctx.author), message)
+
+@bot.command(name="load")
+@commands.has_role(CONTROL_ROLE)
+async def load(ctx, arg):
+    """
+    (CONTROL) Loads either the map, state or both from file.
+    """
+    await perform(load_game, ctx, arg)
 
 # HELPER FUNCTIONS
 
