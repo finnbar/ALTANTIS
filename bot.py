@@ -199,7 +199,7 @@ async def load(ctx, arg):
     """
     (CONTROL) Loads either the map, state or both from file.
     """
-    await perform(load_game, ctx, arg)
+    await perform(load_game, ctx, arg, bot)
 
 # HELPER FUNCTIONS
 

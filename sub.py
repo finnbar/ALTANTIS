@@ -309,3 +309,52 @@ class Submarine():
                 await sub.send_message(f"**Message received from {self.name}**:\n`{garbled}`\n**END MESSAGE**")
         self.last_comms = now()
         return True
+    
+    def to_dict(self):
+        """
+        Converts this submarine instance to a serialisable dictionary.
+        We just use self.__dict__ and then convert things as necessary.
+        """
+        dictionary = self.__dict__.copy()
+
+        # self.channels: convert channels to their IDs.
+        ids = {}
+        for channel in self.channels:
+            ids[channel] = self.channels[channel].id
+        dictionary["channels"] = ids
+
+        return dictionary
+    
+def sub_from_dict(dictionary, client):
+    """
+    Creates a submarine from a serialised dictionary.
+    """
+    newsub = Submarine("", {})
+
+    # self.channels: turn channel IDs into their objects.
+    channels = dictionary["channels"]
+    for channel in channels:
+        channels[channel] = client.get_channel(channels[channel])
+
+    newsub.__dict__ = dictionary
+    return newsub
+
+def state_to_dict():
+    """
+    Convert our state to a dictionary. This just runs to_dict on each member of
+    the state.
+    """
+    state_dict = {}
+    for subname in state:
+        state_dict[subname] = state[subname].to_dict()
+    return state_dict
+
+def state_from_dict(dictionary, client):
+    """
+    Overwrites state with the state made by state_to_dict.
+    """
+    global state
+    new_state = {}
+    for subname in dictionary:
+        new_state[subname] = sub_from_dict(dictionary[subname], client)
+    state = new_state

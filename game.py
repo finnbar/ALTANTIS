@@ -2,11 +2,11 @@
 Runs the game, performing the right actions at fixed time intervals.
 """
 
-from sub import get_teams, get_sub, state
-from world import undersea_map
+from sub import get_teams, get_sub, state_to_dict, state_from_dict
+from world import map_to_dict, map_from_dict
 from utils import OKAY_REACT, FAIL_REACT
 
-import jsonpickle
+import json
 
 async def perform_timestep(counter):
     """
@@ -54,10 +54,6 @@ async def perform_timestep(counter):
     
     save_game()
 
-# TODO: due to Discord objects in Submarine, I can't just pickle. Will need to think properly.
-# The best way to do this is probably an o.__dict__ with Discord channels replaced by their IDs.
-# I might be able to cheat this with a DiscordChannel class of my own with its own to_json.
-
 def save_game():
     """
     Save the game to map.json and state.json.
@@ -65,14 +61,14 @@ def save_game():
     This must be called at the end of the loop, as to guarantee that we're
     not about to overwrite important data being written during it.
     """
-    state_pickle = jsonpickle.encode(state)
-    map_pickle = jsonpickle.encode(undersea_map)
+    state_dict = state_to_dict()
+    map_dict = map_to_dict()
     with open("state.json", "w") as state_file:
-        state_file.write(state_pickle)
+        state_file.write(json.dumps(state_dict))
     with open("map.json", "w") as map_file:
-        map_file.write(map_pickle)
+        map_file.write(json.dumps(map_dict))
 
-def load_game(which):
+def load_game(which, bot):
     """
     Loads the state (from state.json), map (from map.json) or both.
     Does not check whether the files exist.
@@ -82,12 +78,12 @@ def load_game(which):
         return FAIL_REACT
     if which in ["both", "map"]:
         with open("map.json", "r") as map_file:
-            map_pickle = map_file.read()
-            global undersea_map
-            undersea_map = jsonpickle.decode(map_pickle)
+            map_string = map_file.read()
+            map_json = json.loads(map_string)
+            map_from_dict(map_json)
     if which in ["both", "state"]:
         with open("state.json", "r") as state_file:
-            state_pickle = state_file.read()
-            global state
-            state = jsonpickle.decode(state_pickle)
+            state_string = state_file.read()
+            state_json = json.loads(state_string)
+            state_from_dict(state_json, bot)
     return OKAY_REACT
