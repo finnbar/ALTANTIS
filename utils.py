@@ -54,7 +54,9 @@ def determine_direction(ax, ay, bx, by):
     Also also, Python's angles are -pi to pi, where 0 is East.
     To solve this, we define regions where each of the four starting directions
     should be present, which are annotated.
-    I've included an image (direction_explanation.png) in this repo to help.
+    Simple idea: ±pi/8 and ±7pi/8 are the points where a vector is closer to
+    E/W than NE/NW/SE/SW, and ±3pi/8 and ±5pi/8 are then points where a vector
+    is closer to N/S than NE/NW/SE/SW.
     """
     if by - ay == 0 and bx - ax == 0:
         return None
@@ -62,8 +64,6 @@ def determine_direction(ax, ay, bx, by):
     angle = math.atan2(by - ay, bx - ax)
     y_val = ""
     # It's northern if the angle is between -7pi/8 and -pi/8.
-    # (This would be southern in a normal coordinates system, but we're working
-    # in reverse because (0,0) is _top_ left rather than bottom left.)
     if -7*math.pi / 8 <= angle <= -math.pi / 8:
         y_val = "N"
     # Southern case is similar: between pi/8 and 7pi/8.
