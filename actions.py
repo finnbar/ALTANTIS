@@ -4,7 +4,7 @@ The backend for all Discord actions, which allow players to control their sub.
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT
 from sub import get_teams, get_sub, add_team
-from world import ascii_map
+from world import ascii_map, bury_treasure_at
 
 direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
                    "W": "⬅", "NE": "↗",
@@ -114,6 +114,11 @@ def get_status(team):
     if sub:
         status_message = sub.status_message()
         return Message(status_message)
+    return FAIL_REACT
+
+def bury_treasure(name, x, y):
+    if bury_treasure_at(name, x, y):
+        return OKAY_REACT
     return FAIL_REACT
 
 async def broadcast(team, message):

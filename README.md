@@ -11,9 +11,9 @@ Important features:
 [x] Can broadcast messages to all in range (via Comms system, which garbles longer-distance messages). Messages have a cooldown.
 [x] A channel per person, so that role-specific info can be broadcast (engineers only get puzzles, navigator only gets end-of-turn, scientists only gets scanners).
 [x] Can activate scanners, and inform players when they hover over things (level 1), are near things and other named subs (level 2), and further afield (level 3). Identify things via direction.
+[ ] Control can drop items on the seafloor. (!bury for control)
 [ ] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
-[ ] Control can drop items on the seafloor, along with players if they so wish.
-[ ] Basic inventory management. (!give for control.)
+[ ] Basic inventory management. (!give for control, !drop for players, !remove for control)
 [ ] Basic resources.
 [ ] !death, so you can die.
 

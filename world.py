@@ -31,6 +31,13 @@ class Empty():
         """
         return 4
 
+    def replaceable(self):
+        """
+        Defines whether this cell is replaceable.
+        Used to avoid accidents when dropping or burying treasure.
+        """
+        return True
+
 class Stormy(Empty):
     def __init__(self, difficulty):
         self.diff = difficulty
@@ -60,6 +67,9 @@ class Wall(Empty):
     
     def to_char(self):
         return "W"
+    
+    def replaceable(self):
+        return False
 
 class Treasure(Empty):
     def __init__(self, name):
@@ -95,6 +105,9 @@ class DockingStation(Empty):
     
     def to_char(self):
         return "D"
+    
+    def replaceable(self):
+        return False
 
 # Map size.
 X_LIMIT = 40
@@ -107,6 +120,13 @@ def possible_directions():
 
 def get_square(x, y):
     return undersea_map[x][y]
+
+def bury_treasure_at(name, x, y):
+    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+        if undersea_map[x][y].replaceable():
+            undersea_map[x][y] = Treasure(name)
+            return True
+    return False
 
 def explore_submap(cx, cy, dist):
     """

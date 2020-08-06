@@ -47,7 +47,7 @@ async def control_move(ctx, team, direction):
 
 @bot.command(name="teleport")
 @commands.has_role(CONTROL_ROLE)
-async def teleport_sub(ctx, team, x, y):
+async def teleport_sub(ctx, team, x : int, y : int):
     """
     (CONTROL) Teleports <teams>'s submarine to a given (<x>, <y>). Does not inform them.
     Also does _not_ check if the position is blocked, but does check if it's a valid point in the world.
@@ -56,7 +56,7 @@ async def teleport_sub(ctx, team, x, y):
 
 @bot.command(name="register")
 @commands.has_role(CONTROL_ROLE)
-async def register_team(ctx, x=0, y=0):
+async def register_team(ctx, x : int = 0, y : int = 0):
     """
     (CONTROL) Registers a new team (with sub at (x,y) defaulting to (0,0)) to the parent channel category.
     Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #navigator, #captain and #scientist.
@@ -135,6 +135,14 @@ async def status(ctx):
     Reports the status of the submarine, including power and direction.
     """
     await perform(get_status, ctx, get_team(ctx.author))
+
+@bot.command(name="broadcast")
+@commands.has_any_role(CAPTAIN, NAVIGATOR)
+async def do_broadcast(ctx, message):
+    """
+    Broadcasts a <message> to all in range. Requires the sub to be activated.
+    """
+    await perform_async(broadcast, ctx, get_team(ctx.author), message)
 
 # LOOP HANDLING
 
@@ -220,13 +228,13 @@ async def new_system(ctx, team, system):
     """
     await perform_async(add_system, ctx, team, system)
 
-@bot.command(name="broadcast")
-@commands.has_any_role(CAPTAIN, NAVIGATOR)
-async def do_broadcast(ctx, message):
+@bot.command(name="bury")
+@commands.has_role(CONTROL_ROLE)
+async def bury(ctx, treasure, x : int, y : int):
     """
-    Broadcasts a <message> to all in range. Requires the sub to be activated.
+    (CONTROL) Buries a treasure <treasure> at location (<x>, <y>).
     """
-    await perform_async(broadcast, ctx, get_team(ctx.author), message)
+    await perform(bury_treasure, ctx, treasure, x, y)
 
 @bot.command(name="load")
 @commands.has_role(CONTROL_ROLE)
@@ -270,7 +278,9 @@ async def perform_async(fn, ctx, *args):
 async def on_command_error(ctx, error):
     print(error)
     if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send('You do not have the correct role for this command.')
+        await ctx.send("You do not have the correct role for this command.")
+    else:
+        await ctx.send(f"ERROR: {error}")
 
 print("ALTANTIS READY")
 bot.run(TOKEN)
