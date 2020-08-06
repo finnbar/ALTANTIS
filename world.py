@@ -2,10 +2,7 @@
 Deals with the world map, which submarines explore.
 """
 
-directions = {"N": (0, -1), "NE": (1, -1), "E": (1, 0), "SE": (1, 1),
-              "S": (0, 1), "SW": (-1, 1), "W": (-1, 0), "NW": (-1, -1)}
-reverse_dir = {"N": "S", "NE": "SW", "E": "W", "SE": "NW", "S": "N",
-               "SW": "NE", "W": "E", "NW": "SE"}
+from utils import diagonal_distance, directions, reverse_dir, determine_direction
 
 class Empty():
     def __init__(self):
@@ -23,6 +20,9 @@ class Empty():
     def to_char(self):
         return "."
     
+    def outward_broadcast(self, strength):
+        return ""
+    
     def difficulty(self):
         """
         Defines how difficult it is to leave a square.
@@ -37,6 +37,11 @@ class Stormy(Empty):
     
     def to_char(self):
         return "!"
+    
+    def outward_broadcast(self, strength):
+        if strength >= 2:
+            return "Storm brewing"
+        return ""
     
     def difficulty(self):
         return self.diff
@@ -59,9 +64,12 @@ class Wall(Empty):
 class Treasure(Empty):
     def __init__(self, name):
         self.name = name
-        # TODO (no rush): make treasure appear to a player once scanned successfully.
-        # May need to do via a list of players that can see each treasure.
         self.visible = False
+    
+    def outward_broadcast(self, strength):
+        if strength > 2:
+            return self.name
+        return "Treasure"
     
     def pick_up(self):
         return True
@@ -75,6 +83,9 @@ class DockingStation(Empty):
     def __init__(self, name, direction):
         self.name = name
         self.direction = direction
+    
+    def outward_broadcast(self, strength):
+        return self.name
     
     def on_entry(self, sub):
         sub.set_direction(self.direction)
@@ -90,8 +101,6 @@ X_LIMIT = 40
 Y_LIMIT = 40
 
 undersea_map = [[Empty() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
-# TODO: Remove and replace with actual map.
-undersea_map[0][39] = DockingStation("The Docking Station", "E")
 
 def possible_directions():
     return directions.keys()
@@ -99,10 +108,39 @@ def possible_directions():
 def get_square(x, y):
     return undersea_map[x][y]
 
+def explore_submap(cx, cy, dist):
+    """
+    Explores the area centered around (cx, cy) spanning distance dist.
+    Returns all outward_broadcast events (as a list) formatted for output.
+    """
+    events = []
+    for i in range(-dist, dist+1):
+        x = cx + i
+        if x < 0 or x >= X_LIMIT:
+            continue
+        for j in range(-dist, dist+1):
+            y = cy + j
+            if y < 0 or y >= Y_LIMIT:
+                continue
+            this_dist = diagonal_distance(0, 0, i, j)
+            event = undersea_map[x][y].outward_broadcast(dist - this_dist)
+            if event != "":
+                direction = determine_direction(cx, cy, x, y)
+                if direction is None:
+                    event = f"{event} in your current square!"
+                else:
+                    event = f"{event} in direction {direction}!"
+                events.append(event)
+    return events
+
 def move_on_map(sub, direction, x, y):
     motion = directions[direction]
-    new_x = (x + motion[0]) % X_LIMIT
-    new_y = (y + motion[1]) % Y_LIMIT
+    new_x = x + motion[0]
+    new_y = y + motion[1]
+    if not (0 <= new_x < X_LIMIT) or not (0 <= new_y < Y_LIMIT):
+        # Crashed into the boundaries of the world, whoops.
+        sub.set_direction(reverse_dir[sub.get_direction()])
+        return x, y, f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{sub.direction}**) and did not move this turn!"
     message = undersea_map[new_x][new_y].on_entry(sub)
     if undersea_map[new_x][new_y].is_obstacle():
         return x, y, message

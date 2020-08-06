@@ -2,10 +2,11 @@
 Manages the submarines as a whole and the individual submarines within it.
 """
 
-from random import choice, random
+from random import choice, random, shuffle
 from time import time as now
+from utils import diagonal_distance, determine_direction
 
-from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT
+from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT, explore_submap
 
 # State dictionary, filled with submarines.
 state = {}
@@ -23,7 +24,7 @@ def get_sub(name):
     if name in state:
         return state[name]
 
-def add_team(name, category):
+def add_team(name, category, x, y):
     """
     Adds a team with the name, if able.
     """
@@ -32,7 +33,7 @@ def add_team(name, category):
         channel_dict = {}
         for channel in child_channels:
             channel_dict[channel.name] = channel
-        state[name] = Submarine(name, channel_dict)
+        state[name] = Submarine(name, channel_dict, x, y)
         return True
     return False
 
@@ -41,7 +42,7 @@ GARBLE = 10
 COMMS_COOLDOWN = 30
 
 class Submarine():
-    def __init__(self, name, channels):
+    def __init__(self, name, channels, x, y):
         self.name = name
         self.channels = channels
         self.direction = "N"
@@ -58,8 +59,8 @@ class Submarine():
         self.innate_power = {"engines": 1}
         # Power only updates at game tick, so we need to keep track of the changes made.
         self.scheduled_power = self.power.copy()
-        self.x = 0
-        self.y = 0
+        self.x = x
+        self.y = y
         self.active = False
         # movement_progress is how much energy has been put towards a move.
         # Once it reaches a value determined by the engines, we move!
@@ -77,6 +78,16 @@ class Submarine():
         if system in self.innate_power:
             used += self.innate_power[system]
         return used
+    
+    def add_system(self, systemname):
+        """
+        Adds a new system with max power 1.
+        """
+        if systemname in self.power:
+            return False
+        self.power[systemname] = 0
+        self.power_max[systemname] = 1
+        return True
     
     def movement_tick(self):
         """
@@ -118,13 +129,38 @@ class Submarine():
             return None
         return message
     
+    def modify_system(self, systemname, amount):
+        """
+        Upgrades or downgrades a system systemname by amount.
+        Specify a negative amount to downgrade.
+        """
+        if not systemname in self.power_max:
+            return False
+        if self.power_max[systemname] + amount < 0:
+            return False
+        self.power_max[systemname] += amount
+        self.power[systemname] = min(self.power[systemname], self.power_max[systemname])
+        return True
+    
+    def modify_innate_system(self, systemname, amount):
+        """
+        Upgrades or downgrads an innate system systemname by amount.
+        """
+        if not systemname in self.power_max:
+            return False
+        current_innate = 0
+        if systemname in self.innate_power:
+            current_innate = self.innate_power[systemname]
+        if current_innate + amount < 0:
+            return False
+        self.innate_power[systemname] = current_innate + amount
+        return True
+    
     def power_systems(self, systems):
         """
         Attempts to give power to the list of things to power `systems`.
         Will not change anything if it would mean you go over the power cap.
-        Will ignore systems that do not already exist, except for verifying
-        whether we have enough power to perform the operation (if we do but it
-        looks like we don't due to an unknown system being named, tough).
+        If you name a system that doesn't exist, it will not apply the changes.
         """
         if len(systems) > self.total_power - self.power_use(self.scheduled_power):
             return False
@@ -137,13 +173,15 @@ class Submarine():
                 if use > maxi:
                     return False
                 power_copy[system] = use
+            else:
+                return False
         self.scheduled_power = power_copy
         return True
     
     def unpower_systems(self, systems):
         """
         Attempts to remove power from all of the named systems in `systems`.
-        Will ignore systems that do not already exist.
+        If you specify a system that doesn't exist, it will fail.
         """
         power_copy = self.scheduled_power.copy()
         for system in systems:
@@ -153,6 +191,8 @@ class Submarine():
                 if use < 0:
                     return False
                 power_copy[system] = use
+            else:
+                return False
         self.scheduled_power = power_copy
         return True
 
@@ -164,6 +204,13 @@ class Submarine():
 
     def get_direction(self):
         return self.direction
+
+    def set_position(self, x, y):
+        if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+            self.x = x
+            self.y = y
+            return True
+        return False
 
     def get_position(self):
         return (self.x, self.y)
@@ -217,7 +264,7 @@ class Submarine():
         We define this error as GARBLE/comms per point of distance.
         The error never goes above 100%. Messages with 100% are not received.
         """
-        if self.power["comms"] == 0:
+        if self.get_power("comms") == 0:
             return None
         message_error = min(distance * GARBLE / self.power["comms"], 100)
         if message_error == 100:
@@ -250,7 +297,11 @@ class Submarine():
 
             if system in self.innate_power:
                 innate = self.innate_power[system]
-            
+
+            # Don't print out information on systems that cannot be powered.
+            if maxi + innate <= 0:
+                continue
+
             power_status = f"({use}/{maxi}"
             if innate > 0 or difference != 0:
                 power_status += " with"
@@ -272,6 +323,44 @@ class Submarine():
 
         # TODO: add inventory here.
         return message + "\nNo more to report."
+    
+    def outward_broadcast(self, strength):
+        """
+        Shows information about this sub to others based on the strength of
+        scanners. This strength is at least zero (comms power - distance).
+        This strength allows for secrecy and limited information.
+        TODO: Make this way more interesting. It's currently just sub name.
+        Could add direction of motion, whether it's got cargo etc.
+        """
+        subname = ""
+        if strength > 0: subname = f" {self.name}"
+        return f"SUBMARINE{subname}"
+    
+    def scan(self):
+        """
+        Perform a scanner sweep of the local area.
+        This finds all subs and objects in range, and returns them.
+        """
+        scanners_range = 2*self.get_power("scanners") - 2
+        events = explore_submap(self.x, self.y, scanners_range)
+        for subname in get_teams():
+            if subname == self.name:
+                continue
+        
+            sub = get_sub(subname)
+            dist = diagonal_distance(self.x, self.y, sub.x, sub.y)
+            if dist > scanners_range:
+                continue
+
+            event = sub.outward_broadcast(scanners_range - dist)
+            direction = determine_direction(self.x, self.y, sub.x, sub.y)
+            if direction is None:
+                event = f"{event} in your current square!"
+            else:
+                event = f"{event} in direction {direction}!"
+            events.append(event)
+        shuffle(events)
+        return events
 
     async def send_message(self, content, channel):
         if self.channels[channel]:
@@ -287,23 +376,13 @@ class Submarine():
     async def broadcast(self, content):
         if self.last_comms + COMMS_COOLDOWN > now():
             return False
-        subnames = get_teams()
-        for subname in subnames:
+        for subname in get_teams():
             if subname == self.name:
                 continue
 
             sub = get_sub(subname)
 
-            # First, get manhattan distance with diagonals.
-            # I don't know what this is called, but the fastest route is
-            # to take the diagonal and then do any excess.
-            # To do wraparound, we consider both distances, so |x1-x2| and
-            # X_LIMIT - |x1-x2| (and the same for y).
-            xdist = abs(sub.x - self.x)
-            xdist = min(40 - xdist, xdist)
-            ydist = abs(sub.y - self.y)
-            ydist = min(40 - ydist, ydist)
-            dist = min(xdist, ydist) + abs(xdist - ydist)
+            dist = diagonal_distance(self.x, self.y, sub.x, sub.y)
             garbled = self.garble(content, dist)
             if garbled is not None:
                 await sub.send_message(f"**Message received from {self.name}**:\n`{garbled}`\n**END MESSAGE**")
@@ -329,7 +408,7 @@ def sub_from_dict(dictionary, client):
     """
     Creates a submarine from a serialised dictionary.
     """
-    newsub = Submarine("", {})
+    newsub = Submarine("", {}, 0, 0)
 
     # self.channels: turn channel IDs into their objects.
     channels = dictionary["channels"]

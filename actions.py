@@ -23,14 +23,25 @@ def move(direction, team):
             return React(direction_emoji[direction])
     return FAIL_REACT
 
-async def register(category):
+def teleport(team, x, y):
+    """
+    Teleports team to (x,y), checking if the space is in the world.
+    """
+    print("Teleporting", team, "to", (x,y))
+    if team in get_teams():
+        sub = get_sub(team)
+        if sub.set_position(x, y):
+            return OKAY_REACT
+    return FAIL_REACT
+
+async def register(category, x, y):
     """
     Registers a team, setting them up with everything they could need.
     Requires a category with the required subchannels.
     ONLY RUNNABLE BY CONTROL.
     """
     print("Registering", category.name)
-    if add_team(category.name, category):
+    if add_team(category.name, category, x, y):
         sub = get_sub(category.name)
         if sub:
             await sub.send_to_all(f"Channel registered for sub **{category.name}**.")
@@ -61,7 +72,7 @@ def power_systems(team, systems):
         print("Applying power increases of", team, "to", systems)
         if sub.power_systems(systems):
             return Message(f"Scheduled power increase of systems {systems} for {team}!")
-        return Message(f"Could not power all of {systems} so did not change anything.")
+        return Message(f"Could not power all of {systems} (either because they do not exist or because you would go over your power limit) so did not change anything.")
     return FAIL_REACT
 
 def unpower_systems(team, systems):
@@ -73,7 +84,7 @@ def unpower_systems(team, systems):
         print("Applying power decreases of", team, "to", systems)
         if sub.unpower_systems(systems):
             return Message(f"Scheduled power decrease of systems {systems} for {team}!")
-        return Message(f"Could not unpower all of {systems} so did not change anything.")
+        return Message(f"Could not unpower all of {systems} (as either that would leave a system with less than zero power, or you specified a system that didn't exist) so did not change anything.")
     return FAIL_REACT
 
 def print_map(team):
@@ -138,4 +149,28 @@ async def upgrade_sub(team, amount):
         sub.power_cap += amount
         await sub.send_message(f"Submarine {team} was upgraded! Power cap increased by {amount}.", "engineer")
         return OKAY_REACT
+    return FAIL_REACT
+
+async def upgrade_sub_system(team, system, amount):
+    sub = get_sub(team)
+    if sub:
+        if sub.modify_system(system, amount):
+            await sub.send_message(f"Submarine {team} was upgraded! {system} max power increased by {amount}.", "engineer")
+            return OKAY_REACT
+    return FAIL_REACT
+
+async def upgrade_sub_innate(team, system, amount):
+    sub = get_sub(team)
+    if sub:
+        if sub.modify_innate(system, amount):
+            await sub.send_message(f"Submarine {team} was upgraded! {system} innate power increased by {amount}.", "engineer")
+            return OKAY_REACT
+    return FAIL_REACT
+
+async def add_system(team, system):
+    sub = get_sub(team)
+    if sub:
+        if sub.add_system(system):
+            await sub.send_message(f"Submarine {team} was upgraded! New system {system} was installed.", "engineer")
+            return OKAY_REACT
     return FAIL_REACT

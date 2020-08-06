@@ -29,7 +29,7 @@ GAME_SPEED = 1
 
 bot = commands.Bot(command_prefix="!")
 
-@bot.command(name="move")
+@bot.command(name="setdir")
 @commands.has_any_role(CAPTAIN, NAVIGATOR)
 async def player_move(ctx, direction):
     """
@@ -37,7 +37,7 @@ async def player_move(ctx, direction):
     """
     await perform(move, ctx, direction, get_team(ctx.author))
 
-@bot.command(name="force_move")
+@bot.command(name="force_setdir")
 @commands.has_role(CONTROL_ROLE)
 async def control_move(ctx, team, direction):
     """
@@ -45,14 +45,23 @@ async def control_move(ctx, team, direction):
     """
     await perform(move, ctx, direction, team)
 
+@bot.command(name="teleport")
+@commands.has_role(CONTROL_ROLE)
+async def teleport_sub(ctx, team, x, y):
+    """
+    (CONTROL) Teleports <teams>'s submarine to a given (<x>, <y>). Does not inform them.
+    Also does _not_ check if the position is blocked, but does check if it's a valid point in the world.
+    """
+    await perform(teleport, ctx, team, x, y)
+
 @bot.command(name="register")
 @commands.has_role(CONTROL_ROLE)
-async def register_team(ctx):
+async def register_team(ctx, x=0, y=0):
     """
-    (CONTROL) Registers a new team to the parent channel category.
+    (CONTROL) Registers a new team (with sub at (x,y) defaulting to (0,0)) to the parent channel category.
     Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #navigator, #captain and #scientist.
     """
-    await perform_async(register, ctx, ctx.message.channel.category)
+    await perform_async(register, ctx, ctx.message.channel.category, x, y)
 
 @bot.command(name="activate")
 @commands.has_any_role(CAPTAIN, NAVIGATOR)
@@ -184,6 +193,32 @@ async def upgrade(ctx, team, amount : int):
     You can specify a negative number, but this will not check that the resulting state makes sense (that is, the team is not using more power than they have) - in general you should use !damage instead.
     """
     await perform_async(upgrade_sub, ctx, team, amount)
+
+@bot.command(name="upgrade_system")
+@commands.has_role(CONTROL_ROLE)
+async def upgrade_system(ctx, team, system, amount : int):
+    """
+    (CONTROL) Upgrades <team>'s system by <amount>.
+    You can specify a negative number to downgrade, and it will check that this makes sense.
+    """
+    await perform_async(upgrade_sub_system, ctx, team, system, amount)
+
+@bot.command(name="upgrade_innate")
+@commands.has_role(CONTROL_ROLE)
+async def upgrade_innate(ctx, team, system, amount : int):
+    """
+    (CONTROL) Upgrades <team>'s innate system by <amount>.
+    You can specify a negative number to downgrade, and it will check that this makes sense.
+    """
+    await perform_async(upgrade_sub_innate, ctx, team, system, amount)
+
+@bot.command(name="install_system")
+@commands.has_role(CONTROL_ROLE)
+async def new_system(ctx, team, system):
+    """
+    (CONTROL) Gives <team> access to new system <system>.
+    """
+    await perform_async(add_system, ctx, team, system)
 
 @bot.command(name="broadcast")
 @commands.has_any_role(CAPTAIN, NAVIGATOR)

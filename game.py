@@ -14,44 +14,60 @@ async def perform_timestep(counter):
     Called at a time interval, when allowed.
     """
     print(f"Running turn {counter}.")
-    for subname in get_teams():
+
+    def is_active_sub(subname):
         sub = get_sub(subname)
-        message_opening = f"---------**TURN {counter}**----------\n"
-        captain_message = ""
-        navigator_message = ""
-        engineer_message = ""
-        scientist_message = ""
+        if not sub: return False
+        return sub.activated()
 
-        # The sub should only activate if it is active. I know, novel.
-        if not sub.activated():
-            continue
+    # Get all active subs. (Can you tell I'm a functional programmer?)
+    subsubset = list(filter(is_active_sub, get_teams()))
+    submessages = {i: {"engineer": "", "captain": "", "navigator": "", "scientist": ""} for i in subsubset}
+    message_opening = f"---------**TURN {counter}**----------\n"
 
-        # Power manipulation:
+    # Power management
+    for subname in subsubset:
+        sub = get_sub(subname)
         power_message = sub.apply_power_schedule()
         if power_message:
             power_message = f"{power_message}\n"
-            captain_message += power_message
-            engineer_message += power_message
-
-        # Actions that aren't moving:
-
-        # Movement:
+            submessages[subname]["captain"] += power_message
+            submessages[subname]["engineer"] += power_message
+    
+    # Movement
+    for subname in subsubset:
+        sub = get_sub(subname)
         move_message = sub.movement_tick()
         if move_message:
             move_message = f"{move_message}\n"
-            captain_message += move_message
-            navigator_message += move_message
-        
-        if captain_message == "":
-            captain_message = "\n"
-        await sub.send_message(f"{message_opening}{captain_message[:-1]}", "captain")
-        if navigator_message != "":
-            await sub.send_message(f"{message_opening}{navigator_message[:-1]}", "navigator")
-        if engineer_message != "":
-            await sub.send_message(f"{message_opening}{engineer_message[:-1]}", "engineer")
-        if scientist_message != "":
-            await sub.send_message(f"{message_opening}{scientist_message[:-1]}", "scientist")
+            submessages[subname]["captain"] += move_message
+            submessages[subname]["navigator"] += move_message
     
+    # Scanning (as we enter a new square only)
+    # TODO: Only make scanner print when things change. This will require
+    # tracking past results and not shuffling them preemptively.
+    for subname in subsubset:
+        sub = get_sub(subname)
+        scan_result = sub.scan()
+        if len(scan_result) > 0:
+            scan_message = "**Scanners found:**\n"
+            scan_message += "\n".join(scan_result)
+            scan_message += "\n"
+            submessages[subname]["captain"] += scan_message
+            submessages[subname]["scientist"] += scan_message
+
+    for subname in subsubset:
+        messages = submessages[subname]
+        if messages["captain"] == "":
+            messages["captain"] = "\n"
+        await sub.send_message(f"{message_opening}{messages['captain'][:-1]}", "captain")
+        if messages["navigator"] != "":
+            await sub.send_message(f"{message_opening}{messages['navigator'][:-1]}", "navigator")
+        if messages["engineer"] != "":
+            await sub.send_message(f"{message_opening}{messages['engineer'][:-1]}", "engineer")
+        if messages["scientist"] != "":
+            await sub.send_message(f"{message_opening}{messages['scientist'][:-1]}", "scientist")
+
     save_game()
 
 def save_game():
