@@ -179,3 +179,17 @@ async def add_system(team, system):
             await sub.send_message(f"Submarine {team} was upgraded! New system {system} was installed.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
+
+async def give_team_puzzle(team, reason):
+    sub = get_sub(team)
+    if sub:
+        await sub.send_puzzle(reason)
+        return OKAY_REACT
+    return FAIL_REACT
+
+async def answer_team_puzzle(team, answer):
+    sub = get_sub(team)
+    if sub:
+        await sub.resolve_puzzle(answer)
+        return OKAY_REACT
+    return FAIL_REACT

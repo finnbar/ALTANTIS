@@ -21,7 +21,7 @@ CAPTAIN = "captain"
 NAVIGATOR = "navigator"
 # The speed of the game, in _seconds_. Remember that most submarines will start
 # moving every four "turns", so really you should think about 4*GAME_SPEED.
-GAME_SPEED = 1
+GAME_SPEED = 5
 
 # GENERAL COMMANDS
 
@@ -144,6 +144,24 @@ async def do_broadcast(ctx, message):
     """
     await perform_async(broadcast, ctx, get_team(ctx.author), message)
 
+@bot.command(name="puzzle")
+@commands.has_role(ENGINEER)
+async def repair_puzzle(ctx):
+    """
+    Gives you a puzzle, which must be solved before you next move. If you
+    already have a puzzle in progress, it will be treated as if you ran out of
+    time!
+    """
+    await perform_async(give_team_puzzle, ctx, get_team(ctx.author), "repair")
+
+@bot.command(name="answer")
+@commands.has_any_role(CAPTAIN, ENGINEER)
+async def answer_puzzle(ctx, answer: str):
+    """
+    Lets you answer a set puzzle that hasn't resolved yet.
+    """
+    await perform_async(answer_team_puzzle, ctx, get_team(ctx.author), answer)
+
 # LOOP HANDLING
 
 @tasks.loop(seconds=GAME_SPEED)
@@ -235,6 +253,14 @@ async def bury(ctx, treasure, x : int, y : int):
     (CONTROL) Buries a treasure <treasure> at location (<x>, <y>).
     """
     await perform(bury_treasure, ctx, treasure, x, y)
+
+@bot.command(name="force_puzzle")
+@commands.has_role(CONTROL_ROLE)
+async def force_puzzle(ctx, team):
+    """
+    (CONTROL) Gives team <team> a puzzle, resolving any puzzles they currently have.
+    """
+    await perform_async(give_team_puzzle, ctx, team, "fixing")
 
 @bot.command(name="load")
 @commands.has_role(CONTROL_ROLE)

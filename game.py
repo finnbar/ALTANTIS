@@ -37,7 +37,7 @@ async def perform_timestep(counter):
     # Movement
     for subname in subsubset:
         sub = get_sub(subname)
-        move_message = sub.movement_tick()
+        move_message = await sub.movement_tick()
         if move_message:
             move_message = f"{move_message}\n"
             submessages[subname]["captain"] += move_message

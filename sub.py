@@ -7,6 +7,9 @@ from time import time as now
 from utils import diagonal_distance, determine_direction
 
 from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT, explore_submap
+from puzzles import load_all_puzzles
+
+from discord import File as DFile
 
 # State dictionary, filled with submarines.
 state = {}
@@ -67,6 +70,12 @@ class Submarine():
         self.movement_progress = 0
         # last_comms is the time when the Comms were last used.
         self.last_comms = 0
+        # puzzles keeps track of what puzzles are available.
+        self.puzzles = load_all_puzzles()
+        self.current_puzzle = None
+        self.puzzle_reason = ""
+        # wear_and_tear is a counter until we introduce a puzzle!
+        self.wear_and_tear = 5
 
     def get_power(self, system):
         """
@@ -89,7 +98,7 @@ class Submarine():
         self.power_max[systemname] = 1
         return True
     
-    def movement_tick(self):
+    async def movement_tick(self):
         """
         Updates internal state and moves if it is time to do so.
         """
@@ -103,6 +112,16 @@ class Submarine():
                 f"Moved **{self.name}** in direction **{direction}**!\n"
                 f"**{self.name}** is now at position **{self.get_position()}**."
             )
+
+            # Puzzles resolve once you've moved:
+            await self.resolve_puzzle(None)
+            # We also need to set wear and tear puzzles if need be.
+            self.wear_and_tear -= 1
+            if self.wear_and_tear <= 0:
+                await self.send_puzzle("wear and tear")
+                self.wear_and_tear = choice([4,5,6])
+
+            # Finally, return our movement.
             if message:
                 return f"{message}\n{move_status}"
             return move_status
@@ -362,9 +381,12 @@ class Submarine():
         shuffle(events)
         return events
 
-    async def send_message(self, content, channel):
+    async def send_message(self, content, channel, filename=None):
+        fp = None
+        if filename:
+            fp = DFile(filename)
         if self.channels[channel]:
-            await self.channels[channel].send(content)
+            await self.channels[channel].send(content, file=fp)
             return True
         return False
     
@@ -385,8 +407,55 @@ class Submarine():
             dist = diagonal_distance(self.x, self.y, sub.x, sub.y)
             garbled = self.garble(content, dist)
             if garbled is not None:
-                await sub.send_message(f"**Message received from {self.name}**:\n`{garbled}`\n**END MESSAGE**")
+                await sub.send_message(f"**Message received from {self.name}**:\n`{garbled}`\n**END MESSAGE**", "captain")
         self.last_comms = now()
+        return True
+    
+    async def send_puzzle(self, reason):
+        """
+        Send the next puzzle, tagging it with a reason.
+        Valid reasons are:
+        * "wear and tear" - done every few moves. Penalty is a damage if ignored or failed, nothing if correct.
+        * "repair" - whenever the engineer asks for it. Penalty is a damage if failed, nothing if ignored, and one healing if correct.
+        * "fixing" - whenever control asks for it. Penalty is the same as wear and tear.
+        If there is a puzzle in progress, that puzzle immediately resolves (as if you ran out of time).
+        """
+        if self.current_puzzle:
+            await self.resolve_puzzle(None)
+        if len(self.puzzles) == 0:
+            self.puzzles = load_all_puzzles()
+        
+        puzzle_to_deliver = self.puzzles[0]
+        self.puzzles = self.puzzles[1:]
+        self.current_puzzle = puzzle_to_deliver
+        self.puzzle_reason = reason
+        await self.send_message(f"Puzzle for **{reason}** received! You have until your submarine next moves to solve it!", "engineer", self.current_puzzle[0])
+        return True
+    
+    async def resolve_puzzle(self, answer):
+        """
+        Resolve the current puzzle, if able. Called with answer=None if time ran out.
+        """
+        if self.current_puzzle is None:
+            return False
+        
+        condition = self.puzzle_reason.capitalize()
+        if answer is not None and answer.lower() == self.current_puzzle[1].lower():
+            # Correct!
+            if condition == "Repair":
+                await self.send_to_all(self.heal(1))
+            await self.send_message(f"Puzzle answered correctly! **{condition}** sorted!", "engineer")
+        else:
+            # Incorrect.
+            if answer is None:
+                if condition != "Repair":
+                    await self.send_to_all(self.damage(1))
+                await self.send_message(f"Ran out of time to solve puzzle. **{condition}** not sorted.", "engineer")
+            else:
+                await self.send_to_all(self.damage(1))
+                await self.send_message(f"You got the answer wrong! **{condition}** not sorted.", "engineer")
+            self.puzzles.append(self.current_puzzle)
+        self.current_puzzle = None
         return True
     
     def to_dict(self):
