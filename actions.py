@@ -109,10 +109,10 @@ def print_map(team):
     formatted += subs_string[:-2]
     return Message(formatted)
 
-def get_status(team):
+def get_status(team, loop):
     sub = get_sub(team)
     if sub:
-        status_message = sub.status_message()
+        status_message = sub.status_message(loop)
         return Message(status_message)
     return FAIL_REACT
 

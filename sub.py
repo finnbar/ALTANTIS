@@ -5,11 +5,13 @@ Manages the submarines as a whole and the individual submarines within it.
 from random import choice, random, shuffle
 from time import time as now
 from utils import diagonal_distance, determine_direction
-
 from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT, explore_submap
 from puzzles import load_all_puzzles
+from consts import GAME_SPEED
 
 from discord import File as DFile
+
+import math, datetime
 
 # State dictionary, filled with submarines.
 state = {}
@@ -294,13 +296,20 @@ class Submarine():
                 new_content[i] = "_"
         return "".join(new_content)
 
-    def status_message(self):
+    def status_message(self, loop):
         message = (
             f"Status for **{self.name}**\n"
             f"------------------------------------\n"
         )
         
         if self.activated():
+            time_until_next = loop.next_iteration.timestamp() - datetime.datetime.now().timestamp()
+            threshold = get_square(self.x, self.y).difficulty()
+            turns_until_move = math.ceil(max(threshold - self.movement_progress, 0) / self.get_power("engines"))
+            turns_plural = "turns" if turns_until_move > 1 else "turn"
+            time_until_move = time_until_next + GAME_SPEED * (turns_until_move - 1)
+            message += f"Next game turn will occur in {int(time_until_next)}s.\n"
+            message += f"Next move estimated to occur in {int(time_until_move)}s ({turns_until_move} {turns_plural}).\n"
             message += f"Currently moving **{self.direction}** and in position ({self.x}, {self.y}).\n\n"
         else:
             message += f"Submarine is currently offline.\n\n"
@@ -448,12 +457,12 @@ class Submarine():
         else:
             # Incorrect.
             if answer is None:
+                await self.send_message(f"Ran out of time to solve puzzle. **{condition}** not sorted.", "engineer")
                 if condition != "Repair":
                     await self.send_to_all(self.damage(1))
-                await self.send_message(f"Ran out of time to solve puzzle. **{condition}** not sorted.", "engineer")
             else:
-                await self.send_to_all(self.damage(1))
                 await self.send_message(f"You got the answer wrong! **{condition}** not sorted.", "engineer")
+                await self.send_to_all(self.damage(1))
             self.puzzles.append(self.current_puzzle)
         self.current_puzzle = None
         return True

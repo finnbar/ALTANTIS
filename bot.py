@@ -11,17 +11,10 @@ from dotenv import load_dotenv
 from actions import *
 from game import perform_timestep, load_game
 from utils import OKAY_REACT
+from consts import *
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-CONTROL_ROLE = "CONTROL"
-ENGINEER = "engineer"
-SCIENTIST = "scientist"
-CAPTAIN = "captain"
-NAVIGATOR = "navigator"
-# The speed of the game, in _seconds_. Remember that most submarines will start
-# moving every four "turns", so really you should think about 4*GAME_SPEED.
-GAME_SPEED = 5
 
 # GENERAL COMMANDS
 
@@ -134,7 +127,7 @@ async def status(ctx):
     """
     Reports the status of the submarine, including power and direction.
     """
-    await perform(get_status, ctx, get_team(ctx.author))
+    await perform(get_status, ctx, get_team(ctx.author), main_loop)
 
 @bot.command(name="broadcast")
 @commands.has_any_role(CAPTAIN, NAVIGATOR)

@@ -31,10 +31,8 @@ Important features:
 [ ] Basic resources.
 [ ] !death, so you can die.
 
-Important fixes:
-[x] The world should not wrap.
-
 Important non-gameplay features:
 [x] Save bot state to disk with each game loop, as to avoid any issues.
 [ ] Possibly deal with locking/unlocking of the main thread.
 [ ] Complete README.
+[ ] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
