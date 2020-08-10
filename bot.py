@@ -155,6 +155,14 @@ async def answer_puzzle(ctx, answer: str):
     """
     await perform_async(answer_team_puzzle, ctx, get_team(ctx.author), answer)
 
+@bot.command(name="death")
+@commands.has_role(CAPTAIN)
+async def death(ctx, subname):
+    """
+    Must be called with your submarine's full name. Kills your submarine. This isn't a joke.
+    """
+    await perform_async(kill_sub, ctx, get_team(ctx.author), subname)
+
 # LOOP HANDLING
 
 @tasks.loop(seconds=GAME_SPEED)
@@ -254,6 +262,15 @@ async def force_puzzle(ctx, team):
     (CONTROL) Gives team <team> a puzzle, resolving any puzzles they currently have.
     """
     await perform_async(give_team_puzzle, ctx, team, "fixing")
+
+@bot.command(name="kill_team")
+@commands.has_role(CONTROL_ROLE)
+async def kill_team(ctx, team):
+    """
+    (CONTROL) Kills the team <team>, removing any trace of their existence bar their channels.
+    Do NOT use this unless you are absolutely sure.
+    """
+    await perform(delete_team, ctx, team)
 
 @bot.command(name="load")
 @commands.has_role(CONTROL_ROLE)

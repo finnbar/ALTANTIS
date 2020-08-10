@@ -32,6 +32,15 @@ def add_team(name, category, x, y):
         return True
     return False
 
+def remove_team(name):
+    """
+    Removes the team with that name, if able.
+    """
+    if name in get_teams():
+        state[name] = None
+        return True
+    return False
+
 def state_to_dict():
     """
     Convert our state to a dictionary. This just runs to_dict on each member of

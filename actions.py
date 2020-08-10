@@ -3,7 +3,7 @@ The backend for all Discord actions, which allow players to control their sub.
 """
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT
-from state import get_teams, get_sub, add_team
+from state import get_teams, get_sub, add_team, remove_team
 from world import ascii_map, bury_treasure_at
 
 direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
@@ -132,6 +132,16 @@ async def broadcast(team, message):
             return Message("The radio is still in use! (It has a thirty second cooldown.)")
     return FAIL_REACT
 
+async def kill_sub(team, verify):
+    sub = get_sub(team)
+    if sub and sub.name == verify:
+        sub.power.damage(sub.power.total_power)
+        # Since no sub can die in one hit.
+        sub.power.damage(1)
+        await sub.send_to_all("Submarine took catastrophic damage and died! Please contact control.")
+        return OKAY_REACT
+    return FAIL_REACT
+
 async def deal_damage(team, amount, reason):
     sub = get_sub(team)
     if sub:
@@ -191,5 +201,11 @@ async def answer_team_puzzle(team, answer):
     sub = get_sub(team)
     if sub:
         await sub.puzzles.resolve_puzzle(answer)
+        return OKAY_REACT
+    return FAIL_REACT
+
+def delete_team(team):
+    # DELETES THE TEAM IN QUESTION. DO NOT DO THIS UNLESS YOU ARE ABSOLUTELY CERTAIN.
+    if remove_team(team):
         return OKAY_REACT
     return FAIL_REACT

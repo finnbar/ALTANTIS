@@ -29,10 +29,10 @@ Important features:
 [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
 [ ] Basic inventory management. (!give for control, !drop for players, !remove for control)
 [ ] Basic resources.
-[ ] !death, so you can die.
+[x] !death, so you can die.
 
 Important non-gameplay features:
 [x] Save bot state to disk with each game loop, as to avoid any issues.
 [ ] Possibly deal with locking/unlocking of the main thread.
 [ ] Complete README.
-[ ] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
+[x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
