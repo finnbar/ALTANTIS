@@ -2,7 +2,7 @@
 Runs the game, performing the right actions at fixed time intervals.
 """
 
-from sub import get_teams, get_sub, state_to_dict, state_from_dict
+from state import get_teams, get_sub, state_to_dict, state_from_dict
 from world import map_to_dict, map_from_dict
 from utils import OKAY_REACT, FAIL_REACT
 
@@ -18,7 +18,7 @@ async def perform_timestep(counter):
     def is_active_sub(subname):
         sub = get_sub(subname)
         if not sub: return False
-        return sub.activated()
+        return sub.power.activated()
 
     # Get all active subs. (Can you tell I'm a functional programmer?)
     subsubset = list(filter(is_active_sub, get_teams()))
@@ -28,7 +28,7 @@ async def perform_timestep(counter):
     # Power management
     for subname in subsubset:
         sub = get_sub(subname)
-        power_message = sub.apply_power_schedule()
+        power_message = sub.power.apply_power_schedule()
         if power_message:
             power_message = f"{power_message}\n"
             submessages[subname]["captain"] += power_message
@@ -37,7 +37,7 @@ async def perform_timestep(counter):
     # Movement and puzzles
     for subname in subsubset:
         sub = get_sub(subname)
-        move_message = await sub.movement_tick()
+        move_message = await sub.movement.movement_tick()
         if move_message:
             move_message = f"{move_message}\n"
             submessages[subname]["captain"] += move_message
@@ -48,7 +48,7 @@ async def perform_timestep(counter):
     # tracking past results and not shuffling them preemptively.
     for subname in subsubset:
         sub = get_sub(subname)
-        scan_result = sub.scan()
+        scan_result = sub.scan.scan()
         if len(scan_result) > 0:
             scan_message = "**Scanners found:**\n"
             scan_message += "\n".join(scan_result)

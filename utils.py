@@ -3,6 +3,8 @@ Utility classes for Statuses (return values from Discord actions).
 Also utility functions for distances and directions.
 """
 
+# MESSAGING UTILITIES
+
 class Status():
     def __init__(self):
         pass
@@ -27,6 +29,8 @@ class Message(Status):
     async def do_status(self, ctx):
         await ctx.send(self.contents)
 
+# DIRECTION UTILITIES
+
 directions = {"N": (0, -1), "NE": (1, -1), "E": (1, 0), "SE": (1, 1),
               "S": (0, 1), "SW": (-1, 1), "W": (-1, 0), "NW": (-1, -1)}
 reverse_dir = {"N": "S", "NE": "SW", "E": "W", "SE": "NW", "S": "N",
@@ -34,20 +38,22 @@ reverse_dir = {"N": "S", "NE": "SW", "E": "W", "SE": "NW", "S": "N",
 
 import math
 
-def diagonal_distance(ax, ay, bx, by):
+def diagonal_distance(pa, pb):
     """
-    Gets manhattan distance with diagonals between (ax, ay) and (bx, by).
+    Gets manhattan distance with diagonals between points pa and pb.
     I don't know what this is called, but the fastest route is to take the
     diagonal and then do any excess.
     """
+    (ax, ay) = pa
+    (bx, by) = pb
     xdist = abs(ax - bx)
     ydist = abs(ay - by)
     dist = min(xdist, ydist) + abs(xdist - ydist)
     return dist
 
-def determine_direction(ax, ay, bx, by):
+def determine_direction(pa, pb):
     """
-    Determines which compass direction (bx, by) is from (ax, ay).
+    Determines which compass direction coord pb is from pa.
     This would normally be easy, but guess which idiot made everything work in
     eight compass directions instead of four? (Me, that's who.)
     Also, we have an extra fun bonus: the world has top left being (0, 0).
@@ -58,6 +64,9 @@ def determine_direction(ax, ay, bx, by):
     E/W than NE/NW/SE/SW, and ±3pi/8 and ±5pi/8 are then points where a vector
     is closer to N/S than NE/NW/SE/SW.
     """
+    (ax, ay) = pa
+    (bx, by) = pb
+
     if by - ay == 0 and bx - ax == 0:
         return None
 

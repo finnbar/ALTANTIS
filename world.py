@@ -128,12 +128,13 @@ def bury_treasure_at(name, x, y):
             return True
     return False
 
-def explore_submap(cx, cy, dist):
+def explore_submap(pos, dist):
     """
-    Explores the area centered around (cx, cy) spanning distance dist.
+    Explores the area centered around pos = (cx, cy) spanning distance dist.
     Returns all outward_broadcast events (as a list) formatted for output.
     """
     events = []
+    (cx, cy) = pos
     for i in range(-dist, dist+1):
         x = cx + i
         if x < 0 or x >= X_LIMIT:
@@ -142,10 +143,10 @@ def explore_submap(cx, cy, dist):
             y = cy + j
             if y < 0 or y >= Y_LIMIT:
                 continue
-            this_dist = diagonal_distance(0, 0, i, j)
+            this_dist = diagonal_distance((0, 0), (i, j))
             event = undersea_map[x][y].outward_broadcast(dist - this_dist)
             if event != "":
-                direction = determine_direction(cx, cy, x, y)
+                direction = determine_direction((cx, cy), (x, y))
                 if direction is None:
                     event = f"{event} in your current square!"
                 else:

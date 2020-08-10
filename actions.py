@@ -3,7 +3,7 @@ The backend for all Discord actions, which allow players to control their sub.
 """
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT
-from sub import get_teams, get_sub, add_team
+from state import get_teams, get_sub, add_team
 from world import ascii_map, bury_treasure_at
 
 direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
@@ -19,7 +19,7 @@ def move(direction, team):
     print("Setting direction of", team, "to", direction)
     if team in get_teams():
         # Store the move and return the correct emoji.
-        if get_sub(team).set_direction(direction):
+        if get_sub(team).movement.set_direction(direction):
             return React(direction_emoji[direction])
     return FAIL_REACT
 
@@ -30,7 +30,7 @@ def teleport(team, x, y):
     print("Teleporting", team, "to", (x,y))
     if team in get_teams():
         sub = get_sub(team)
-        if sub.set_position(x, y):
+        if sub.movement.set_position(x, y):
             return OKAY_REACT
     return FAIL_REACT
 
@@ -55,11 +55,11 @@ def set_activation(team, value):
     sub = get_sub(team)
     if sub:
         print("Setting power of", team, "to", value)
-        if sub.activated() == value:
+        if sub.power.activated() == value:
             return Message(f"{team} unchanged.")
-        sub.activate(value)
-        if sub.activated():
-            return Message(f"{team} is **ON** and running! Current direction: **{sub.get_direction()}**.")
+        sub.power.activate(value)
+        if sub.power.activated():
+            return Message(f"{team} is **ON** and running! Current direction: **{sub.movement.get_direction()}**.")
         return Message(f"{team} is **OFF** and halted!")
     return FAIL_REACT
 
@@ -70,7 +70,7 @@ def power_systems(team, systems):
     sub = get_sub(team)
     if sub:
         print("Applying power increases of", team, "to", systems)
-        if sub.power_systems(systems):
+        if sub.power.power_systems(systems):
             return Message(f"Scheduled power increase of systems {systems} for {team}!")
         return Message(f"Could not power all of {systems} (either because they do not exist or because you would go over your power limit) so did not change anything.")
     return FAIL_REACT
@@ -82,7 +82,7 @@ def unpower_systems(team, systems):
     sub = get_sub(team)
     if sub:
         print("Applying power decreases of", team, "to", systems)
-        if sub.unpower_systems(systems):
+        if sub.power.unpower_systems(systems):
             return Message(f"Scheduled power decrease of systems {systems} for {team}!")
         return Message(f"Could not unpower all of {systems} (as either that would leave a system with less than zero power, or you specified a system that didn't exist) so did not change anything.")
     return FAIL_REACT
@@ -123,7 +123,7 @@ def bury_treasure(name, x, y):
 
 async def broadcast(team, message):
     sub = get_sub(team)
-    if sub and sub.activated():
+    if sub and sub.power.activated():
         print(f"Going to broadcast {message}!")
         result = await sub.broadcast(message)
         if result:
@@ -135,7 +135,7 @@ async def broadcast(team, message):
 async def deal_damage(team, amount, reason):
     sub = get_sub(team)
     if sub:
-        damage_message = sub.damage(amount)
+        damage_message = sub.power.damage(amount)
         if reason: await sub.send_to_all(reason)
         await sub.send_to_all(damage_message)
         return OKAY_REACT
@@ -151,7 +151,7 @@ async def shout_at_team(team, message):
 async def upgrade_sub(team, amount):
     sub = get_sub(team)
     if sub:
-        sub.power_cap += amount
+        sub.power.modify_reactor(amount)
         await sub.send_message(f"Submarine {team} was upgraded! Power cap increased by {amount}.", "engineer")
         return OKAY_REACT
     return FAIL_REACT
@@ -159,7 +159,7 @@ async def upgrade_sub(team, amount):
 async def upgrade_sub_system(team, system, amount):
     sub = get_sub(team)
     if sub:
-        if sub.modify_system(system, amount):
+        if sub.power.modify_system(system, amount):
             await sub.send_message(f"Submarine {team} was upgraded! {system} max power increased by {amount}.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
@@ -167,7 +167,7 @@ async def upgrade_sub_system(team, system, amount):
 async def upgrade_sub_innate(team, system, amount):
     sub = get_sub(team)
     if sub:
-        if sub.modify_innate(system, amount):
+        if sub.power.modify_innate(system, amount):
             await sub.send_message(f"Submarine {team} was upgraded! {system} innate power increased by {amount}.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
@@ -175,7 +175,7 @@ async def upgrade_sub_innate(team, system, amount):
 async def add_system(team, system):
     sub = get_sub(team)
     if sub:
-        if sub.add_system(system):
+        if sub.power.add_system(system):
             await sub.send_message(f"Submarine {team} was upgraded! New system {system} was installed.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
@@ -183,13 +183,13 @@ async def add_system(team, system):
 async def give_team_puzzle(team, reason):
     sub = get_sub(team)
     if sub:
-        await sub.send_puzzle(reason)
+        await sub.puzzles.send_puzzle(reason)
         return OKAY_REACT
     return FAIL_REACT
 
 async def answer_team_puzzle(team, answer):
     sub = get_sub(team)
     if sub:
-        await sub.resolve_puzzle(answer)
+        await sub.puzzles.resolve_puzzle(answer)
         return OKAY_REACT
     return FAIL_REACT
