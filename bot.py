@@ -155,6 +155,14 @@ async def answer_puzzle(ctx, answer: str):
     """
     await perform_async(answer_team_puzzle, ctx, get_team(ctx.author), answer)
 
+@bot.command(name="crane")
+@commands.has_any_role(CAPTAIN, SCIENTIST)
+async def crane(ctx):
+    """
+    Drops the crane in your current location. Takes two turns to resolve.
+    """
+    await perform(drop_crane, ctx, get_team(ctx.author))
+
 @bot.command(name="death")
 @commands.has_role(CAPTAIN)
 async def death(ctx, subname):

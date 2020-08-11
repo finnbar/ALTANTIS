@@ -30,6 +30,8 @@ class ScanSystem():
         This finds all subs and objects in range, and returns them.
         """
         scanners_range = 2*self.sub.power.get_power("scanners") - 2
+        if scanners_range < 0:
+            return []
         my_position = self.sub.movement.get_position()
         events = explore_submap(my_position, scanners_range)
         for subname in get_teams():

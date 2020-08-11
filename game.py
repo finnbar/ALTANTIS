@@ -34,6 +34,14 @@ async def perform_timestep(counter):
             submessages[subname]["captain"] += power_message
             submessages[subname]["engineer"] += power_message
     
+    # The crane
+    for subname in subsubset:
+        sub = get_sub(subname)
+        crane_message = sub.inventory.crane_tick()
+        if crane_message:
+            crane_message = f"{crane_message}\n"
+            submessages[subname]["scientist"] += crane_message
+    
     # Movement and puzzles
     for subname in subsubset:
         sub = get_sub(subname)

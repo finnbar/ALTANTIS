@@ -117,8 +117,15 @@ def get_status(team, loop):
     return FAIL_REACT
 
 def bury_treasure(name, x, y):
-    if bury_treasure_at(name, x, y):
+    if bury_treasure_at(name, (x, y)):
         return OKAY_REACT
+    return FAIL_REACT
+
+def drop_crane(team):
+    sub = get_sub(team)
+    if sub:
+        if sub.inventory.drop_crane():
+            return OKAY_REACT
     return FAIL_REACT
 
 async def broadcast(team, message):

@@ -12,7 +12,7 @@ class Empty():
         return False
     
     def pick_up(self):
-        return False
+        return None
     
     def on_entry(self, sub):
         return None
@@ -82,7 +82,7 @@ class Treasure(Empty):
         return "Treasure"
     
     def pick_up(self):
-        return True
+        return self.name
     
     def to_char(self):
         if self.visible:
@@ -121,12 +121,22 @@ def possible_directions():
 def get_square(x, y):
     return undersea_map[x][y]
 
-def bury_treasure_at(name, x, y):
+def bury_treasure_at(name, pos):
+    (x, y) = pos
     if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
         if undersea_map[x][y].replaceable():
             undersea_map[x][y] = Treasure(name)
             return True
     return False
+
+def pick_up_treasure(pos):
+    (x, y) = pos
+    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+        treasure = undersea_map[x][y].pick_up()
+        if treasure:
+            undersea_map[x][y] = Empty()
+            return treasure
+    return None
 
 def explore_submap(pos, dist):
     """

@@ -28,6 +28,9 @@ Important features:
 [x] Control can drop items on the seafloor. (!bury for control)
 [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
 [ ] Basic inventory management. (!give for control, !remove for control, !trade maybe. no !drop as that's littering)
+[x] The Crane.
+[ ] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.)
+[ ] Weapons, oh my.
 [x] !death, so you can die.
 
 Important non-gameplay features:
@@ -42,3 +45,4 @@ Nice features:
 [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
 [ ] Mechanical resources (e.g. currency).
 [ ] Control commands run in team channels default to affecting that team.
+[ ] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
