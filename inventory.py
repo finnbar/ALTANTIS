@@ -45,8 +45,10 @@ class Inventory():
         if self.sub.power.get_power("crane") == 0:
             # Drop what's currently being held.
             if self.crane_holds:
-                bury_treasure_at(self.crane_holds, self.sub.movement.get_position())
+                treasure = self.crane_holds
+                bury_treasure_at(treasure, self.sub.movement.get_position())
                 self.crane_holds = None
+                return f"Dropped {treasure} because the crane was unpowered..."
             return ""
         if self.schedule_crane and not self.crane_down:
             # The crane goes down!
