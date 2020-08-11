@@ -16,34 +16,34 @@ You'll need to do a few things to run this bot. In no particular order:
 ## Feature list
 
 Important features:
-[x] Can have submarines, which move.
-[x] Has a map with obstacles.
-[x] Can turn the sub off and on. (Allowing players to dock.)
-[x] Submarines can travel at multiple speeds.
-[x] Full power management. Can power systems, but has a power cap (which can be increased by control).
-[x] Pretty power management (!status will tell you about upcoming power changes.)
-[x] Can broadcast messages to all in range (via Comms system, which garbles longer-distance messages). Messages have a cooldown.
-[x] A channel per person, so that role-specific info can be broadcast (engineers only get puzzles, navigator only gets end-of-turn, scientists only gets scanners).
-[x] Can activate scanners, and inform players when they hover over things (level 1), are near things and other named subs (level 2), and further afield (level 3). Identify things via direction.
-[x] Control can drop items on the seafloor. (!bury for control)
-[x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
-[x] Basic inventory management. (!give for control, !remove for control, no !drop as that's littering)
-[ ] Trading between players (!give_(??) to players to give to another team from their inventory). Need to decide on the exact model to use here - do you allow one-sided trades? How do you make sure people aren't just thrown garbage?
-[x] The Crane.
-[ ] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
-[ ] Weapons, oh my.
-[x] !death, so you can die.
+- [x] Can have submarines, which move.
+- [x] Has a map with obstacles.
+- [x] Can turn the sub off and on. (Allowing players to dock.)
+- [x] Submarines can travel at multiple speeds.
+- [x] Full power management. Can power systems, but has a power cap (which can be increased by control).
+- [x] Pretty power management (!status will tell you about upcoming power changes.)
+- [x] Can broadcast messages to all in range (via Comms system, which garbles longer-distance messages). Messages have a cooldown.
+- [x] A channel per person, so that role-specific info can be broadcast (engineers only get puzzles, navigator only gets end-of-turn, scientists only gets scanners).
+- [x] Can activate scanners, and inform players when they hover over things (level 1), are near things and other named subs (level 2), and further afield (level 3). Identify things via direction.
+- [x] Control can drop items on the seafloor. (!bury for control)
+- [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
+- [x] Basic inventory management. (!give for control, !remove for control, no !drop as that's littering)
+- [ ] Trading between players (!give_(??) to players to give to another team from their inventory). Need to decide on the exact model to use here - do you allow one-sided trades? How do you make sure people aren't just thrown garbage?
+- [x] The Crane.
+- [ ] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
+- [ ] Weapons, oh my.
+- [x] !death, so you can die.
 
 Important non-gameplay features:
-[x] Save bot state to disk with each game loop, as to avoid any issues.
-[ ] Deal with locking/unlocking of the main thread, if possible. (Could have issues if someone does something during game turn execution.)
-[ ] Complete README.
-[x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
-[ ] Sort commands by functionality.
+- [x] Save bot state to disk with each game loop, as to avoid any issues.
+- [ ] Deal with locking/unlocking of the main thread, if possible. (Could have issues if someone does something during game turn execution.)
+- [ ] Complete README.
+- [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
+- [ ] Sort commands by functionality.
 
 Nice features:
-[ ] !explode, which explodes (x,y) with a range and amount of damage.
-[ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
-[ ] Mechanical resources (e.g. currency).
-[ ] Control commands run in team channels default to affecting that team.
-[ ] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
+- [ ] !explode, which explodes (x,y) with a range and amount of damage.
+- [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
+- [ ] Mechanical resources (e.g. currency).
+- [ ] Control commands run in team channels default to affecting that team.
+- [ ] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
