@@ -217,4 +217,4 @@ class PowerManager():
                 system_status = "online"
             message += f"* **{system.capitalize()}** is {system_status} {power_status}\n"
 
-        return message
+        return message + "\n"

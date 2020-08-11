@@ -204,6 +204,22 @@ async def answer_team_puzzle(team, answer):
         return OKAY_REACT
     return FAIL_REACT
 
+async def give_item_to_team(team, item, quantity):
+    sub = get_sub(team)
+    if sub:
+        if sub.inventory.add(item, quantity):
+            await sub.send_message(f"Obtained {quantity}x {item}!", "captain")
+            return OKAY_REACT
+    return FAIL_REACT
+
+async def take_item_from_team(team, item, quantity):
+    sub = get_sub(team)
+    if sub:
+        if sub.inventory.remove(item, quantity):
+            await sub.send_message(f"Lost {quantity}x {item}!", "captain")
+            return OKAY_REACT
+    return FAIL_REACT
+
 def delete_team(team):
     # DELETES THE TEAM IN QUESTION. DO NOT DO THIS UNLESS YOU ARE ABSOLUTELY CERTAIN.
     if remove_team(team):

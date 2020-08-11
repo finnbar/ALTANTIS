@@ -280,6 +280,38 @@ async def load(ctx, arg):
     """
     await perform(load_game, ctx, arg, bot)
 
+@bot.command(name="give")
+@commands.has_role(CONTROL_ROLE)
+async def give(ctx, team, item, quantity : int = 1):
+    """
+    (CONTROL) Gives <team> an <item> with optional <quantity>.
+    """
+    await perform_async(give_item_to_team, ctx, team, item, quantity)
+
+@bot.command(name="pay")
+@commands.has_role(CONTROL_ROLE)
+async def pay(ctx, team, amount : int):
+    """
+    (CONTROL) Pay a <team> <amount> money. Shorthand for !give with currency name.
+    """
+    await perform_async(give_item_to_team, ctx, team, CURRENCY_NAME, amount)
+
+@bot.command(name="take")
+@commands.has_role(CONTROL_ROLE)
+async def take(ctx, team, item, quantity : int = 1):
+    """
+    (CONTROL) Take <quantity> of <item> away from <team>.
+    """
+    await perform_async(take_item_from_team, ctx, team, item, quantity)
+
+@bot.command(name="get_paid")
+@commands.has_role(CONTROL_ROLE)
+async def get_paid(ctx, team, amount : int):
+    """
+    (CONTROL) Get paid by <team> <amount> money. Shorthand for !take with currency name.
+    """
+    await perform_async(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
+
 # HELPER FUNCTIONS
 
 def get_team(author):

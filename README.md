@@ -27,12 +27,18 @@ Important features:
 [x] Can activate scanners, and inform players when they hover over things (level 1), are near things and other named subs (level 2), and further afield (level 3). Identify things via direction.
 [x] Control can drop items on the seafloor. (!bury for control)
 [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
-[ ] Basic inventory management. (!give for control, !drop for players, !remove for control)
-[ ] Basic resources.
+[ ] Basic inventory management. (!give for control, !remove for control, !trade maybe. no !drop as that's littering)
 [x] !death, so you can die.
 
 Important non-gameplay features:
 [x] Save bot state to disk with each game loop, as to avoid any issues.
-[ ] Possibly deal with locking/unlocking of the main thread.
+[ ] Deal with locking/unlocking of the main thread, if possible. (Could have issues if someone does something during game turn execution.)
 [ ] Complete README.
 [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
+[ ] Sort commands by functionality.
+
+Nice features:
+[ ] !explode, which explodes (x,y) with a range and amount of damage.
+[ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
+[ ] Mechanical resources (e.g. currency).
+[ ] Control commands run in team channels default to affecting that team.
