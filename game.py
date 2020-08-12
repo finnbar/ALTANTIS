@@ -25,9 +25,6 @@ async def perform_timestep(counter):
     submessages = {i: {"engineer": "", "captain": "", "navigator": "", "scientist": ""} for i in subsubset}
     message_opening = f"---------**TURN {counter}**----------\n"
 
-    # Trade rejection
-    # TODO: Reject all ongoing trades, sending messages correctly.
-
     # Power management
     for subname in subsubset:
         sub = get_sub(subname)
@@ -44,6 +41,13 @@ async def perform_timestep(counter):
         if crane_message:
             crane_message = f"{crane_message}\n"
             submessages[subname]["scientist"] += crane_message
+
+    # Trade timeout
+    for subname in subsubset:
+        sub = get_sub(subname)
+        trade_messages = sub.inventory.timeout_trade()
+        for target in trade_messages:
+            submessages[target]["captain"] += trade_messages[target]
     
     # Movement and puzzles
     for subname in subsubset:

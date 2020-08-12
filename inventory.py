@@ -22,6 +22,8 @@ class Inventory():
         self.schedule_crane = False
 
         # TRADING
+        # An aside: we don't save this data because it is difficult to serialise
+        # and restoring an incomplete trade isn't actually helpful.
         # Who you're trading with, as a Submarine object.
         self.trading_partner = None
         # What you've offered.
@@ -174,6 +176,18 @@ class Inventory():
         self.accepting = False
         self.my_turn = False
         self.trading_partner = None
+    
+    def timeout_trade(self):
+        """
+        Timeout a currently running trade.
+        """
+        if self.trading_partner is None:
+            return {}
+        partner = self.trading_partner
+        self.reset_trade_state()
+        partner.inventory.reset_trade_state()
+        return {self.sub.name: f"Trade with {partner.name} cancelled due to timeout.",
+                partner.name: f"Trade with {self.sub.name} cancelled due to timeout."}
     
     async def make_offer(self, items):
         """

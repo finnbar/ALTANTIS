@@ -61,8 +61,8 @@ class Wall(Empty):
         return True
     
     def on_entry(self, sub):
-        sub.damage(self.damaging)
-        sub.set_direction(reverse_dir[sub.get_direction()])
+        sub.power.damage(self.damaging)
+        sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
         return f"The submarine hit a wall and took {self.damaging} damage!"
     
     def to_char(self):
@@ -98,9 +98,9 @@ class DockingStation(Empty):
         return self.name
     
     def on_entry(self, sub):
-        sub.set_direction(self.direction)
-        sub.activate(False)
-        (x, y) = sub.get_position()
+        sub.movement.set_direction(self.direction)
+        sub.power.activate(False)
+        (x, y) = sub.movement.get_position()
         return f"Docked at **{self.name}** at position ({x}, {y})! The power has been stopped."
     
     def to_char(self):
@@ -170,8 +170,8 @@ def move_on_map(sub, direction, x, y):
     new_y = y + motion[1]
     if not (0 <= new_x < X_LIMIT) or not (0 <= new_y < Y_LIMIT):
         # Crashed into the boundaries of the world, whoops.
-        sub.set_direction(reverse_dir[sub.get_direction()])
-        return x, y, f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{sub.direction}**) and did not move this turn!"
+        sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
+        return x, y, f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{sub.movement.direction}**) and did not move this turn!"
     message = undersea_map[new_x][new_y].on_entry(sub)
     if undersea_map[new_x][new_y].is_obstacle():
         return x, y, message

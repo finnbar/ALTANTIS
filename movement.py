@@ -61,7 +61,7 @@ class MovementControls():
         return (self.x, self.y)
 
     def move(self):
-        self.x, self.y, message = move_on_map(self, self.direction, self.x, self.y)
+        self.x, self.y, message = move_on_map(self.sub, self.direction, self.x, self.y)
         return message
     
     def status(self, loop):

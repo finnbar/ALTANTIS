@@ -44,7 +44,7 @@ class ScanSystem():
             if dist > scanners_range:
                 continue
 
-            event = sub.outward_broadcast(scanners_range - dist)
+            event = sub.scan.outward_broadcast(scanners_range - dist)
             direction = determine_direction(my_position, sub_position)
             if direction is None:
                 event = f"{event} in your current square!"

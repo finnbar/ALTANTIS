@@ -28,7 +28,7 @@ Important features:
 - [x] Control can drop items on the seafloor. (!bury for control)
 - [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
 - [x] Basic inventory management. (!give for control, !remove for control, no !drop as that's littering)
-- [ ] Trading between players (see Discord discussion for model).
+- [x] Trading between players (see Discord discussion for model).
 - [x] The Crane.
 - [ ] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
 - [ ] Weapons, oh my.
@@ -40,6 +40,7 @@ Important non-gameplay features:
 - [ ] Complete README.
 - [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
 - [ ] Sort commands by functionality.
+- [ ] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
 
 Nice features:
 - [ ] !explode, which explodes (x,y) with a range and amount of damage.
