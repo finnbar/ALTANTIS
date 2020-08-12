@@ -25,6 +25,9 @@ async def perform_timestep(counter):
     submessages = {i: {"engineer": "", "captain": "", "navigator": "", "scientist": ""} for i in subsubset}
     message_opening = f"---------**TURN {counter}**----------\n"
 
+    # Trade rejection
+    # TODO: Reject all ongoing trades, sending messages correctly.
+
     # Power management
     for subname in subsubset:
         sub = get_sub(subname)

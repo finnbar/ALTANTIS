@@ -128,6 +128,47 @@ def drop_crane(team):
             return OKAY_REACT
     return FAIL_REACT
 
+def to_pair_list(items):
+    pairs = []
+    if len(items) % 2 == 1:
+        raise ValueError("Input list is badly formatted.")
+    for i in range(0, len(items), 2):
+        pairs.append((items[i], int(items[i+1])))
+    return pairs
+
+async def arrange_trade(team, partner, items):
+    pair_list = []
+    try:
+        pair_list = to_pair_list(items)
+    except ValueError as _:
+        return Message("Input list is badly formatted.")
+    sub = get_sub(team)
+    partner_sub = get_sub(partner)
+    if sub and partner_sub:
+        return Message(await sub.inventory.begin_trade(partner_sub, pair_list))
+    return Message("Didn't recognise the submarine asked for.")
+
+async def make_offer(team, items):
+    pair_list = to_pair_list(items)
+    if pair_list is None:
+        return Message("Input list is badly formatted.")
+    sub = get_sub(team)
+    if sub:
+        return Message(await sub.inventory.make_offer(pair_list))
+    return FAIL_REACT
+
+async def accept_offer(team):
+    sub = get_sub(team)
+    if sub:
+        return Message(await sub.inventory.accept_trade())
+    return FAIL_REACT
+
+async def reject_offer(team):
+    sub = get_sub(team)
+    if sub:
+        return Message(await sub.inventory.reject_trade())
+    return FAIL_REACT
+
 async def broadcast(team, message):
     sub = get_sub(team)
     if sub and sub.power.activated():

@@ -28,7 +28,7 @@ Important features:
 - [x] Control can drop items on the seafloor. (!bury for control)
 - [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
 - [x] Basic inventory management. (!give for control, !remove for control, no !drop as that's littering)
-- [ ] Trading between players (!give_(??) to players to give to another team from their inventory). Need to decide on the exact model to use here - do you allow one-sided trades? How do you make sure people aren't just thrown garbage?
+- [ ] Trading between players (see Discord discussion for model).
 - [x] The Crane.
 - [ ] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
 - [ ] Weapons, oh my.

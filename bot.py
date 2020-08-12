@@ -171,6 +171,40 @@ async def death(ctx, subname):
     """
     await perform_async(kill_sub, ctx, get_team(ctx.author), subname)
 
+@bot.command(name="trade")
+@commands.has_role(CAPTAIN)
+async def trade(ctx, subname, *args):
+    """
+    Begins a trade with <subname>, where you offer item1 quantity1 item2 quantity2 and so on.
+    For example: !trade team_name Fish 10 "Gold coin" 3
+    """
+    await perform_async(arrange_trade, ctx, get_team(ctx.author), subname, list(args))
+
+@bot.command(name="offer")
+@commands.has_role(CAPTAIN)
+async def offer(ctx, *args):
+    """
+    Makes a counteroffer in your current trade, of form item1 quantity1 item2 quantity2...
+    For example: !offer Fish 10 "Gold coin" 4
+    """
+    await perform_async(make_offer, ctx, get_team(ctx.author), list(args))
+
+@bot.command(name="accept_trade")
+@commands.has_role(CAPTAIN)
+async def accept_trade(ctx):
+    """
+    Accepts the current trade. A trade will only complete once both parties have accepted the trade.
+    """
+    await perform_async(accept_offer, ctx, get_team(ctx.author))
+
+@bot.command(name="reject_trade")
+@commands.has_role(CAPTAIN)
+async def reject_trade(ctx):
+    """
+    Rejects and ends the current trade.
+    """
+    await perform_async(reject_offer, ctx, get_team(ctx.author))
+
 # LOOP HANDLING
 
 @tasks.loop(seconds=GAME_SPEED)
@@ -186,11 +220,6 @@ async def startloop(ctx):
     """
     main_loop.start()
     await OKAY_REACT.do_status(ctx)
-
-# TODO: replace stop with cancel, but only after introducing a lock that prevents cancellation during the running of the loop.
-# in fact, have a lock just so that the loop bit runs without issue.
-# you can do this with asyncio.Lock - although it's slightly more complex than that.
-# do we want a reader-writer lock?
 
 @bot.command(name="stoploop")
 @commands.has_role(CONTROL_ROLE)
@@ -308,7 +337,7 @@ async def pay(ctx, team, amount : int):
 @commands.has_role(CONTROL_ROLE)
 async def take(ctx, team, item, quantity : int = 1):
     """
-    (CONTROL) Take <quantity> of <item> away from <team>.
+    (CONTROL) Take <quantity> of <item> away from <team>. Do not use this during a trade.
     """
     await perform_async(take_item_from_team, ctx, team, item, quantity)
 
@@ -316,7 +345,7 @@ async def take(ctx, team, item, quantity : int = 1):
 @commands.has_role(CONTROL_ROLE)
 async def get_paid(ctx, team, amount : int):
     """
-    (CONTROL) Get paid by <team> <amount> money. Shorthand for !take with currency name.
+    (CONTROL) Get paid by <team> <amount> money. Shorthand for !take with currency name. Do not use this during a trade.
     """
     await perform_async(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
 
