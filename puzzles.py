@@ -13,9 +13,13 @@ questions = glob.glob("puzzles/*")
 questions.remove("puzzles/answers.json")
 
 def attach_answer(question):
-    answer = ""
+    answer = []
     if question in answers:
         answer = answers[question]
+        if type(answer) is str:
+            answer = [answer]
+        for i in range(len(answer)):
+            answer[i] = answer[i].lower()
     return (question, answer)
 
 puzzles = list(map(attach_answer, questions))
@@ -71,7 +75,7 @@ class EngineeringPuzzles():
             return False
         
         condition = self.puzzle_reason.capitalize()
-        if answer is not None and answer.lower() == self.current_puzzle[1].lower():
+        if answer is not None and answer.lower() in self.current_puzzle[1]:
             # Correct!
             if condition == "Repair":
                 await self.sub.send_to_all(self.sub.power.heal(1))

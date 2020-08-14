@@ -8,10 +8,12 @@ You'll need to do a few things to run this bot. In no particular order:
 
 ```json
 {
-    "00.png": "a",
-    "01.pdf": "001"
+    "puzzles/00.png": "a",
+    "puzzles/01.pdf": "001"
 }
 ```
+
+You can also specify multiple answers for a puzzle - just replace the string with a list of strings.
 
 ## Feature list
 
