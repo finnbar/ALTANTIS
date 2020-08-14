@@ -30,16 +30,16 @@ Important features:
 - [x] Basic inventory management. (!give for control, !remove for control, no !drop as that's littering)
 - [x] Trading between players (see Discord discussion for model).
 - [x] The Crane.
-- [ ] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
+- [x] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
 - [ ] Weapons, oh my.
 - [x] !death, so you can die.
 
 Important non-gameplay features:
 - [x] Save bot state to disk with each game loop, as to avoid any issues.
-- [ ] Deal with locking/unlocking of the main thread, if possible. (Could have issues if someone does something during game turn execution.)
+- [x] Deal with locking/unlocking of the main thread, if possible. (Could have issues if someone does something during game turn execution.) I don't believe this is actually necessary, as async is still single-threaded.
 - [ ] Complete README.
 - [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
-- [ ] Sort commands by functionality.
+- [x] Sort commands by functionality.
 - [ ] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
 
 Nice features:

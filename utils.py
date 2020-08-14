@@ -103,3 +103,12 @@ def list_to_and_separated(items):
     result = result[:-1]
     result[-2] = " and "
     return "".join(result)
+
+def to_pair_list(items):
+    pairs = []
+    if len(items) % 2 == 1:
+        raise ValueError("Input list is badly formatted.")
+    for i in range(0, len(items), 2):
+        pairs.append((items[i], int(items[i+1])))
+    return pairs
+

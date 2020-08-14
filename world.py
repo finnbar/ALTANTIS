@@ -164,7 +164,7 @@ def ascii_map(subs):
         for x in range(X_LIMIT):
             tile_char = undersea_map[x][y].to_char()
             for i in range(len(subs)):
-                (sx, sy) = subs[i].get_position()
+                (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
                     tile_char = str(i)
             row += tile_char

@@ -2,7 +2,7 @@
 The backend for all Discord actions, which allow players to control their sub.
 """
 
-from utils import React, Message, OKAY_REACT, FAIL_REACT
+from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
 from state import get_teams, get_sub, add_team, remove_team
 from world import ascii_map, bury_treasure_at, get_square
 
@@ -10,6 +10,8 @@ direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
                    "W": "⬅", "NE": "↗",
                    "NW": "↖", "SE": "↘",
                    "SW": "↙"}
+
+# MOVEMENT
 
 def move(direction, team):
     """
@@ -34,20 +36,6 @@ def teleport(team, x, y):
             return OKAY_REACT
     return FAIL_REACT
 
-async def register(category, x, y):
-    """
-    Registers a team, setting them up with everything they could need.
-    Requires a category with the required subchannels.
-    ONLY RUNNABLE BY CONTROL.
-    """
-    print("Registering", category.name)
-    if add_team(category.name, category, x, y):
-        sub = get_sub(category.name)
-        if sub:
-            await sub.send_to_all(f"Channel registered for sub **{category.name}**.")
-            return OKAY_REACT
-    return FAIL_REACT
-
 def set_activation(team, value):
     """
     Sets the submarine's power to `value`.
@@ -63,29 +51,7 @@ def set_activation(team, value):
         return Message(f"{team} is **OFF** and halted!")
     return FAIL_REACT
 
-def power_systems(team, systems):
-    """
-    Powers `systems` of the submarine `team` if able.
-    """
-    sub = get_sub(team)
-    if sub:
-        print("Applying power increases of", team, "to", systems)
-        if sub.power.power_systems(systems):
-            return Message(f"Scheduled power increase of systems {systems} for {team}!")
-        return Message(f"Could not power all of {systems} (either because they do not exist or because you would go over your power limit) so did not change anything.")
-    return FAIL_REACT
-
-def unpower_systems(team, systems):
-    """
-    Unpowers `systems` of the submarine `team` if able.
-    """
-    sub = get_sub(team)
-    if sub:
-        print("Applying power decreases of", team, "to", systems)
-        if sub.power.unpower_systems(systems):
-            return Message(f"Scheduled power decrease of systems {systems} for {team}!")
-        return Message(f"Could not unpower all of {systems} (as either that would leave a system with less than zero power, or you specified a system that didn't exist) so did not change anything.")
-    return FAIL_REACT
+# STATUS
 
 def print_map(team):
     """
@@ -116,89 +82,30 @@ def get_status(team, loop):
         return Message(status_message)
     return FAIL_REACT
 
-def bury_treasure(name, x, y):
-    if bury_treasure_at(name, (x, y)):
-        return OKAY_REACT
-    return FAIL_REACT
+# POWER
 
-def drop_crane(team):
-    sub = get_sub(team)
-    if sub and sub.inventory.drop_crane():
-        return OKAY_REACT
-    return FAIL_REACT
-
-def to_pair_list(items):
-    pairs = []
-    if len(items) % 2 == 1:
-        raise ValueError("Input list is badly formatted.")
-    for i in range(0, len(items), 2):
-        pairs.append((items[i], int(items[i+1])))
-    return pairs
-
-def add_attribute_to(x, y, attribute, value):
-    square = get_square(x, y)
-    if square and square.add_attribute(attribute, value):
-        return OKAY_REACT
-    return FAIL_REACT
-
-def remove_attribute_from(x, y, attribute, value):
-    square = get_square(x, y)
-    if square and square.remove_attribute(attribute, value):
-        return OKAY_REACT
-    return FAIL_REACT
-
-async def arrange_trade(team, partner, items):
-    pair_list = []
-    try:
-        pair_list = to_pair_list(items)
-    except ValueError as _:
-        return Message("Input list is badly formatted.")
-    sub = get_sub(team)
-    partner_sub = get_sub(partner)
-    if sub and partner_sub:
-        return Message(await sub.inventory.begin_trade(partner_sub, pair_list))
-    return Message("Didn't recognise the submarine asked for.")
-
-async def make_offer(team, items):
-    pair_list = to_pair_list(items)
-    if pair_list is None:
-        return Message("Input list is badly formatted.")
+def power_systems(team, systems):
+    """
+    Powers `systems` of the submarine `team` if able.
+    """
     sub = get_sub(team)
     if sub:
-        return Message(await sub.inventory.make_offer(pair_list))
+        print("Applying power increases of", team, "to", systems)
+        if sub.power.power_systems(systems):
+            return Message(f"Scheduled power increase of systems {systems} for {team}!")
+        return Message(f"Could not power all of {systems} (either because they do not exist or because you would go over your power limit) so did not change anything.")
     return FAIL_REACT
 
-async def accept_offer(team):
+def unpower_systems(team, systems):
+    """
+    Unpowers `systems` of the submarine `team` if able.
+    """
     sub = get_sub(team)
     if sub:
-        return Message(await sub.inventory.accept_trade())
-    return FAIL_REACT
-
-async def reject_offer(team):
-    sub = get_sub(team)
-    if sub:
-        return Message(await sub.inventory.reject_trade())
-    return FAIL_REACT
-
-async def broadcast(team, message):
-    sub = get_sub(team)
-    if sub and sub.power.activated():
-        print(f"Going to broadcast {message}!")
-        result = await sub.comms.broadcast(message)
-        if result:
-            return OKAY_REACT
-        else:
-            return Message("The radio is still in use! (It has a thirty second cooldown.)")
-    return FAIL_REACT
-
-async def kill_sub(team, verify):
-    sub = get_sub(team)
-    if sub and sub.name == verify:
-        sub.power.damage(sub.power.total_power)
-        # Since no sub can die in one hit.
-        sub.power.damage(1)
-        await sub.send_to_all("Submarine took catastrophic damage and died! Please contact control.")
-        return OKAY_REACT
+        print("Applying power decreases of", team, "to", systems)
+        if sub.power.unpower_systems(systems):
+            return Message(f"Scheduled power decrease of systems {systems} for {team}!")
+        return Message(f"Could not unpower all of {systems} (as either that would leave a system with less than zero power, or you specified a system that didn't exist) so did not change anything.")
     return FAIL_REACT
 
 async def deal_damage(team, amount, reason):
@@ -207,13 +114,6 @@ async def deal_damage(team, amount, reason):
         damage_message = sub.power.damage(amount)
         if reason: await sub.send_to_all(reason)
         await sub.send_to_all(damage_message)
-        return OKAY_REACT
-    return FAIL_REACT
-
-async def shout_at_team(team, message):
-    sub = get_sub(team)
-    if sub:
-        await sub.send_to_all(message)
         return OKAY_REACT
     return FAIL_REACT
 
@@ -249,18 +149,59 @@ async def add_system(team, system):
             return OKAY_REACT
     return FAIL_REACT
 
-async def give_team_puzzle(team, reason):
+# COMMS
+
+async def shout_at_team(team, message):
     sub = get_sub(team)
     if sub:
-        await sub.puzzles.send_puzzle(reason)
+        await sub.send_to_all(message)
         return OKAY_REACT
     return FAIL_REACT
 
-async def answer_team_puzzle(team, answer):
+async def broadcast(team, message):
+    sub = get_sub(team)
+    if sub and sub.power.activated():
+        print(f"Going to broadcast {message}!")
+        result = await sub.comms.broadcast(message)
+        if result:
+            return OKAY_REACT
+        else:
+            return Message("The radio is still in use! (It has a thirty second cooldown.)")
+    return FAIL_REACT
+
+# INVENTORY
+
+async def arrange_trade(team, partner, items):
+    pair_list = []
+    try:
+        pair_list = to_pair_list(items)
+    except ValueError as _:
+        return Message("Input list is badly formatted.")
+    sub = get_sub(team)
+    partner_sub = get_sub(partner)
+    if sub and partner_sub:
+        return Message(await sub.inventory.begin_trade(partner_sub, pair_list))
+    return Message("Didn't recognise the submarine asked for.")
+
+async def make_offer(team, items):
+    pair_list = to_pair_list(items)
+    if pair_list is None:
+        return Message("Input list is badly formatted.")
     sub = get_sub(team)
     if sub:
-        await sub.puzzles.resolve_puzzle(answer)
-        return OKAY_REACT
+        return Message(await sub.inventory.make_offer(pair_list))
+    return FAIL_REACT
+
+async def accept_offer(team):
+    sub = get_sub(team)
+    if sub:
+        return Message(await sub.inventory.accept_trade())
+    return FAIL_REACT
+
+async def reject_offer(team):
+    sub = get_sub(team)
+    if sub:
+        return Message(await sub.inventory.reject_trade())
     return FAIL_REACT
 
 async def give_item_to_team(team, item, quantity):
@@ -279,8 +220,79 @@ async def take_item_from_team(team, item, quantity):
             return OKAY_REACT
     return FAIL_REACT
 
+# ENGINEERING
+
+async def give_team_puzzle(team, reason):
+    sub = get_sub(team)
+    if sub:
+        await sub.puzzles.send_puzzle(reason)
+        return OKAY_REACT
+    return FAIL_REACT
+
+async def answer_team_puzzle(team, answer):
+    sub = get_sub(team)
+    if sub:
+        await sub.puzzles.resolve_puzzle(answer)
+        return OKAY_REACT
+    return FAIL_REACT
+
+# CRANE
+
+def drop_crane(team):
+    sub = get_sub(team)
+    if sub and sub.inventory.drop_crane():
+        return OKAY_REACT
+    return FAIL_REACT
+
+# DANGER ZONE
+
+async def kill_sub(team, verify):
+    sub = get_sub(team)
+    if sub and sub.name == verify:
+        sub.power.damage(sub.power.total_power)
+        # Since no sub can die in one hit.
+        sub.power.damage(1)
+        await sub.send_to_all("Submarine took catastrophic damage and died! Please contact control.")
+        return OKAY_REACT
+    return FAIL_REACT
+
 def delete_team(team):
     # DELETES THE TEAM IN QUESTION. DO NOT DO THIS UNLESS YOU ARE ABSOLUTELY CERTAIN.
     if remove_team(team):
+        return OKAY_REACT
+    return FAIL_REACT
+
+# GAME MANAGEMENT
+
+async def register(category, x, y):
+    """
+    Registers a team, setting them up with everything they could need.
+    Requires a category with the required subchannels.
+    ONLY RUNNABLE BY CONTROL.
+    """
+    print("Registering", category.name)
+    if add_team(category.name, category, x, y):
+        sub = get_sub(category.name)
+        if sub:
+            await sub.send_to_all(f"Channel registered for sub **{category.name}**.")
+            return OKAY_REACT
+    return FAIL_REACT
+
+# MAP MODIFICATION
+
+def bury_treasure(name, x, y):
+    if bury_treasure_at(name, (x, y)):
+        return OKAY_REACT
+    return FAIL_REACT
+
+def add_attribute_to(x, y, attribute, value):
+    square = get_square(x, y)
+    if square and square.add_attribute(attribute, value):
+        return OKAY_REACT
+    return FAIL_REACT
+
+def remove_attribute_from(x, y, attribute, value):
+    square = get_square(x, y)
+    if square and square.remove_attribute(attribute, value):
         return OKAY_REACT
     return FAIL_REACT
