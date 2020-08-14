@@ -86,3 +86,20 @@ def determine_direction(pa, pb):
     if abs(angle) < 3*math.pi / 8:
         x_val = "E"
     return y_val + x_val
+
+# Textual utilities
+
+def list_to_and_separated(items):
+    if len(items) == 0:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    # Turn into a list with commas to separate elements.
+    result = []
+    for item in items:
+        result.append(item)
+        result.append(", ")
+    # Then remove the last comma and replace the second last comma with " and "
+    result = result[:-1]
+    result[-2] = " and "
+    return "".join(result)

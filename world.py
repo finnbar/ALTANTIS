@@ -2,140 +2,114 @@
 Deals with the world map, which submarines explore.
 """
 
-from utils import diagonal_distance, directions, reverse_dir, determine_direction
+from utils import diagonal_distance, directions, reverse_dir, determine_direction, list_to_and_separated
 
-class Empty():
+class Cell():
     def __init__(self):
-        pass
-
+        # The item this square contains.
+        self.treasure = None
+        # Fundamentally describes how the square acts. These are described
+        # throughout the class. A cell with no attributes acts like Empty from
+        # the previous version - has no extra difficulty etc.
+        self.attributes = {}
+    
     def is_obstacle(self):
-        return False
+        # obstacle: this cell cannot be entered.
+        return "obstacle" in self.attributes
     
     def pick_up(self):
-        return None
+        treas = self.treasure
+        self.treasure = None
+        return treas
     
-    def on_entry(self, sub):
-        return None
-
-    def to_char(self):
-        return "."
+    def bury_treasure(self, treasure):
+        if self.treasure is None:
+            self.treasure = treasure
+            return True
+        return False
     
     def outward_broadcast(self, strength):
+        # This is what the sub sees when scanning this cell.
+        broadcast = []
+        if "storm" in self.attributes:
+            broadcast.append("storm brewing")
+        if self.treasure is not None:
+            if strength > 2:
+                broadcast.append(f"{self.treasure.lower()}")
+            else:
+                broadcast.append("a treasure chest")
+        if "docking" in self.attributes:
+            broadcast.append(f"docking station \"{self.attributes['docking'].lower()}\"")
+        return list_to_and_separated(broadcast).capitalize()
+    
+    def on_entry(self, sub):
+        # This is what happens when a sub attempts to enter this space.
+        # This includes docking and damage.
+        if "docking" in self.attributes:
+            sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
+            sub.power.activate(False)
+            (x, y) = sub.movement.get_position()
+            return f"Docked at **{self.attributes['docking']}** at position ({x}, {y})! The power has been stopped."
+        if "obstacle" in self.attributes:
+            message = sub.power.damage(1)
+            sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
+            return f"The submarine hit a wall and took one damage!\n{message}"
         return ""
+
+    def to_char(self):
+        if "obstacle" in self.attributes:
+            return "W"
+        if "docking" in self.attributes:
+            return "D"
+        if "storm" in self.attributes:
+            return "!"
+        if "calm" in self.attributes:
+            return " "
+        return "."
     
     def difficulty(self):
-        """
-        Defines how difficult it is to leave a square.
-        4 is the normal (takes a one-engine sub four turns).
-        8 is difficult terrain, 2 is easy and so on.
-        """
+        if "storm" in self.attributes:
+            return 8
+        elif "calm" in self.attributes:
+            return 2
         return 4
-
-    def replaceable(self):
-        """
-        Defines whether this cell is replaceable.
-        Used to avoid accidents when dropping or burying treasure.
-        """
-        return True
-
-class Stormy(Empty):
-    def __init__(self, difficulty):
-        self.diff = difficulty
     
-    def to_char(self):
-        return "!"
-    
-    def outward_broadcast(self, strength):
-        if strength >= 2:
-            return "Storm brewing"
-        return ""
-    
-    def difficulty(self):
-        return self.diff
-
-class Wall(Empty):
-    def __init__(self, damaging):
-        self.damaging = damaging
-    
-    def is_obstacle(self):
-        return True
-    
-    def on_entry(self, sub):
-        sub.power.damage(self.damaging)
-        sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
-        return f"The submarine hit a wall and took {self.damaging} damage!"
-    
-    def to_char(self):
-        return "W"
-    
-    def replaceable(self):
+    def add_attribute(self, attr, val=""):
+        if attr not in self.attributes:
+            self.attributes[attr] = val
+            return True
         return False
-
-class Treasure(Empty):
-    def __init__(self, name):
-        self.name = name
-        self.visible = False
     
-    def outward_broadcast(self, strength):
-        if strength > 2:
-            return self.name
-        return "Treasure"
-    
-    def pick_up(self):
-        return self.name
-    
-    def to_char(self):
-        if self.visible:
-            return "T"
-        return "."
-
-class DockingStation(Empty):
-    def __init__(self, name, direction):
-        self.name = name
-        self.direction = direction
-    
-    def outward_broadcast(self, strength):
-        return self.name
-    
-    def on_entry(self, sub):
-        sub.movement.set_direction(self.direction)
-        sub.power.activate(False)
-        (x, y) = sub.movement.get_position()
-        return f"Docked at **{self.name}** at position ({x}, {y})! The power has been stopped."
-    
-    def to_char(self):
-        return "D"
-    
-    def replaceable(self):
+    def remove_attribute(self, attr):
+        if attr in self.attributes:
+            del self.attributes[attr]
+            return True
         return False
 
 # Map size.
 X_LIMIT = 40
 Y_LIMIT = 40
 
-undersea_map = [[Empty() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
+undersea_map = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
 
 def possible_directions():
     return directions.keys()
 
 def get_square(x, y):
-    return undersea_map[x][y]
+    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+        return undersea_map[x][y]
+    return None
 
 def bury_treasure_at(name, pos):
     (x, y) = pos
     if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
-        if undersea_map[x][y].replaceable():
-            undersea_map[x][y] = Treasure(name)
-            return True
+        return undersea_map[x][y].bury_treasure(name)
     return False
 
 def pick_up_treasure(pos):
     (x, y) = pos
     if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
-        treasure = undersea_map[x][y].pick_up()
-        if treasure:
-            undersea_map[x][y] = Empty()
-            return treasure
+        return undersea_map[x][y].pick_up()
     return None
 
 def explore_submap(pos, dist):
@@ -205,7 +179,6 @@ def map_to_dict():
     for i in range(X_LIMIT):
         for j in range(Y_LIMIT):
             undersea_map_dicts[i][j] = undersea_map[i][j].__dict__
-            undersea_map_dicts[i][j]["__classname__"] = type(undersea_map[i][j]).__name__
     return (undersea_map_dicts, X_LIMIT, Y_LIMIT)
 
 def map_from_dict(triple):
@@ -214,19 +187,8 @@ def map_from_dict(triple):
     """
     global X_LIMIT, Y_LIMIT, undersea_map
     (map_dicts, X_LIMIT, Y_LIMIT) = triple
-    undersea_map_new = [[Empty() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
+    undersea_map_new = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
     for i in range(X_LIMIT):
         for j in range(Y_LIMIT):
-            class_name = map_dicts[i][j]["__classname__"]
-            # NOTE: this dictionary has to be manually updated each time. Lovely.
-            classes = {"Empty": lambda: Empty(),
-                       "DockingStation": lambda: DockingStation("", "N"),
-                       "Stormy": lambda: Stormy(1),
-                       "Treasure": lambda: Treasure(""),
-                       "Wall": lambda: Wall(1)}
-            if class_name not in classes:
-                return False
-            undersea_map_new[i][j] = classes[class_name]()
-            map_dicts[i][j]["__classname__"] = None
             undersea_map_new[i][j].__dict__ = map_dicts[i][j]
     undersea_map = undersea_map_new

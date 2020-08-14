@@ -4,7 +4,7 @@ The backend for all Discord actions, which allow players to control their sub.
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT
 from state import get_teams, get_sub, add_team, remove_team
-from world import ascii_map, bury_treasure_at
+from world import ascii_map, bury_treasure_at, get_square
 
 direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
                    "W": "⬅", "NE": "↗",
@@ -123,9 +123,8 @@ def bury_treasure(name, x, y):
 
 def drop_crane(team):
     sub = get_sub(team)
-    if sub:
-        if sub.inventory.drop_crane():
-            return OKAY_REACT
+    if sub and sub.inventory.drop_crane():
+        return OKAY_REACT
     return FAIL_REACT
 
 def to_pair_list(items):
@@ -135,6 +134,18 @@ def to_pair_list(items):
     for i in range(0, len(items), 2):
         pairs.append((items[i], int(items[i+1])))
     return pairs
+
+def add_attribute_to(x, y, attribute, value):
+    square = get_square(x, y)
+    if square and square.add_attribute(attribute, value):
+        return OKAY_REACT
+    return FAIL_REACT
+
+def remove_attribute_from(x, y, attribute, value):
+    square = get_square(x, y)
+    if square and square.remove_attribute(attribute, value):
+        return OKAY_REACT
+    return FAIL_REACT
 
 async def arrange_trade(team, partner, items):
     pair_list = []

@@ -349,6 +349,22 @@ async def get_paid(ctx, team, amount : int):
     """
     await perform_async(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
 
+@bot.command(name="add_attribute")
+@commands.has_role(CONTROL_ROLE)
+async def add_attribute(ctx, x : int, y : int, attribute, value=""):
+    """
+    (CONTROL) Add <attribute> to the square <x> <y> taking optional value <value>.
+    """
+    await perform(add_attribute_to, ctx, x, y, attribute, value)
+
+@bot.command(name="remove_attribute")
+@commands.has_role(CONTROL_ROLE)
+async def remove_attribute(ctx, x : int, y : int, attribute, value=""):
+    """
+    (CONTROL) Add <attribute> to the square <x> <y> taking optional value <value>.
+    """
+    await perform(remove_attribute_from, ctx, x, y, attribute, value)
+
 # HELPER FUNCTIONS
 
 def get_team(author):

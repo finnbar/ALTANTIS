@@ -5,6 +5,7 @@ Also features The Crane.
 
 from consts import CURRENCY_NAME
 from world import pick_up_treasure, bury_treasure_at
+from utils import list_to_and_separated
 
 class Inventory():
     def __init__(self, sub):
@@ -77,7 +78,7 @@ class Inventory():
             self.schedule_crane = False
             # Attempt to pick up the item.
             self.crane_holds = pick_up_treasure(self.sub.movement.get_position())
-            return f"Crane went down and found {self.crane_holds}! Coming up next turn!"
+            return f"Crane went down and found a treasure chest! Coming up next turn!"
         elif self.crane_down:
             # The crane comes back up! Oh no
             self.crane_down = False
@@ -108,20 +109,12 @@ class Inventory():
         return offer
     
     def offer_as_text(self, offer):
-        # First, build each item string.
-        # Also add space for a comma.
         if len(offer) == 0:
             return "nothing"
         offer_list = []
         for item in offer:
             offer_list.append(f"{offer[item]}x {item}")
-            offer_list.append(", ")
-        # Remove the last comma.
-        offer_list = offer_list[:-1]
-        # Replace the last intersperser character with " and ":
-        if len(offer_list) >= 3:
-            offer_list[-2] = " and "
-        return "".join(offer_list)
+        return list_to_and_separated(offer_list)
     
     async def begin_trade(self, partner, items):
         """
