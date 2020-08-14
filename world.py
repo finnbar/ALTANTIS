@@ -30,6 +30,8 @@ class Cell():
     
     def outward_broadcast(self, strength):
         # This is what the sub sees when scanning this cell.
+        if "hiddenness" in self.attributes and self.attributes["hiddenness"] > strength:
+            return ""
         broadcast = []
         if "storm" in self.attributes:
             broadcast.append("storm brewing")
