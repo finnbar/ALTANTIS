@@ -33,7 +33,15 @@ async def perform_timestep(counter):
             power_message = f"{power_message}\n"
             submessages[subname]["captain"] += power_message
             submessages[subname]["engineer"] += power_message
-    
+
+    # Weapons
+    for subname in subsubset:
+        sub = get_sub(subname)
+        weapons_message = sub.weapons.weaponry_tick()
+        if weapons_message:
+            weapons_message = f"{weapons_message}\n"
+            submessages[subname]["captain"] += weapons_message
+
     # The crane
     for subname in subsubset:
         sub = get_sub(subname)
@@ -47,8 +55,8 @@ async def perform_timestep(counter):
         sub = get_sub(subname)
         trade_messages = sub.inventory.timeout_trade()
         for target in trade_messages:
-            submessages[target]["captain"] += trade_messages[target]
-    
+            submessages[target]["captain"] += trade_messages[target] + "\n"
+
     # Movement and puzzles
     for subname in subsubset:
         sub = get_sub(subname)
@@ -57,7 +65,18 @@ async def perform_timestep(counter):
             move_message = f"{move_message}\n"
             submessages[subname]["captain"] += move_message
             submessages[subname]["navigator"] += move_message
-    
+
+    # Damage
+    for subname in subsubset:
+        sub = get_sub(subname)
+        damage_message = sub.power.damage_tick()
+        if damage_message:
+            damage_message = f"{damage_message}\n"
+            submessages[subname]["captain"] += damage_message
+            submessages[subname]["navigator"] += damage_message
+            submessages[subname]["engineer"] += damage_message
+            submessages[subname]["scientist"] += damage_message
+
     # Scanning (as we enter a new square only)
     # TODO: Only make scanner print when things change. This will require
     # tracking past results and not shuffling them preemptively.

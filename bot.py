@@ -137,7 +137,7 @@ class PowerManagement(commands.Cog):
     @commands.has_role(CONTROL_ROLE)
     async def damage(self, ctx, team, amount : int, reason=""):
         """
-        (CONTROL) Forces <team> to take <amount> damage. You can optionally specify a <reason> which will be messaged to them before.
+        (CONTROL) Forces <team> to take <amount> damage at next loop. You can optionally specify a <reason> which will be messaged to them before.
         """
         await perform_async(deal_damage, ctx, team, amount, reason)
 
@@ -398,6 +398,27 @@ class MapModification(commands.Cog):
         """
         await perform(remove_attribute_from, ctx, x, y, attribute, value)
 
+class Weaponry(commands.Cog):
+    """
+    Allows your submarine to shoot.
+    """
+
+    @commands.command(name="shoot_damaging")
+    @commands.has_any_role(CAPTAIN, ENGINEER)
+    async def damaging(self, ctx, x : int, y : int):
+        """
+        Schedules a damaging shot at (<x>, <y>). This uses two weapons charges.
+        """
+        await perform(schedule_shot, ctx, x, y, get_team(ctx.author), True)
+    
+    @commands.command(name="shoot_stunning")
+    @commands.has_any_role(CAPTAIN, ENGINEER)
+    async def nondamaging(self, ctx, x : int, y : int):
+        """
+        Schedules a nondamaging shot at (<x>, <y>). This uses two weapons charges.
+        """
+        await perform(schedule_shot, ctx, x, y, get_team(ctx.author), False)
+
 # HELPER FUNCTIONS
 
 def get_team(author):
@@ -446,6 +467,7 @@ bot.add_cog(MapModification())
 bot.add_cog(Movement())
 bot.add_cog(PowerManagement())
 bot.add_cog(Status())
+bot.add_cog(Weaponry())
 
 print("ALTANTIS READY")
 bot.run(TOKEN)

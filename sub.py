@@ -11,7 +11,7 @@ import math, datetime
 
 MAX_SPEED = 4
 
-subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory"]
+subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory", "weapons"]
 
 class Submarine():
     def __init__(self, name, channels, x, y):
@@ -24,6 +24,7 @@ class Submarine():
         from puzzles import EngineeringPuzzles
         from movement import MovementControls
         from inventory import Inventory
+        from weapons import Weaponry
 
         self.name = name
         self.channels = channels
@@ -33,6 +34,7 @@ class Submarine():
         self.puzzles = EngineeringPuzzles(self)
         self.scan = ScanSystem(self)
         self.inventory = Inventory(self)
+        self.weapons = Weaponry(self)
 
     def status_message(self, loop):
         message = (
@@ -43,6 +45,7 @@ class Submarine():
         message += self.movement.status(loop)
         message += self.power.status()
         message += self.inventory.status()
+        message += self.weapons.status()
 
         return message + "\nNo more to report."
     

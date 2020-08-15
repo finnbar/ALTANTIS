@@ -111,9 +111,8 @@ def unpower_systems(team, systems):
 async def deal_damage(team, amount, reason):
     sub = get_sub(team)
     if sub:
-        damage_message = sub.power.damage(amount)
+        sub.power.damage(amount)
         if reason: await sub.send_to_all(reason)
-        await sub.send_to_all(damage_message)
         return OKAY_REACT
     return FAIL_REACT
 
@@ -252,7 +251,7 @@ async def kill_sub(team, verify):
         sub.power.damage(sub.power.total_power)
         # Since no sub can die in one hit.
         sub.power.damage(1)
-        await sub.send_to_all("Submarine took catastrophic damage and died! Please contact control.")
+        await sub.send_to_all("Submarine took catastrophic damage and will die on next game loop.")
         return OKAY_REACT
     return FAIL_REACT
 
@@ -295,4 +294,12 @@ def remove_attribute_from(x, y, attribute, value):
     square = get_square(x, y)
     if square and square.remove_attribute(attribute, value):
         return OKAY_REACT
+    return FAIL_REACT
+
+# WEAPONRY
+
+def schedule_shot(x, y, team, damaging):
+    sub = get_sub(team)
+    if sub:
+        return Message(sub.weapons.prepare_shot(damaging, x, y))
     return FAIL_REACT

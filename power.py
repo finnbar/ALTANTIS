@@ -21,6 +21,8 @@ class PowerManager():
         self.innate_power = {"engines": 1}
         # Power only updates at game tick, so we need to keep track of the changes made.
         self.scheduled_power = self.power.copy()
+        # Damage only happens at game tick, so we need to keep track of any taken.
+        self.scheduled_damage = []
 
     def activate(self, value):
         self.active = value
@@ -150,7 +152,7 @@ class PowerManager():
         self.scheduled_power = power_copy
         return True
 
-    def damage(self, amount):
+    def run_damage(self, amount):
         if amount <= 0:
             return ""
         self.total_power -= 1
@@ -174,8 +176,18 @@ class PowerManager():
                 "**EMERGENCY SUBMARINE POWER INITIATED!!! ONLY BASIC ENGINE FUNCTIONALITY AVAILABLE!!!**"
             )
         # Else continue taking damage.
-        message = self.damage(amount - 1)
+        message = self.run_damage(amount - 1)
         return f"Damage taken to {system}!\n" + message
+    
+    def damage(self, amount):
+        self.scheduled_damage.append(amount)
+    
+    def damage_tick(self):
+        damage_message = ""
+        for hit in self.scheduled_damage:
+            damage_message += self.run_damage(hit)
+        self.scheduled_damage = []
+        return damage_message
 
     def heal(self, amount):
         self.total_power = min(self.total_power + amount, self.total_power_max)

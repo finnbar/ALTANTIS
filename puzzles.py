@@ -85,10 +85,10 @@ class EngineeringPuzzles():
             if answer is None:
                 await self.sub.send_message(f"Ran out of time to solve puzzle. **{condition}** not sorted.", "engineer")
                 if condition != "Repair":
-                    await self.sub.send_to_all(self.sub.power.damage(1))
+                    self.sub.power.damage(1)
             else:
                 await self.sub.send_message(f"You got the answer wrong! **{condition}** not sorted.", "engineer")
-                await self.sub.send_to_all(self.sub.power.damage(1))
+                self.sub.power.damage(1)
             self.puzzles.append(self.current_puzzle)
         self.current_puzzle = None
         return True

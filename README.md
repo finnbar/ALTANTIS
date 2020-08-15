@@ -33,7 +33,7 @@ Important features:
 - [x] Trading between players (see Discord discussion for model).
 - [x] The Crane.
 - [x] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
-- [ ] Weapons, oh my.
+- [x] Weapons, oh my.
 - [x] !death, so you can die.
 
 Important non-gameplay features:
@@ -50,3 +50,4 @@ Nice features:
 - [ ] Mechanical resources (e.g. currency).
 - [ ] Control commands run in team channels default to affecting that team.
 - [ ] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
+- [ ] NPCs/Structures, which can take damage etc.
