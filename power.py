@@ -13,7 +13,7 @@ class PowerManager():
         self.power = {"engines": 0, "scanners": 1, "comms": 1, "crane": 0, "weapons": 1}
         # power_max is the maximum power for each system.
         self.power_max = {"engines": 1, "scanners": 1, "comms": 2, "crane": 1, "weapons": 1}
-        # total_power acts as health - if your total_power would go _below_ zero, you explode.
+        # total_power acts as health - if your total_power becomes zero, you die. Whoops.
         self.total_power = 3
         # total_power_max allows for healing up until that cap.
         self.total_power_max = 3
@@ -26,8 +26,10 @@ class PowerManager():
         self.scheduled_damage = []
 
     def activate(self, value):
-        self.active = value
-        return True
+        if self.total_power > 0 or not value:
+            self.active = value
+            return True
+        return False
 
     def activated(self):
         return self.active
@@ -157,8 +159,8 @@ class PowerManager():
         if amount <= 0:
             return ""
         self.total_power -= 1
-        # If the submarine is now below zero power, it explodes.
-        if self.total_power < 0:
+        # If you're now out of power, die.
+        if self.total_power <= 0:
             self.activate(False)
             return "**SUBMARINE DESTROYED. PLEASE SPEAK TO CONTROL.**"
         # Otherwise, if there is unused power, damage that first.
@@ -170,12 +172,6 @@ class PowerManager():
             available_systems = filter(lambda system: self.power[system] > 0, self.power)
             system = choice(list(available_systems))
             self.unpower_systems([system])
-        # If the submarine hits zero, soak up all remaining damage.
-        if self.total_power == 0:
-            return (
-                f"Damage taken to {system}!\n"
-                "**EMERGENCY SUBMARINE POWER INITIATED!!! ONLY BASIC ENGINE FUNCTIONALITY AVAILABLE!!!**"
-            )
         # Else continue taking damage.
         message = self.run_damage(amount - 1)
         return f"Damage taken to {system}!\n" + message

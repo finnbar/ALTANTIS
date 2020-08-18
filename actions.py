@@ -257,8 +257,6 @@ async def kill_sub(team, verify):
     sub = get_sub(team)
     if sub and sub.name == verify:
         sub.power.damage(sub.power.total_power)
-        # Since no sub can die in one hit.
-        sub.power.damage(1)
         await sub.send_to_all("Submarine took catastrophic damage and will die on next game loop.")
         return OKAY_REACT
     return FAIL_REACT
