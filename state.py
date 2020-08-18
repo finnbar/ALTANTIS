@@ -37,7 +37,7 @@ def remove_team(name):
     Removes the team with that name, if able.
     """
     if name in get_teams():
-        state[name] = None
+        del state[name]
         return True
     return False
 

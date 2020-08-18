@@ -61,7 +61,7 @@ Nice features:
 Fixes:
 - [ ] Trading should cease at movement rather than tick.
 - [x] Remove "focus sash" idea.
-- [ ] Fix issues when bot is deleted (causes A Lot).
+- [x] Fix issues when bot is deleted (causes A Lot).
 - [ ] !mapall should also show treasure
 - [ ] Sub "is online" should have tick emoji in !status
 - [ ] Communicate power ERRORS better (e.g. "x has too much power")
