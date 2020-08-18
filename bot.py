@@ -12,6 +12,7 @@ from actions import *
 from game import perform_timestep, load_game
 from utils import OKAY_REACT
 from consts import *
+from control import init_control
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -23,16 +24,12 @@ bot = commands.Bot(command_prefix="!")
 async def main_loop():
     await perform_timestep(main_loop.current_loop)
 
-# CAPTAIN should only have map
-# remove NAV and merge with CAPTAIN
-
-# give to just nav
 class Movement(commands.Cog):
     """
     All commands that allow you to move the submarine.
     """
     @commands.command(name="setdir")
-    @commands.has_any_role(CAPTAIN, NAVIGATOR)
+    @commands.has_role(CAPTAIN)
     async def player_move(self, ctx, direction):
         """
         Sets the direction of your submarine to <direction>.
@@ -57,7 +54,7 @@ class Movement(commands.Cog):
         await perform(teleport, ctx, team, x, y)
 
     @commands.command(name="activate")
-    @commands.has_any_role(CAPTAIN, NAVIGATOR)
+    @commands.has_any_role(CAPTAIN)
     async def on(self, ctx):
         """
         Activates your submarine, allowing it to move and do actions in real-time.
@@ -65,7 +62,7 @@ class Movement(commands.Cog):
         await perform(set_activation, ctx, get_team(ctx.author), True)
 
     @commands.command(name="deactivate")
-    @commands.has_any_role(CAPTAIN, NAVIGATOR)
+    @commands.has_role(CAPTAIN)
     async def off(self, ctx):
         """
         Deactivates your submarine, stopping it from moving and performing actions.
@@ -73,12 +70,12 @@ class Movement(commands.Cog):
         """
         await perform(set_activation, ctx, get_team(ctx.author), False)
 
-# everyone
 class Status(commands.Cog):
     """
     All commands that get the status of your submarine and its local environment.
     """
     @commands.command(name="map")
+    @commands.has_role(CAPTAIN)
     async def player_map(self, ctx):
         """
         Shows a map of the world, including your submarine!
@@ -100,13 +97,12 @@ class Status(commands.Cog):
         """
         await perform(get_status, ctx, get_team(ctx.author), main_loop)
 
-# engineer
 class PowerManagement(commands.Cog):
     """
     Commands for powering, unpowering, upgrading, downgrading, healing and damaging subsystems.
     """
     @commands.command(name="power")
-    @commands.has_any_role(CAPTAIN, ENGINEER)
+    @commands.has_role(ENGINEER)
     async def power(self, ctx, *systems):
         """
         Gives one power to all of <systems> (any number of systems, can repeat).
@@ -123,7 +119,7 @@ class PowerManagement(commands.Cog):
         await perform(power_systems, ctx, team, list(systems))
 
     @commands.command(name="unpower")
-    @commands.has_any_role(CAPTAIN, ENGINEER)
+    @commands.has_role(ENGINEER)
     async def unpower(self, ctx, *systems):
         """
         Removes one power from all of <systems> (any number of systems, can repeat).
@@ -190,13 +186,12 @@ class PowerManagement(commands.Cog):
         """
         await perform_async(add_system, ctx, team, system)
 
-# captain
 class Comms(commands.Cog):
     """
     Commands for communicating with your fellow subs.
     """
     @commands.command(name="broadcast")
-    @commands.has_any_role(CAPTAIN, NAVIGATOR)
+    @commands.has_role(CAPTAIN)
     async def do_broadcast(self, ctx, message):
         """
         Broadcasts a <message> to all in range. Requires the sub to be activated.
@@ -211,7 +206,6 @@ class Comms(commands.Cog):
         """
         await perform_async(shout_at_team, ctx, team, message)
 
-# captain
 class Inventory(commands.Cog):
     """
     Commands for trading with subs on the same space as you.
@@ -282,7 +276,6 @@ class Inventory(commands.Cog):
         """
         await perform_async(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
 
-# engineer
 class Engineering(commands.Cog):
     """
     Commands for dealing with the engineering issues.
@@ -298,7 +291,7 @@ class Engineering(commands.Cog):
         await perform_async(give_team_puzzle, ctx, get_team(ctx.author), "repair")
 
     @commands.command(name="answer")
-    @commands.has_any_role(CAPTAIN, ENGINEER)
+    @commands.has_role(ENGINEER)
     async def answer_puzzle(self, ctx, answer: str):
         """
         Lets you answer a set puzzle that hasn't resolved yet.
@@ -313,20 +306,18 @@ class Engineering(commands.Cog):
         """
         await perform_async(give_team_puzzle, ctx, team, "fixing")
 
-# scientist
 class Crane(commands.Cog):
     """
     Commands for operating the crane.
     """
     @commands.command(name="crane")
-    @commands.has_any_role(CAPTAIN, SCIENTIST)
+    @commands.has_role(SCIENTIST)
     async def crane(self, ctx):
         """
         Drops the crane in your current location. Takes two turns to resolve.
         """
         await perform(drop_crane, ctx, get_team(ctx.author))
 
-# captain
 class DangerZone(commands.Cog):
     """
     DO NOT USE COMMANDS HERE UNLESS YOU ARE ABSOLUTELY CERTAIN.
@@ -365,7 +356,7 @@ class GameManagement(commands.Cog):
     async def register_team(self, ctx, x : int = 0, y : int = 0):
         """
         (CONTROL) Registers a new team (with sub at (x,y) defaulting to (0,0)) to the parent channel category.
-        Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #navigator, #captain and #scientist.
+        Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer,  #captain and #scientist.
         """
         await perform_async(register, ctx, ctx.message.channel.category, x, y)
 
@@ -417,14 +408,13 @@ class MapModification(commands.Cog):
         """
         await perform(remove_attribute_from, ctx, x, y, attribute, value)
 
-# scientist
 class Weaponry(commands.Cog):
     """
     Allows your submarine to shoot.
     """
 
     @commands.command(name="shoot_damaging")
-    @commands.has_any_role(CAPTAIN, ENGINEER)
+    @commands.has_role(SCIENTIST)
     async def damaging(self, ctx, x : int, y : int):
         """
         Schedules a damaging shot at (<x>, <y>). This uses two weapons charges.
@@ -432,7 +422,7 @@ class Weaponry(commands.Cog):
         await perform(schedule_shot, ctx, x, y, get_team(ctx.author), True)
     
     @commands.command(name="shoot_stunning")
-    @commands.has_any_role(CAPTAIN, ENGINEER)
+    @commands.has_role(SCIENTIST)
     async def nondamaging(self, ctx, x : int, y : int):
         """
         Schedules a nondamaging shot at (<x>, <y>). This uses two weapons charges.
@@ -488,6 +478,8 @@ bot.add_cog(Movement())
 bot.add_cog(PowerManagement())
 bot.add_cog(Status())
 bot.add_cog(Weaponry())
+
+init_control(bot)
 
 print("ALTANTIS READY")
 bot.run(TOKEN)

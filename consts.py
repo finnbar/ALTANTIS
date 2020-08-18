@@ -2,7 +2,6 @@ CONTROL_ROLE = "CONTROL"
 ENGINEER = "engineer"
 SCIENTIST = "scientist"
 CAPTAIN = "captain"
-NAVIGATOR = "navigator"
 
 CURRENCY_NAME = "Gold coin"
 

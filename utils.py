@@ -3,7 +3,7 @@ Utility classes for Statuses (return values from Discord actions).
 Also utility functions for distances and directions.
 """
 
-# MESSAGING UTILITIES
+# Messaging utilities
 
 class Status():
     def __init__(self):
@@ -29,7 +29,7 @@ class Message(Status):
     async def do_status(self, ctx):
         await ctx.send(self.contents)
 
-# DIRECTION UTILITIES
+# Direction utilities
 
 directions = {"N": (0, -1), "NE": (1, -1), "E": (1, 0), "SE": (1, 1),
               "S": (0, 1), "SW": (-1, 1), "W": (-1, 0), "NW": (-1, -1)}
@@ -111,4 +111,3 @@ def to_pair_list(items):
     for i in range(0, len(items), 2):
         pairs.append((items[i], int(items[i+1])))
     return pairs
-

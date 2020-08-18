@@ -22,7 +22,7 @@ async def perform_timestep(counter):
 
     # Get all active subs. (Can you tell I'm a functional programmer?)
     subsubset = list(filter(is_active_sub, get_teams()))
-    submessages = {i: {"engineer": "", "captain": "", "navigator": "", "scientist": ""} for i in subsubset}
+    submessages = {i: {"engineer": "", "captain": "", "scientist": ""} for i in subsubset}
     message_opening = f"---------**TURN {counter}**----------\n"
 
     # Power management
@@ -64,7 +64,6 @@ async def perform_timestep(counter):
         if move_message:
             move_message = f"{move_message}\n"
             submessages[subname]["captain"] += move_message
-            submessages[subname]["navigator"] += move_message
     
     # Scanning (as we enter a new square only)
     # TODO: Only make scanner print when things change. This will require
@@ -86,7 +85,6 @@ async def perform_timestep(counter):
         if damage_message:
             damage_message = f"{damage_message}\n"
             submessages[subname]["captain"] += damage_message
-            submessages[subname]["navigator"] += damage_message
             submessages[subname]["engineer"] += damage_message
             submessages[subname]["scientist"] += damage_message
 
@@ -95,8 +93,6 @@ async def perform_timestep(counter):
         if messages["captain"] == "":
             messages["captain"] = "\n"
         await sub.send_message(f"{message_opening}{messages['captain'][:-1]}", "captain")
-        if messages["navigator"] != "":
-            await sub.send_message(f"{message_opening}{messages['navigator'][:-1]}", "navigator")
         if messages["engineer"] != "":
             await sub.send_message(f"{message_opening}{messages['engineer'][:-1]}", "engineer")
         if messages["scientist"] != "":

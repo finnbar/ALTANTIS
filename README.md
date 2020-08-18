@@ -25,7 +25,7 @@ Important features:
 - [x] Full power management. Can power systems, but has a power cap (which can be increased by control).
 - [x] Pretty power management (!status will tell you about upcoming power changes.)
 - [x] Can broadcast messages to all in range (via Comms system, which garbles longer-distance messages). Messages have a cooldown.
-- [x] A channel per person, so that role-specific info can be broadcast (engineers only get puzzles, navigator only gets end-of-turn, scientists only gets scanners).
+- [x] A channel per person, so that role-specific info can be broadcast (engineers only get puzzles, end-of-turn, scientists only gets scanners).
 - [x] Can activate scanners, and inform players when they hover over things (level 1), are near things and other named subs (level 2), and further afield (level 3). Identify things via direction.
 - [x] Control can drop items on the seafloor. (!bury for control)
 - [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
@@ -46,6 +46,7 @@ Important non-gameplay features:
 
 Nice features:
 - [ ] !explode, which explodes (x,y) with a range and amount of damage.
+- [ ] Add !scan to recall previous scan command.
 - [ ] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
 - [ ] NPCs/Structures, which can take damage etc. Also trading predefined trades. See my notes for this in #bot-impl. Probably needs its own state dictionary, except a list will suffice. (It's fine if this is a little slow, as it's called every few minutes.)
 - [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
@@ -60,7 +61,6 @@ Fixes:
 - [ ] Trading should cease at movement rather than tick.
 - [ ] Remove "focus sash" idea.
 - [ ] Fix issues when bot is deleted (causes A Lot).
-- [ ] Add !sensor to recall previous sensor command.
 - [ ] !mapall should also show treasure
 - [ ] Sub "is online" should have tick emoji in !status
 - [ ] Communicate power ERRORS better (e.g. "x has too much power")
