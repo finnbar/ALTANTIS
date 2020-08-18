@@ -3,7 +3,7 @@ Allows the sub to move.
 """
 
 from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT, explore_submap
-from consts import GAME_SPEED
+from consts import GAME_SPEED, direction_emoji
 
 import math, datetime
 
@@ -69,14 +69,17 @@ class MovementControls():
         power_system = self.sub.power
 
         if power_system.activated():
-            time_until_next = loop.next_iteration.timestamp() - datetime.datetime.now().timestamp()
+            time_until_next = math.inf
+            if loop:
+                time_until_next = loop.next_iteration.timestamp() - datetime.datetime.now().timestamp()
             threshold = get_square(self.x, self.y).difficulty()
             turns_until_move = math.ceil(max(threshold - self.movement_progress, 0) / power_system.get_power("engines"))
             turns_plural = "turns" if turns_until_move > 1 else "turn"
             time_until_move = time_until_next + GAME_SPEED * (turns_until_move - 1)
+            message += f"Submarine is currently online. ✅\n"
             message += f"Next game turn will occur in {int(time_until_next)}s.\n"
             message += f"Next move estimated to occur in {int(time_until_move)}s ({turns_until_move} {turns_plural}).\n"
-            message += f"Currently moving **{self.direction}** and in position ({self.x}, {self.y}).\n\n"
+            message += f"Currently moving **{self.direction}** ({direction_emoji[self.direction]}) and in position **({self.x}, {self.y})**.\n\n"
         else:
-            message += f"Submarine is currently offline.\n\n"
+            message += f"Submarine is currently offline. ❎\n\n"
         return message

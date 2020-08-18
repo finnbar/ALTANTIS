@@ -192,7 +192,10 @@ class PowerManager():
         return f"Healed back up to {self.total_power} power!"
     
     def status(self):
-        message = f"**Power status** ({self.power_use(self.power)}/{self.total_power}/{self.total_power_max} used/available/max):\n"
+        message = f"**Power status** (Reactor working at {self.total_power}/{self.total_power_max} capacity).\n"
+        message += f"{self.total_power - self.power_use(self.scheduled_power)} power available to schedule.\n"
+
+        max_system_length = max(map(lambda x: len(x), self.power.keys()))
 
         for system in self.power:
             use = self.power[system]
@@ -207,24 +210,28 @@ class PowerManager():
             # Don't print out information on systems that cannot be powered.
             if maxi + innate <= 0:
                 continue
+        
+            system_name = system.capitalize() + (" " * (max_system_length - len(system)))
 
-            power_status = f"({use}/{maxi}"
-            if innate > 0 or difference != 0:
-                power_status += " with"
+            current_power = f"{use}/{maxi}"
             if innate > 0:
-                power_status += f" {innate} innate"
-                if difference != 0:
-                    power_status += ","
+                current_power += f" +{innate}"
+            else:
+                current_power += "   "
+
+            changes = ""
             if difference != 0:
                 plusminus = "+"
                 if difference < 0:
                     plusminus = "-"
-                power_status += f" {plusminus}{abs(difference)} scheduled"
-            power_status += ")"
+                changes = f"`({plusminus}{abs(difference)} next tick)`"
 
-            system_status = "offline"
-            if use + innate > 0:
-                system_status = "online"
-            message += f"* **{system.capitalize()}** is {system_status} {power_status}\n"
+            system_status = ["❎"] * maxi
+            for i in range(use):
+                system_status[i] = "✅"
+            system_status = "".join(system_status)
+            if innate > 0:
+                system_status += " [**+**" + ("✅" * innate) + "]"
+            message += f"`{system_name} {current_power}`  {system_status} {changes}\n"
 
         return message + "\n"

@@ -19,8 +19,8 @@ class React(Status):
     async def do_status(self, ctx):
         await ctx.message.add_reaction(self.react)
 
-OKAY_REACT = React("☑")
-FAIL_REACT = React("❌")
+OKAY_REACT = React("✅")
+FAIL_REACT = React("❎")
 
 class Message(Status):
     def __init__(self, contents):
