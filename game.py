@@ -45,7 +45,7 @@ async def perform_timestep(counter):
     # The crane
     for subname in subsubset:
         sub = get_sub(subname)
-        crane_message = sub.inventory.crane_tick()
+        crane_message = await sub.inventory.crane_tick()
         if crane_message:
             crane_message = f"{crane_message}\n"
             submessages[subname]["scientist"] += crane_message
@@ -81,7 +81,7 @@ async def perform_timestep(counter):
     # Damage
     for subname in subsubset:
         sub = get_sub(subname)
-        damage_message = sub.power.damage_tick()
+        damage_message = await sub.power.damage_tick()
         if damage_message:
             damage_message = f"{damage_message}\n"
             submessages[subname]["captain"] += damage_message

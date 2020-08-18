@@ -39,15 +39,16 @@ Important features:
 Important non-gameplay features:
 - [x] Save bot state to disk with each game loop, as to avoid any issues.
 - [x] Deal with locking/unlocking of the main thread, if possible. (Could have issues if someone does something during game turn execution.) I don't believe this is actually necessary, as async is still single-threaded.
-- [ ] Complete README.
 - [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
 - [x] Sort commands by functionality.
+- [ ] Complete README.
 - [ ] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
 
 Nice features:
+- [x] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
+- [ ] Turn tracker should always be visible even when deactivated. (Maybe add an extra message.)
 - [ ] !explode, which explodes (x,y) with a range and amount of damage.
 - [ ] Add !scan to recall previous scan command.
-- [ ] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
 - [ ] NPCs/Structures, which can take damage etc. Also trading predefined trades. See my notes for this in #bot-impl. Probably needs its own state dictionary, except a list will suffice. (It's fine if this is a little slow, as it's called every few minutes.)
 - [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
 - [ ] Control commands run in team channels default to affecting that team.

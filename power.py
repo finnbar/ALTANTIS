@@ -3,6 +3,7 @@ Allows submarines to manage their power usage.
 """
 
 from random import choice
+from control import notify_control
 
 class PowerManager():
     def __init__(self, sub):
@@ -182,10 +183,11 @@ class PowerManager():
     def damage(self, amount):
         self.scheduled_damage.append(amount)
     
-    def damage_tick(self):
+    async def damage_tick(self):
         damage_message = ""
         for hit in self.scheduled_damage:
             damage_message += self.run_damage(hit)
+            await notify_control(f"**{self.sub.name}** took **{hit} damage**!")
         self.scheduled_damage = []
         return damage_message
 

@@ -6,6 +6,7 @@ Also features The Crane.
 from consts import CURRENCY_NAME
 from world import pick_up_treasure, bury_treasure_at
 from utils import list_to_and_separated
+from control import notify_control
 
 class Inventory():
     def __init__(self, sub):
@@ -63,7 +64,7 @@ class Inventory():
             return True
         return False
     
-    def crane_tick(self):
+    async def crane_tick(self):
         if self.sub.power.get_power("crane") == 0:
             # Drop what's currently being held.
             if self.crane_holds:
@@ -85,6 +86,7 @@ class Inventory():
             treasure = self.crane_holds
             self.add(treasure)
             self.crane_holds = None
+            await notify_control(f"**{self.sub.name}** picked up treasure **{treasure}**!")
             return f"Crane came back up with {treasure}!"
         return ""
 

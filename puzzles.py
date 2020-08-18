@@ -4,6 +4,7 @@ Deals with the engineering puzzles, which need to be imported, served and marked
 
 import json, glob
 from random import choice
+from control import notify_control
 
 answers = {}
 with open("puzzles/answers.json", "r") as ans_file:
@@ -80,6 +81,7 @@ class EngineeringPuzzles():
             if condition == "Repair":
                 await self.sub.send_to_all(self.sub.power.heal(1))
             await self.sub.send_message(f"Puzzle answered correctly! **{condition}** sorted!", "engineer")
+            await notify_control(f"**{self.sub.name}** got puzzle **\"{self.current_puzzle[0]}\"** **correct**!")
         else:
             # Incorrect.
             if answer is None:
@@ -90,6 +92,7 @@ class EngineeringPuzzles():
                 await self.sub.send_message(f"You got the answer wrong! **{condition}** not sorted.", "engineer")
                 self.sub.power.damage(1)
             self.puzzles.append(self.current_puzzle)
+            await notify_control(f"**{self.sub.name}** got puzzle **\"{self.current_puzzle[0]}\"** **wrong**!")
         self.current_puzzle = None
         return True
     

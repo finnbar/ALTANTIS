@@ -2,11 +2,12 @@
 A file for useful control functionality.
 """
 
-control_controller = None
+control_alerts = None
 
 async def notify_control(event):
-    await control_controller.send(event)
+    if control_alerts:
+        await control_alerts.send(event)
 
-def init_control(client):
-    global control_controller
-    control_controller = client
+def init_control_notifs(channel):
+    global control_alerts
+    control_alerts = channel

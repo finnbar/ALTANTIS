@@ -12,7 +12,7 @@ from actions import *
 from game import perform_timestep, load_game
 from utils import OKAY_REACT
 from consts import *
-from control import init_control
+from control import init_control_notifs
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -379,6 +379,15 @@ class GameManagement(commands.Cog):
         """
         main_loop.stop()
         await OKAY_REACT.do_status(ctx)
+    
+    @commands.command(name="set_alerts_channel")
+    @commands.has_role(CONTROL_ROLE)
+    async def set_alerts_channel(self, ctx):
+        """
+        (CONTROL) Sets up a channel for control alerts, which notify control directly of important occurrences.
+        """
+        init_control_notifs(ctx.channel)
+        await OKAY_REACT.do_status(ctx)
 
 class MapModification(commands.Cog):
     """
@@ -478,8 +487,6 @@ bot.add_cog(Movement())
 bot.add_cog(PowerManagement())
 bot.add_cog(Status())
 bot.add_cog(Weaponry())
-
-init_control(bot)
 
 print("ALTANTIS READY")
 bot.run(TOKEN)
