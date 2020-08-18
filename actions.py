@@ -32,7 +32,7 @@ def teleport(team, x, y):
             return OKAY_REACT
     return FAIL_REACT
 
-def set_activation(team, value):
+async def set_activation(team, value):
     """
     Sets the submarine's power to `value`.
     """
@@ -40,11 +40,13 @@ def set_activation(team, value):
     if sub:
         print("Setting power of", team, "to", value)
         if sub.power.activated() == value:
-            return Message(f"{team} unchanged.")
+            return Message(f"{team} activation unchanged.")
         sub.power.activate(value)
         if sub.power.activated():
-            return Message(f"{team} is **ON** and running! Current direction: **{sub.movement.get_direction()}**.")
-        return Message(f"{team} is **OFF** and halted!")
+            await sub.send_to_all(f"{team} is **ON** and running! Current direction: **{sub.movement.get_direction()}**.")
+            return OKAY_REACT
+        await sub.send_to_all(f"{team} is **OFF** and halted!")
+        return OKAY_REACT
     return FAIL_REACT
 
 # STATUS

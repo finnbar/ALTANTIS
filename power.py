@@ -4,7 +4,7 @@ Allows submarines to manage their power usage.
 
 from random import choice
 from control import notify_control
-from consts import TICK, CROSS
+from consts import TICK, CROSS, DARKTICK
 
 class PowerManager():
     def __init__(self, sub):
@@ -192,6 +192,15 @@ class PowerManager():
         self.total_power = min(self.total_power + amount, self.total_power_max)
         return f"Healed back up to {self.total_power} power!"
     
+    def emoji_power_status(self, innate, use, maxi):
+        system_list = [CROSS] * maxi
+        for i in range(use):
+            system_list[i] = TICK
+        system_status = "".join(system_list)
+        if innate > 0:
+            system_status = (DARKTICK * innate) + system_status
+        return system_status
+    
     def status(self):
         message = f"**Power status** (Reactor working at {self.total_power}/{self.total_power_max} capacity).\n"
         message += f"{self.total_power - self.power_use(self.scheduled_power)} power available to schedule.\n"
@@ -214,25 +223,20 @@ class PowerManager():
         
             system_name = system.capitalize() + (" " * (max_system_length - len(system)))
 
-            current_power = f"{use}/{maxi}"
+            current_power = ""
             if innate > 0:
-                current_power += f" +{innate}"
+                current_power += f"{innate}+"
             else:
-                current_power += "   "
+                current_power += "  "
+            current_power += f"{use}/{maxi}"
 
             changes = ""
             if difference != 0:
-                plusminus = "+"
-                if difference < 0:
-                    plusminus = "-"
-                changes = f"`({plusminus}{abs(difference)} next tick)`"
+                changes = "**-- 🕒 ->** "
+                changes += self.emoji_power_status(innate, scheduled, maxi)
+            
+            system_status = self.emoji_power_status(innate, use, maxi)
 
-            system_status = [CROSS] * maxi
-            for i in range(use):
-                system_status[i] = TICK
-            system_status = "".join(system_status)
-            if innate > 0:
-                system_status += " [**+**" + (TICK * innate) + "]"
             message += f"`{system_name} {current_power}`  {system_status} {changes}\n"
 
         return message + "\n"

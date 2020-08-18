@@ -59,7 +59,7 @@ class Movement(commands.Cog):
         """
         Activates your submarine, allowing it to move and do actions in real-time.
         """
-        await perform(set_activation, ctx, get_team(ctx.author), True)
+        await perform_async(set_activation, ctx, get_team(ctx.author), True)
 
     @commands.command(name="deactivate")
     @commands.has_role(CAPTAIN)
@@ -68,7 +68,7 @@ class Movement(commands.Cog):
         Deactivates your submarine, stopping it from moving and performing actions.
         Needed for docking.
         """
-        await perform(set_activation, ctx, get_team(ctx.author), False)
+        await perform_async(set_activation, ctx, get_team(ctx.author), False)
 
 class Status(commands.Cog):
     """

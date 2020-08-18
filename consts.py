@@ -16,3 +16,4 @@ direction_emoji = {"N": "⬆", "E": "➡", "S": "⬇",
 
 TICK = "<:greentick:745348214210822255>"
 CROSS = "<:redcross:745348213149532170>"
+DARKTICK = "<:greentick_dark:745360199921172531>"
