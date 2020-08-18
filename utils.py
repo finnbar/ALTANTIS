@@ -3,6 +3,8 @@ Utility classes for Statuses (return values from Discord actions).
 Also utility functions for distances and directions.
 """
 
+from consts import TICK, CROSS
+
 # Messaging utilities
 
 class Status():
@@ -19,8 +21,8 @@ class React(Status):
     async def do_status(self, ctx):
         await ctx.message.add_reaction(self.react)
 
-OKAY_REACT = React("✅")
-FAIL_REACT = React("❎")
+OKAY_REACT = React(TICK)
+FAIL_REACT = React(CROSS)
 
 class Message(Status):
     def __init__(self, contents):

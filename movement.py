@@ -3,7 +3,7 @@ Allows the sub to move.
 """
 
 from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT, explore_submap
-from consts import GAME_SPEED, direction_emoji
+from consts import GAME_SPEED, direction_emoji, TICK, CROSS
 
 import math, datetime
 
@@ -76,10 +76,10 @@ class MovementControls():
             turns_until_move = math.ceil(max(threshold - self.movement_progress, 0) / power_system.get_power("engines"))
             turns_plural = "turns" if turns_until_move > 1 else "turn"
             time_until_move = time_until_next + GAME_SPEED * (turns_until_move - 1)
-            message += f"Submarine is currently online. ✅\n"
+            message += f"Submarine is currently online. {TICK}\n"
             message += f"Next game turn will occur in {int(time_until_next)}s.\n"
             message += f"Next move estimated to occur in {int(time_until_move)}s ({turns_until_move} {turns_plural}).\n"
             message += f"Currently moving **{self.direction}** ({direction_emoji[self.direction]}) and in position **({self.x}, {self.y})**.\n\n"
         else:
-            message += f"Submarine is currently offline. ❎\n\n"
+            message += f"Submarine is currently offline. {CROSS}\n\n"
         return message

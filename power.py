@@ -4,6 +4,7 @@ Allows submarines to manage their power usage.
 
 from random import choice
 from control import notify_control
+from consts import TICK, CROSS
 
 class PowerManager():
     def __init__(self, sub):
@@ -226,12 +227,12 @@ class PowerManager():
                     plusminus = "-"
                 changes = f"`({plusminus}{abs(difference)} next tick)`"
 
-            system_status = ["❎"] * maxi
+            system_status = [CROSS] * maxi
             for i in range(use):
-                system_status[i] = "✅"
+                system_status[i] = TICK
             system_status = "".join(system_status)
             if innate > 0:
-                system_status += " [**+**" + ("✅" * innate) + "]"
+                system_status += " [**+**" + (TICK * innate) + "]"
             message += f"`{system_name} {current_power}`  {system_status} {changes}\n"
 
         return message + "\n"
