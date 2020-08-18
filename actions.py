@@ -86,10 +86,8 @@ def power_systems(team, systems):
     """
     sub = get_sub(team)
     if sub:
-        print("Applying power increases of", team, "to", systems)
-        if sub.power.power_systems(systems):
-            return Message(f"Scheduled power increase of systems {systems} for {team}!")
-        return Message(f"Could not power all of {systems} (either because they do not exist or because you would go over your power limit) so did not change anything.")
+        result = sub.power.power_systems(systems)
+        return Message(result)
     return FAIL_REACT
 
 def unpower_systems(team, systems):
@@ -98,10 +96,8 @@ def unpower_systems(team, systems):
     """
     sub = get_sub(team)
     if sub:
-        print("Applying power decreases of", team, "to", systems)
-        if sub.power.unpower_systems(systems):
-            return Message(f"Scheduled power decrease of systems {systems} for {team}!")
-        return Message(f"Could not unpower all of {systems} (as either that would leave a system with less than zero power, or you specified a system that didn't exist) so did not change anything.")
+        result = sub.power.unpower_systems(systems)
+        return Message(result)
     return FAIL_REACT
 
 async def deal_damage(team, amount, reason):

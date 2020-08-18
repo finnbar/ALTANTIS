@@ -63,8 +63,8 @@ Fixes:
 - [x] Remove "focus sash" idea.
 - [x] Fix issues when bot is deleted (causes A Lot).
 - [ ] !mapall should also show treasure
-- [ ] Sub "is online" should have tick emoji in !status
-- [ ] Communicate power ERRORS better (e.g. "x has too much power")
+- [x] Sub "is online" should have tick emoji in !status
+- [x] Communicate power ERRORS better (e.g. "x has too much power")
 - [ ] Tell _everyone_ when it's activated/deactivated.
 - [ ] !investigate_square, which shouts about the attributes/treasure of a given square (CONTROL)
 - [ ] Standardise commands to _team_ _strings_ _coordinates_.

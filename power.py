@@ -122,7 +122,7 @@ class PowerManager():
         If you name a system that doesn't exist, it will not apply the changes.
         """
         if len(systems) > self.total_power - self.power_use(self.scheduled_power):
-            return False
+            return f"You will exceed your power cap with this! Operation cancelled."
         power_copy = self.scheduled_power.copy()
         for system in systems:
             if system in power_copy:
@@ -130,12 +130,12 @@ class PowerManager():
                 maxi = self.power_max[system]
                 use += 1
                 if use > maxi:
-                    return False
+                    return f"Cannot power {system} above its maximum power cap! Operation cancelled."
                 power_copy[system] = use
             else:
-                return False
+                return f"System {system} isn't present on this submarine. Operation cancelled."
         self.scheduled_power = power_copy
-        return True
+        return f"Systems {systems} will be powered next tick."
     
     def unpower_systems(self, systems):
         """
@@ -148,12 +148,12 @@ class PowerManager():
                 use = power_copy[system]
                 use -= 1
                 if use < 0:
-                    return False
+                    return f"Cannot unpower {system} below zero power! Operation cancelled."
                 power_copy[system] = use
             else:
-                return False
+                return f"System {system} isn't present on this submarine. Operation cancelled."
         self.scheduled_power = power_copy
-        return True
+        return f"Systems {systems} will be unpowered next tick."
 
     def run_damage(self, amount):
         if amount <= 0:
