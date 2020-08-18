@@ -46,8 +46,25 @@ Important non-gameplay features:
 
 Nice features:
 - [ ] !explode, which explodes (x,y) with a range and amount of damage.
-- [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
-- [ ] Mechanical resources (e.g. currency).
-- [ ] Control commands run in team channels default to affecting that team.
 - [ ] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
-- [ ] NPCs/Structures, which can take damage etc.
+- [ ] NPCs/Structures, which can take damage etc. Also trading predefined trades. See my notes for this in #bot-impl. Probably needs its own state dictionary, except a list will suffice. (It's fine if this is a little slow, as it's called every few minutes.)
+- [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
+- [ ] Control commands run in team channels default to affecting that team.
+- [ ] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions.
+- [ ] !drop? Might need to have undroppable items.
+- [ ] Emoji map
+- [ ] !save (determine if this is a safe command to add)
+- [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
+
+Fixes:
+- [ ] Trading should cease at movement rather than tick.
+- [ ] Remove "focus sash" idea.
+- [ ] Fix issues when bot is deleted (causes A Lot).
+- [ ] Add !sensor to recall previous sensor command.
+- [ ] !mapall should also show treasure
+- [ ] Sub "is online" should have tick emoji in !status
+- [ ] Communicate power ERRORS better (e.g. "x has too much power")
+- [ ] Tell _everyone_ when it's activated/deactivated.
+- [ ] !investigate_square, which shouts about the attributes/treasure of a given square (CONTROL)
+- [ ] Standardise commands to _team_ _strings_ _coordinates_.
+- [ ] Crane with more power can go up/down faster.

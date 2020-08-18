@@ -22,7 +22,7 @@ class ScanSystem():
         """
         subname = ""
         if strength > 0: subname = f" {self.sub.name}"
-        return f"SUBMARINE{subname}"
+        return f"Submarine{subname}"
 
     def scan(self):
         """

@@ -65,18 +65,7 @@ async def perform_timestep(counter):
             move_message = f"{move_message}\n"
             submessages[subname]["captain"] += move_message
             submessages[subname]["navigator"] += move_message
-
-    # Damage
-    for subname in subsubset:
-        sub = get_sub(subname)
-        damage_message = sub.power.damage_tick()
-        if damage_message:
-            damage_message = f"{damage_message}\n"
-            submessages[subname]["captain"] += damage_message
-            submessages[subname]["navigator"] += damage_message
-            submessages[subname]["engineer"] += damage_message
-            submessages[subname]["scientist"] += damage_message
-
+    
     # Scanning (as we enter a new square only)
     # TODO: Only make scanner print when things change. This will require
     # tracking past results and not shuffling them preemptively.
@@ -89,6 +78,17 @@ async def perform_timestep(counter):
             scan_message += "\n"
             submessages[subname]["captain"] += scan_message
             submessages[subname]["scientist"] += scan_message
+
+    # Damage
+    for subname in subsubset:
+        sub = get_sub(subname)
+        damage_message = sub.power.damage_tick()
+        if damage_message:
+            damage_message = f"{damage_message}\n"
+            submessages[subname]["captain"] += damage_message
+            submessages[subname]["navigator"] += damage_message
+            submessages[subname]["engineer"] += damage_message
+            submessages[subname]["scientist"] += damage_message
 
     for subname in subsubset:
         messages = submessages[subname]

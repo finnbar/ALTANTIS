@@ -116,6 +116,14 @@ async def deal_damage(team, amount, reason):
         return OKAY_REACT
     return FAIL_REACT
 
+async def heal_up(team, amount, reason):
+    sub = get_sub(team)
+    if sub:
+        sub.power.heal(amount)
+        if reason: await sub.send_to_all(reason)
+        return OKAY_REACT
+    return FAIL_REACT
+
 async def upgrade_sub(team, amount):
     sub = get_sub(team)
     if sub:

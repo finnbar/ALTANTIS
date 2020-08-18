@@ -23,6 +23,10 @@ bot = commands.Bot(command_prefix="!")
 async def main_loop():
     await perform_timestep(main_loop.current_loop)
 
+# CAPTAIN should only have map
+# remove NAV and merge with CAPTAIN
+
+# give to just nav
 class Movement(commands.Cog):
     """
     All commands that allow you to move the submarine.
@@ -69,6 +73,7 @@ class Movement(commands.Cog):
         """
         await perform(set_activation, ctx, get_team(ctx.author), False)
 
+# everyone
 class Status(commands.Cog):
     """
     All commands that get the status of your submarine and its local environment.
@@ -95,6 +100,7 @@ class Status(commands.Cog):
         """
         await perform(get_status, ctx, get_team(ctx.author), main_loop)
 
+# engineer
 class PowerManagement(commands.Cog):
     """
     Commands for powering, unpowering, upgrading, downgrading, healing and damaging subsystems.
@@ -141,6 +147,14 @@ class PowerManagement(commands.Cog):
         """
         await perform_async(deal_damage, ctx, team, amount, reason)
 
+    @commands.command(name="heal")
+    @commands.has_role(CONTROL_ROLE)
+    async def perform_healing(self, ctx, team, amount : int, reason=""):
+        """
+        (CONTROL) Forces <team> to take <amount> healing at next loop. You can optionally specify a <reason> which will be messaged to them before.
+        """
+        await perform_async(heal_up, ctx, team, amount, reason)
+
     @commands.command(name="upgrade")
     @commands.has_role(CONTROL_ROLE)
     async def upgrade(self, ctx, team, amount : int):
@@ -176,6 +190,7 @@ class PowerManagement(commands.Cog):
         """
         await perform_async(add_system, ctx, team, system)
 
+# captain
 class Comms(commands.Cog):
     """
     Commands for communicating with your fellow subs.
@@ -196,6 +211,7 @@ class Comms(commands.Cog):
         """
         await perform_async(shout_at_team, ctx, team, message)
 
+# captain
 class Inventory(commands.Cog):
     """
     Commands for trading with subs on the same space as you.
@@ -266,6 +282,7 @@ class Inventory(commands.Cog):
         """
         await perform_async(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
 
+# engineer
 class Engineering(commands.Cog):
     """
     Commands for dealing with the engineering issues.
@@ -296,6 +313,7 @@ class Engineering(commands.Cog):
         """
         await perform_async(give_team_puzzle, ctx, team, "fixing")
 
+# scientist
 class Crane(commands.Cog):
     """
     Commands for operating the crane.
@@ -308,6 +326,7 @@ class Crane(commands.Cog):
         """
         await perform(drop_crane, ctx, get_team(ctx.author))
 
+# captain
 class DangerZone(commands.Cog):
     """
     DO NOT USE COMMANDS HERE UNLESS YOU ARE ABSOLUTELY CERTAIN.
@@ -398,6 +417,7 @@ class MapModification(commands.Cog):
         """
         await perform(remove_attribute_from, ctx, x, y, attribute, value)
 
+# scientist
 class Weaponry(commands.Cog):
     """
     Allows your submarine to shoot.
