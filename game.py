@@ -21,8 +21,10 @@ async def perform_timestep(counter):
         return sub.power.activated()
 
     # Get all active subs. (Can you tell I'm a functional programmer?)
+    # Note: we still collect all messages for all subs, as there are some
+    # messages that inactive subs should receive.
     subsubset = list(filter(is_active_sub, get_teams()))
-    submessages = {i: {"engineer": "", "captain": "", "scientist": ""} for i in subsubset}
+    submessages = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_teams()}
     message_opening = f"---------**TURN {counter}**----------\n"
 
     # Power management
@@ -50,20 +52,15 @@ async def perform_timestep(counter):
             crane_message = f"{crane_message}\n"
             submessages[subname]["scientist"] += crane_message
 
-    # Trade timeout
+    # Movement, trade and puzzles
     for subname in subsubset:
         sub = get_sub(subname)
-        trade_messages = sub.inventory.timeout_trade()
-        for target in trade_messages:
-            submessages[target]["captain"] += trade_messages[target] + "\n"
-
-    # Movement and puzzles
-    for subname in subsubset:
-        sub = get_sub(subname)
-        move_message = await sub.movement.movement_tick()
+        move_message, trade_messages = await sub.movement.movement_tick()
         if move_message:
             move_message = f"{move_message}\n"
             submessages[subname]["captain"] += move_message
+        for target in trade_messages:
+            submessages[target]["captain"] += trade_messages[target] + "\n"
     
     # Scanning (as we enter a new square only)
     # TODO: Only make scanner print when things change. This will require
@@ -88,10 +85,14 @@ async def perform_timestep(counter):
             submessages[subname]["engineer"] += damage_message
             submessages[subname]["scientist"] += damage_message
 
-    for subname in subsubset:
+    for subname in get_teams():
         messages = submessages[subname]
+        sub = get_sub(subname)
         if messages["captain"] == "":
-            messages["captain"] = "\n"
+            if subname not in subsubset:
+                messages["captain"] = "Your submarine is deactivated so nothing happened.\n"
+            else:
+                messages["captain"] = "Your submarine is active, but there is nothing to notify you about.\n"
         await sub.send_message(f"{message_opening}{messages['captain'][:-1]}", "captain")
         if messages["engineer"] != "":
             await sub.send_message(f"{message_opening}{messages['engineer'][:-1]}", "engineer")

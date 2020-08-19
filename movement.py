@@ -35,11 +35,14 @@ class MovementControls():
             # Do all the puzzles stuff.
             await self.sub.puzzles.movement_tick()
 
+            # Cancel trades, if necessary.
+            trade_messages = self.sub.inventory.timeout_trade()
+
             # Finally, return our movement.
             if message:
-                return f"{message}\n{move_status}"
-            return move_status
-        return None
+                return f"{message}\n{move_status}", trade_messages
+            return move_status, trade_messages
+        return None, {}
     
     def set_direction(self, direction):
         if direction in possible_directions():
@@ -70,15 +73,16 @@ class MovementControls():
 
         if power_system.activated():
             time_until_next = math.inf
-            if loop:
+            if loop and loop.next_iteration:
                 time_until_next = loop.next_iteration.timestamp() - datetime.datetime.now().timestamp()
             threshold = get_square(self.x, self.y).difficulty()
             turns_until_move = math.ceil(max(threshold - self.movement_progress, 0) / power_system.get_power("engines"))
             turns_plural = "turns" if turns_until_move > 1 else "turn"
             time_until_move = time_until_next + GAME_SPEED * (turns_until_move - 1)
             message += f"Submarine is currently online. {TICK}\n"
-            message += f"Next game turn will occur in {int(time_until_next)}s.\n"
-            message += f"Next move estimated to occur in {int(time_until_move)}s ({turns_until_move} {turns_plural}).\n"
+            if time_until_next != math.inf:
+                message += f"Next game turn will occur in {int(time_until_next)}s.\n"
+                message += f"Next move estimated to occur in {int(time_until_move)}s ({turns_until_move} {turns_plural}).\n"
             message += f"Currently moving **{self.direction}** ({direction_emoji[self.direction]}) and in position **({self.x}, {self.y})**.\n\n"
         else:
             message += f"Submarine is currently offline. {CROSS}\n\n"

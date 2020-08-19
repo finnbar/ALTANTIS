@@ -59,7 +59,7 @@ Nice features:
 - [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
 
 Fixes:
-- [ ] Trading should cease at movement rather than tick.
+- [x] Trading should cease at movement rather than tick.
 - [x] Remove "focus sash" idea.
 - [x] Fix issues when bot is deleted (causes A Lot).
 - [x] !mapall should also show treasure

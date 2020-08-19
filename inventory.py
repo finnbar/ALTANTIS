@@ -155,25 +155,25 @@ class Inventory():
         self.my_turn = False
         offer_text = self.offer_as_text(offer)
         await partner.inventory.received_trade(self.sub, offer_text)
-        return f"You have offered **{offer_text}** to {partner.name}. Wait for them to respond to the trade, and then you may give a counteroffer with `!offer`, `!accept_trade` if you agree with what they've said, or `!reject_trade` if you don't want to trade anymore. You have until either sub next activates to complete the trade."
+        return f"You have offered **{offer_text}** to {partner.name}. Wait for them to respond to the trade, and then you may give a counteroffer with `!offer`, `!accept_trade` if you agree with what they've said, or `!reject_trade` if you don't want to trade anymore. You have until either sub next moves to complete the trade."
 
     async def received_trade(self, sub, offer_text):
         self.accepting = False
         self.trading_partner = sub
         self.my_turn = True
-        await self.sub.send_message(f"**{sub.name}** asked for trade! They are offering **{offer_text}**. Respond with `!offer` to present your side of the trade, `!accept_trade` if you want to offer nothing in exchange, or `!reject_trade` if you don't want to trade. You have until either sub next activates to complete the trade.", "captain")
+        await self.sub.send_message(f"**{sub.name}** asked for trade! They are offering **{offer_text}**. Respond with `!offer` to present your side of the trade, `!accept_trade` if you want to offer nothing in exchange, or `!reject_trade` if you don't want to trade. You have until either sub next moves to complete the trade.", "captain")
     
     async def reject_trade(self):
         """
         End a currently running trade.
         """
         if not self.trading_partner:
-            return "No trade to end."
+            return None
 
         partner_name = self.trading_partner.name
         self.trading_partner.inventory.reset_trade_state()
         self.reset_trade_state()
-        await self.trading_partner.send_message(f"Trade with **{self.sub.name}** cancelled due to rejection.")
+        await self.trading_partner.send_message(f"Trade with **{self.sub.name}** cancelled due to rejection.", "captain")
         return f"Trade with **{partner_name}** cancelled due to rejection."
     
     def reset_trade_state(self):
