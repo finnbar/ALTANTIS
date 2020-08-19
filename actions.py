@@ -4,7 +4,7 @@ The backend for all Discord actions, which allow players to control their sub.
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
 from state import get_teams, get_sub, add_team, remove_team
-from world import ascii_map, bury_treasure_at, get_square
+from world import draw_map, bury_treasure_at, get_square
 from consts import direction_emoji
 
 # MOVEMENT
@@ -51,11 +51,15 @@ async def set_activation(team, value):
 
 # STATUS
 
-def print_map(team):
+def print_map(team, options=["W", "D", "S"]):
     """
     Prints the map from the perspective of one submarine, or all if team is None.
     """
     subs = []
+    code_to_key = {"W": "Wall", "D": "Docking station", "S": "Storm", "T": "Treasure", "N": "NPC"}
+    if options is True:
+        options = code_to_key.keys()
+    options = list(filter(lambda v: v in code_to_key, options))
     if team is None:
         subs = [get_sub(sub) for sub in get_teams()]
     else:
@@ -65,13 +69,15 @@ def print_map(team):
         subs = [sub]
     print("Printing map for", subs)
     formatted = f"```\n"
-    map_string = ascii_map(subs)
+    map_string = draw_map(subs, options)
     formatted += map_string + "\n```\n"
-    subs_string = "With submarines: "
+    subs_string = "**KEY**\n"
     for i in range(len(subs)):
         subs_string += f"{i}: {subs[i].name}, "
-    formatted += subs_string[:-2]
-    return Message(formatted)
+    formatted += subs_string[:-2] + "\n"
+    for o in options:
+        formatted += f"{o}: {code_to_key[o]}\n"
+    return Message(formatted[:-1])
 
 def get_status(team, loop):
     sub = get_sub(team)

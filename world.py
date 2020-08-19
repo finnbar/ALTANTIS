@@ -58,15 +58,15 @@ class Cell():
             return f"The submarine hit a wall and took one damage!\n{message}"
         return ""
 
-    def to_char(self):
-        if "obstacle" in self.attributes:
+    def to_char(self, to_show):
+        if "T" in to_show and self.treasure is not None:
+            return "T"
+        if "W" in to_show and "obstacle" in self.attributes:
             return "W"
-        if "docking" in self.attributes:
+        if "D" in to_show and "docking" in self.attributes:
             return "D"
-        if "storm" in self.attributes:
-            return "!"
-        if "calm" in self.attributes:
-            return " "
+        if "S" in to_show and "storm" in self.attributes:
+            return "S"
         return "."
     
     def difficulty(self):
@@ -153,7 +153,7 @@ def move_on_map(sub, direction, x, y):
         return x, y, message
     return new_x, new_y, message
 
-def ascii_map(subs):
+def draw_map(subs, to_show):
     """
     Draws an ASCII version of the map.
     `subs` is a list of submarines, which are marked 0-9 on the map.
@@ -162,7 +162,8 @@ def ascii_map(subs):
     for y in range(Y_LIMIT):
         row = ""
         for x in range(X_LIMIT):
-            tile_char = undersea_map[x][y].to_char()
+            tile_char = undersea_map[x][y].to_char(to_show)
+            # NOTE: NPC checking will go here, if "N" in to_show
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:

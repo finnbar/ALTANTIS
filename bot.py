@@ -84,11 +84,14 @@ class Status(commands.Cog):
 
     @commands.command(name="mapall")
     @commands.has_role(CONTROL_ROLE)
-    async def control_map(self, ctx):
+    async def control_map(self, ctx, *opts):
         """
         (CONTROL) Shows a map of the world, including all submarines.
         """
-        await perform(print_map, ctx, None)
+        if opts == ():
+            await perform(print_map, ctx, None, True)
+        else:
+            await perform(print_map, ctx, None, list(opts))
 
     @commands.command(name="status")
     async def status(self, ctx):
