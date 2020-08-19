@@ -64,6 +64,22 @@ class Inventory():
             return True
         return False
     
+    def send_crane_down(self):
+        # The crane goes down!
+        self.crane_down = True
+        self.schedule_crane = False
+        # Attempt to pick up the item.
+        self.crane_holds = pick_up_treasure(self.sub.movement.get_position())
+    
+    async def send_crane_up(self):
+        # The crane comes back up! Oh no
+        self.crane_down = False
+        treasure = self.crane_holds
+        self.add(treasure)
+        self.crane_holds = None
+        await notify_control(f"**{self.sub.name}** picked up treasure **{treasure}**!")
+        return treasure
+    
     async def crane_tick(self):
         if self.sub.power.get_power("crane") == 0:
             # Drop what's currently being held.
@@ -74,19 +90,13 @@ class Inventory():
                 return f"Dropped {treasure} because the crane was unpowered..."
             return ""
         if self.schedule_crane and not self.crane_down:
-            # The crane goes down!
-            self.crane_down = True
-            self.schedule_crane = False
-            # Attempt to pick up the item.
-            self.crane_holds = pick_up_treasure(self.sub.movement.get_position())
-            return f"Crane went down and found a treasure chest! Coming up next turn!"
+            self.send_crane_down()
+            if self.sub.power.get_power("crane") == 1:
+                return f"Crane went down and found a treasure chest! Coming up next turn!"
+            treasure = await self.send_crane_up()
+            return f"Crane went down and up again, finding {treasure}!"
         elif self.crane_down:
-            # The crane comes back up! Oh no
-            self.crane_down = False
-            treasure = self.crane_holds
-            self.add(treasure)
-            self.crane_holds = None
-            await notify_control(f"**{self.sub.name}** picked up treasure **{treasure}**!")
+            treasure = await self.send_crane_up()
             return f"Crane came back up with {treasure}!"
         return ""
 

@@ -68,4 +68,4 @@ Fixes:
 - [x] Tell _everyone_ when it's activated/deactivated.
 - [x] !zoom, which shouts about the attributes/treasure of a given square (CONTROL)
 - [ ] Standardise commands to _team_ _strings_ _coordinates_.
-- [ ] Crane with more power can go up/down faster.
+- [x] Crane with more power can go up/down faster.
