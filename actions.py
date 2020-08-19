@@ -4,7 +4,7 @@ The backend for all Discord actions, which allow players to control their sub.
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
 from state import get_teams, get_sub, add_team, remove_team
-from world import draw_map, bury_treasure_at, get_square
+from world import draw_map, bury_treasure_at, get_square, investigate_square
 from consts import direction_emoji
 
 # MOVEMENT
@@ -78,6 +78,9 @@ def print_map(team, options=["W", "D", "S"]):
     for o in options:
         formatted += f"{o}: {code_to_key[o]}\n"
     return Message(formatted[:-1])
+
+def zoom_in(x, y, loop):
+    return Message(investigate_square(x, y, loop))
 
 def get_status(team, loop):
     sub = get_sub(team)

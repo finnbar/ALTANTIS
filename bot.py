@@ -92,6 +92,14 @@ class Status(commands.Cog):
             await perform(print_map, ctx, None, True)
         else:
             await perform(print_map, ctx, None, list(opts))
+    
+    @commands.command(name="zoom")
+    @commands.has_role(CONTROL_ROLE)
+    async def zoom(self, ctx, x : int, y : int):
+        """
+        (CONTROL) Gives all details of a given square <x>, <y>.
+        """
+        await perform(zoom_in, ctx, x, y, main_loop)
 
     @commands.command(name="status")
     async def status(self, ctx):

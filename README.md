@@ -62,10 +62,10 @@ Fixes:
 - [ ] Trading should cease at movement rather than tick.
 - [x] Remove "focus sash" idea.
 - [x] Fix issues when bot is deleted (causes A Lot).
-- [ ] !mapall should also show treasure
+- [x] !mapall should also show treasure
 - [x] Sub "is online" should have tick emoji in !status
 - [x] Communicate power ERRORS better (e.g. "x has too much power")
 - [x] Tell _everyone_ when it's activated/deactivated.
-- [ ] !investigate_square, which shouts about the attributes/treasure of a given square (CONTROL)
+- [x] !zoom, which shouts about the attributes/treasure of a given square (CONTROL)
 - [ ] Standardise commands to _team_ _strings_ _coordinates_.
 - [ ] Crane with more power can go up/down faster.

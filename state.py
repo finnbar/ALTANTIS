@@ -12,6 +12,16 @@ def get_teams():
     """
     return list(state.keys())
 
+def filtered_teams(pred):
+    """
+    Gets all names of subs that satisfy some predicate.
+    """
+    subs = []
+    for sub in state:
+        if pred(state[sub]):
+            subs.append(sub)
+    return subs
+
 def get_sub(name):
     """
     Gets the Submarine object associated with `name`.

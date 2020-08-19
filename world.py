@@ -3,6 +3,7 @@ Deals with the world map, which submarines explore.
 """
 
 from utils import diagonal_distance, directions, reverse_dir, determine_direction, list_to_and_separated
+from state import filtered_teams, get_sub
 
 class Cell():
     def __init__(self):
@@ -12,6 +13,9 @@ class Cell():
         # throughout the class. A cell with no attributes acts like Empty from
         # the previous version - has no extra difficulty etc.
         self.attributes = {}
+    
+    def square_status(self):
+        return f"This square has treasure {self.treasure} and attributes {self.attributes}."
     
     def is_obstacle(self):
         # obstacle: this cell cannot be entered.
@@ -113,6 +117,17 @@ def pick_up_treasure(pos):
     if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
         return undersea_map[x][y].pick_up()
     return None
+
+def investigate_square(x, y, loop):
+    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+        report = f"Report for square **({x}, {y})**\n"
+        report += get_square(x, y).square_status() + "\n\n"
+        # See if any subs are here, and if so print their status.
+        subs_in_square = filtered_teams(lambda sub: sub.movement.x == x and sub.movement.y == y)
+        for subname in subs_in_square:
+            sub = get_sub(subname)
+            report += sub.status_message(loop) + "\n\n"
+        return report
 
 def explore_submap(pos, dist):
     """
