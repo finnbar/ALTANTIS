@@ -44,17 +44,20 @@ Important non-gameplay features:
 - [ ] Complete README.
 - [ ] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
 
-Nice features:
+New features:
 - [x] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
-- [ ] Turn tracker should always be visible even when deactivated. (Maybe add an extra message.)
+- [x] Turn tracker should always be visible even when deactivated. (Maybe add an extra message.)
 - [ ] !explode, which explodes (x,y) with a range and amount of damage.
 - [ ] Add !scan to recall previous scan command.
-- [ ] NPCs/Structures, which can take damage etc. Also trading predefined trades. See my notes for this in #bot-impl. Probably needs its own state dictionary, except a list will suffice. (It's fine if this is a little slow, as it's called every few minutes.)
+- [ ] NPCs/Structures in their own state dictionary (likely just a list - it's fine if this is a little slow, as it's called every few minutes). These NPCs have health, a treasure drop, and an optional `on_tick` ability which fires every turn.
 - [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
+- [ ] NPCs can trade.
+- [ ] !drop? Might need to have undroppable items. This relies on a minor overhaul of the items system (since they're currently just strings - maybe we can do something really sneaky here and make undroppable KEY ITEMS which are in all-caps).
+
+Quality of life things:
 - [ ] Control commands run in team channels default to affecting that team.
-- [ ] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions.
-- [ ] !drop? Might need to have undroppable items.
-- [ ] Emoji map
+- [ ] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
+- [ ] Emoji map.
 - [ ] !save (determine if this is a safe command to add)
 - [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
 
@@ -67,5 +70,5 @@ Fixes:
 - [x] Communicate power ERRORS better (e.g. "x has too much power")
 - [x] Tell _everyone_ when it's activated/deactivated.
 - [x] !zoom, which shouts about the attributes/treasure of a given square (CONTROL)
-- [ ] Standardise commands to _team_ _strings_ _coordinates_.
+- [x] Standardise commands to _team_ _strings_ _coordinates_.
 - [x] Crane with more power can go up/down faster.

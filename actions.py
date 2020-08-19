@@ -299,9 +299,9 @@ def add_attribute_to(x, y, attribute, value):
         return OKAY_REACT
     return FAIL_REACT
 
-def remove_attribute_from(x, y, attribute, value):
+def remove_attribute_from(x, y, attribute):
     square = get_square(x, y)
-    if square and square.remove_attribute(attribute, value):
+    if square and square.remove_attribute(attribute):
         return OKAY_REACT
     return FAIL_REACT
 

@@ -54,7 +54,7 @@ class Movement(commands.Cog):
         await perform(teleport, ctx, team, x, y)
 
     @commands.command(name="activate")
-    @commands.has_any_role(CAPTAIN)
+    @commands.has_role(CAPTAIN)
     async def on(self, ctx):
         """
         Activates your submarine, allowing it to move and do actions in real-time.
@@ -118,6 +118,7 @@ class PowerManagement(commands.Cog):
         """
         Gives one power to all of <systems> (any number of systems, can repeat).
         Fails if this would overload the power.
+        NOTE: This is cumulative - it acts based on all previous calls to this (before the game tick).
         """
         await perform(power_systems, ctx, get_team(ctx.author), list(systems))
 
@@ -134,7 +135,8 @@ class PowerManagement(commands.Cog):
     async def unpower(self, ctx, *systems):
         """
         Removes one power from all of <systems> (any number of systems, can repeat).
-        Fails if this would reduce a system's power below zero.
+        Fails if a system would have less than zero power.
+        NOTE: This is cumulative - it acts based on all previous calls to this (before the game tick).
         """
         await perform(unpower_systems, ctx, get_team(ctx.author), list(systems))
 
@@ -223,12 +225,12 @@ class Inventory(commands.Cog):
     """
     @commands.command(name="trade")
     @commands.has_role(CAPTAIN)
-    async def trade(self, ctx, subname, *args):
+    async def trade(self, ctx, team, *args):
         """
-        Begins a trade with <subname>, where you offer item1 quantity1 item2 quantity2 and so on.
+        Begins a trade with <team>, where you offer item1 quantity1 item2 quantity2 and so on.
         For example: !trade team_name Fish 10 "Gold coin" 3
         """
-        await perform_async(arrange_trade, ctx, get_team(ctx.author), subname, list(args))
+        await perform_async(arrange_trade, ctx, get_team(ctx.author), team, list(args))
 
     @commands.command(name="offer")
     @commands.has_role(CAPTAIN)
@@ -337,7 +339,7 @@ class DangerZone(commands.Cog):
     @commands.has_role(CAPTAIN)
     async def death(self, ctx, subname):
         """
-        Must be called with your submarine's full name. Kills your submarine. This isn't a joke.
+        Kills your submarine. This isn't a joke. Must be called with your submarine's full name.
         """
         await perform_async(kill_sub, ctx, get_team(ctx.author), subname)
 
@@ -346,6 +348,7 @@ class DangerZone(commands.Cog):
     async def kill_team(self, ctx, team):
         """
         (CONTROL) Kills the team <team>, removing any trace of their existence bar their channels.
+        This deletes their Submarine object, so all game progress is erased.
         Do NOT use this unless you are absolutely sure.
         """
         await perform(delete_team, ctx, team)
@@ -358,7 +361,7 @@ class GameManagement(commands.Cog):
     @commands.has_role(CONTROL_ROLE)
     async def load(self, ctx, arg):
         """
-        (CONTROL) Loads either the map, state or both from file.
+        (CONTROL) Loads either the map, state or both from file. You must specify "map", "state" or "both" as the single argument.
         """
         await perform(load_game, ctx, arg, bot)
 
@@ -367,7 +370,7 @@ class GameManagement(commands.Cog):
     async def register_team(self, ctx, x : int = 0, y : int = 0):
         """
         (CONTROL) Registers a new team (with sub at (x,y) defaulting to (0,0)) to the parent channel category.
-        Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer,  #captain and #scientist.
+        Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #captain and #scientist.
         """
         await perform_async(register, ctx, ctx.message.channel.category, x, y)
 
@@ -414,7 +417,7 @@ class MapModification(commands.Cog):
 
     @commands.command(name="add_attribute")
     @commands.has_role(CONTROL_ROLE)
-    async def add_attribute(self, ctx, x : int, y : int, attribute, value=""):
+    async def add_attribute(self, ctx, attribute, value, x : int, y : int):
         """
         (CONTROL) Add <attribute> to the square <x> <y> taking optional value <value>.
         """
@@ -422,11 +425,11 @@ class MapModification(commands.Cog):
 
     @commands.command(name="remove_attribute")
     @commands.has_role(CONTROL_ROLE)
-    async def remove_attribute(self, ctx, x : int, y : int, attribute, value=""):
+    async def remove_attribute(self, ctx, attribute, x : int, y : int):
         """
-        (CONTROL) Add <attribute> to the square <x> <y> taking optional value <value>.
+        (CONTROL) Remove <attribute> from the square <x> <y>.
         """
-        await perform(remove_attribute_from, ctx, x, y, attribute, value)
+        await perform(remove_attribute_from, ctx, x, y, attribute)
 
 class Weaponry(commands.Cog):
     """
