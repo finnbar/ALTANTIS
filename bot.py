@@ -42,7 +42,7 @@ class Movement(commands.Cog):
         """
         (CONTROL) Forces <team>'s submarine to a given direction. Does not inform them.
         """
-        await perform(move, ctx, direction, team)
+        await perform_unsafe(move, ctx, direction, team)
 
     @commands.command(name="teleport")
     @commands.has_role(CONTROL_ROLE)
@@ -51,7 +51,7 @@ class Movement(commands.Cog):
         (CONTROL) Teleports <teams>'s submarine to a given (<x>, <y>). Does not inform them.
         Also does _not_ check if the position is blocked, but does check if it's a valid point in the world.
         """
-        await perform(teleport, ctx, team, x, y)
+        await perform_unsafe(teleport, ctx, team, x, y)
 
     @commands.command(name="activate")
     @commands.has_role(CAPTAIN)
@@ -89,9 +89,9 @@ class Status(commands.Cog):
         (CONTROL) Shows a map of the world, including all submarines.
         """
         if opts == ():
-            await perform(print_map, ctx, None, True)
+            await perform_unsafe(print_map, ctx, None, True)
         else:
-            await perform(print_map, ctx, None, list(opts))
+            await perform_unsafe(print_map, ctx, None, list(opts))
     
     @commands.command(name="zoom")
     @commands.has_role(CONTROL_ROLE)
@@ -99,7 +99,7 @@ class Status(commands.Cog):
         """
         (CONTROL) Gives all details of a given square <x>, <y>.
         """
-        await perform(zoom_in, ctx, x, y, main_loop)
+        await perform_unsafe(zoom_in, ctx, x, y, main_loop)
 
     @commands.command(name="status")
     async def status(self, ctx):
@@ -128,7 +128,7 @@ class PowerManagement(commands.Cog):
         """
         (CONTROL) Forces <team> to give one power to all of <systems>.
         """
-        await perform(power_systems, ctx, team, list(systems))
+        await perform_unsafe(power_systems, ctx, team, list(systems))
 
     @commands.command(name="unpower")
     @commands.has_role(ENGINEER)
@@ -146,7 +146,7 @@ class PowerManagement(commands.Cog):
         """
         (CONTROL) Forces <team> to remove one power from all of <systems>.
         """
-        await perform(unpower_systems, ctx, team, list(systems))
+        await perform_unsafe(unpower_systems, ctx, team, list(systems))
     
     @commands.command(name="damage")
     @commands.has_role(CONTROL_ROLE)
@@ -171,7 +171,7 @@ class PowerManagement(commands.Cog):
         (CONTROL) Upgrades <team>'s reactor by <amount>.
         You can specify a negative number, but this will not check that the resulting state makes sense (that is, the team is not using more power than they have) - in general you should use !damage instead.
         """
-        await perform_async(upgrade_sub, ctx, team, amount)
+        await perform_async_unsafe(upgrade_sub, ctx, team, amount)
 
     @commands.command(name="upgrade_system")
     @commands.has_role(CONTROL_ROLE)
@@ -180,7 +180,7 @@ class PowerManagement(commands.Cog):
         (CONTROL) Upgrades <team>'s system by <amount>.
         You can specify a negative number to downgrade, and it will check that this makes sense.
         """
-        await perform_async(upgrade_sub_system, ctx, team, system, amount)
+        await perform_async_unsafe(upgrade_sub_system, ctx, team, system, amount)
 
     @commands.command(name="upgrade_innate")
     @commands.has_role(CONTROL_ROLE)
@@ -189,7 +189,7 @@ class PowerManagement(commands.Cog):
         (CONTROL) Upgrades <team>'s innate system by <amount>.
         You can specify a negative number to downgrade, and it will check that this makes sense.
         """
-        await perform_async(upgrade_sub_innate, ctx, team, system, amount)
+        await perform_async_unsafe(upgrade_sub_innate, ctx, team, system, amount)
 
     @commands.command(name="install_system")
     @commands.has_role(CONTROL_ROLE)
@@ -197,7 +197,7 @@ class PowerManagement(commands.Cog):
         """
         (CONTROL) Gives <team> access to new system <system>.
         """
-        await perform_async(add_system, ctx, team, system)
+        await perform_async_unsafe(add_system, ctx, team, system)
 
 class Comms(commands.Cog):
     """
@@ -217,7 +217,7 @@ class Comms(commands.Cog):
         """
         (CONTROL) Sends to <team> the message <message>, regardless of distance.
         """
-        await perform_async(shout_at_team, ctx, team, message)
+        await perform_async_unsafe(shout_at_team, ctx, team, message)
 
 class Inventory(commands.Cog):
     """
@@ -263,7 +263,7 @@ class Inventory(commands.Cog):
         """
         (CONTROL) Gives <team> an <item> with optional <quantity>.
         """
-        await perform_async(give_item_to_team, ctx, team, item, quantity)
+        await perform_async_unsafe(give_item_to_team, ctx, team, item, quantity)
 
     @commands.command(name="pay")
     @commands.has_role(CONTROL_ROLE)
@@ -271,7 +271,7 @@ class Inventory(commands.Cog):
         """
         (CONTROL) Pay a <team> <amount> money. Shorthand for !give with currency name.
         """
-        await perform_async(give_item_to_team, ctx, team, CURRENCY_NAME, amount)
+        await perform_async_unsafe(give_item_to_team, ctx, team, CURRENCY_NAME, amount)
 
     @commands.command(name="take")
     @commands.has_role(CONTROL_ROLE)
@@ -279,7 +279,7 @@ class Inventory(commands.Cog):
         """
         (CONTROL) Take <quantity> of <item> away from <team>. Do not use this during a trade.
         """
-        await perform_async(take_item_from_team, ctx, team, item, quantity)
+        await perform_async_unsafe(take_item_from_team, ctx, team, item, quantity)
 
     @commands.command(name="get_paid")
     @commands.has_role(CONTROL_ROLE)
@@ -287,7 +287,7 @@ class Inventory(commands.Cog):
         """
         (CONTROL) Get paid by <team> <amount> money. Shorthand for !take with currency name. Do not use this during a trade.
         """
-        await perform_async(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
+        await perform_async_unsafe(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
 
 class Engineering(commands.Cog):
     """
@@ -351,7 +351,7 @@ class DangerZone(commands.Cog):
         This deletes their Submarine object, so all game progress is erased.
         Do NOT use this unless you are absolutely sure.
         """
-        await perform(delete_team, ctx, team)
+        await perform_unsafe(delete_team, ctx, team)
 
 class GameManagement(commands.Cog):
     """
@@ -363,7 +363,7 @@ class GameManagement(commands.Cog):
         """
         (CONTROL) Loads either the map, state or both from file. You must specify "map", "state" or "both" as the single argument.
         """
-        await perform(load_game, ctx, arg, bot)
+        await perform_unsafe(load_game, ctx, arg, bot)
 
     @commands.command(name="register")
     @commands.has_role(CONTROL_ROLE)
@@ -372,7 +372,7 @@ class GameManagement(commands.Cog):
         (CONTROL) Registers a new team (with sub at (x,y) defaulting to (0,0)) to the parent channel category.
         Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #captain and #scientist.
         """
-        await perform_async(register, ctx, ctx.message.channel.category, x, y)
+        await perform_async_unsafe(register, ctx, ctx.message.channel.category, x, y)
 
     @commands.command(name="startloop")
     @commands.has_role(CONTROL_ROLE)
@@ -413,7 +413,7 @@ class MapModification(commands.Cog):
         """
         (CONTROL) Buries a treasure <treasure> at location (<x>, <y>).
         """
-        await perform(bury_treasure, ctx, treasure, x, y)
+        await perform_unsafe(bury_treasure, ctx, treasure, x, y)
 
     @commands.command(name="add_attribute")
     @commands.has_role(CONTROL_ROLE)
@@ -421,7 +421,7 @@ class MapModification(commands.Cog):
         """
         (CONTROL) Add <attribute> to the square <x> <y> taking optional value <value>.
         """
-        await perform(add_attribute_to, ctx, x, y, attribute, value)
+        await perform_unsafe(add_attribute_to, ctx, x, y, attribute, value)
 
     @commands.command(name="remove_attribute")
     @commands.has_role(CONTROL_ROLE)
@@ -429,7 +429,7 @@ class MapModification(commands.Cog):
         """
         (CONTROL) Remove <attribute> from the square <x> <y>.
         """
-        await perform(remove_attribute_from, ctx, x, y, attribute)
+        await perform_unsafe(remove_attribute_from, ctx, x, y, attribute)
 
 class Weaponry(commands.Cog):
     """
@@ -466,16 +466,38 @@ def get_team(author):
 
 async def perform(fn, ctx, *args):
     """
+    Checks if the main loop is running, and if so performs the function.
+    """
+    if main_loop.is_running():
+        await perform_unsafe(fn, ctx, *args)
+    else:
+        await FAIL_REACT.do_status(ctx)
+
+async def perform_unsafe(fn, ctx, *args):
+    """
     Performs an action fn with *args and then performs the Discord action
     returned by fn using the context ctx.
+    NOTE: This can run outside of the main loop, so should only be called
+    if you are certain this will not be an issue.
     """
     status = fn(*args)
     if status: await status.do_status(ctx)
 
 async def perform_async(fn, ctx, *args):
     """
+    Checks if the main loop is running, and if so performs the async function.
+    """
+    if main_loop.is_running():
+        await perform_async_unsafe(fn, ctx, *args)
+    else:
+        await FAIL_REACT.do_status(ctx)
+
+async def perform_async_unsafe(fn, ctx, *args):
+    """
     Performs an async fn with *args and then the Discord action returned
     by fn using the context ctx.
+    NOTE: This can run outside of the main loop, so should only be called
+    if you are certain this will not be an issue.
     """
     status = await fn(*args)
     if status: await status.do_status(ctx)
