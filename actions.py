@@ -89,6 +89,12 @@ def get_status(team, loop):
         return Message(status_message)
     return FAIL_REACT
 
+def get_scan(team):
+    sub = get_sub(team)
+    if sub:
+        return Message(sub.scan.previous_scan())
+    return FAIL_REACT
+
 # POWER
 
 def power_systems(team, systems):

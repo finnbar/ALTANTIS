@@ -11,6 +11,7 @@ from random import shuffle
 class ScanSystem():
     def __init__(self, sub):
         self.sub = sub
+        self.prev_scan = ""
 
     def outward_broadcast(self, strength):
         """
@@ -53,4 +54,16 @@ class ScanSystem():
             events.append(event)
         shuffle(events)
         return events
-
+    
+    def scan_string(self):
+        events = self.scan()
+        scan_message = ""
+        if len(events) > 0:
+            scan_message = "**Scanners found:**\n"
+            scan_message += "\n".join(events)
+            scan_message += "\n"
+        self.prev_scan = scan_message
+        return scan_message
+    
+    def previous_scan(self):
+        return self.prev_scan

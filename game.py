@@ -63,15 +63,10 @@ async def perform_timestep(counter):
             submessages[target]["captain"] += trade_messages[target] + "\n"
     
     # Scanning (as we enter a new square only)
-    # TODO: Only make scanner print when things change. This will require
-    # tracking past results and not shuffling them preemptively.
     for subname in subsubset:
         sub = get_sub(subname)
-        scan_result = sub.scan.scan()
-        if len(scan_result) > 0:
-            scan_message = "**Scanners found:**\n"
-            scan_message += "\n".join(scan_result)
-            scan_message += "\n"
+        scan_message = sub.scan.scan_string()
+        if scan_message != "":
             submessages[subname]["captain"] += scan_message
             submessages[subname]["scientist"] += scan_message
 

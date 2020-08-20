@@ -107,6 +107,13 @@ class Status(commands.Cog):
         Reports the status of the submarine, including power and direction.
         """
         await perform(get_status, ctx, get_team(ctx.author), main_loop)
+    
+    @commands.command(name="scan")
+    async def scan(self, ctx):
+        """
+        Repeats the scan message sent at the start of the current tick.
+        """
+        await perform(get_scan, ctx, get_team(ctx.author))
 
 class PowerManagement(commands.Cog):
     """
