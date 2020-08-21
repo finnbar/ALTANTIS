@@ -38,7 +38,7 @@ class Submarine():
 
     def status_message(self, loop):
         message = (
-            f"Status for **{self.name}**\n"
+            f"Status for **{self.name.title()}**\n"
             f"------------------------------------\n\n"
         )
         

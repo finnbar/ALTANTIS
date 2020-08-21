@@ -475,11 +475,18 @@ def get_team(author):
     """
     Gets the first role that has a submarine associated with it, or None.
     """
-    roles = list(map(lambda x: x.name, author.roles))
+    roles = list(map(lambda x: x.name.lower(), author.roles))
     for team in get_teams():
         if team in roles:
             return team
     return None
+
+def to_lowercase_list(args):
+    alist = list(args)
+    for i in range(len(alist)):
+        if type(alist[i]) == str:
+            alist[i] = alist[i].lower()
+    return alist
 
 async def perform(fn, ctx, *args):
     """
@@ -497,7 +504,8 @@ async def perform_unsafe(fn, ctx, *args):
     NOTE: This can run outside of the main loop, so should only be called
     if you are certain this will not be an issue.
     """
-    status = fn(*args)
+    lower_args = to_lowercase_list(args)
+    status = fn(*lower_args)
     if status: await status.do_status(ctx)
 
 async def perform_async(fn, ctx, *args):
@@ -516,7 +524,8 @@ async def perform_async_unsafe(fn, ctx, *args):
     NOTE: This can run outside of the main loop, so should only be called
     if you are certain this will not be an issue.
     """
-    status = await fn(*args)
+    lower_args = to_lowercase_list(args)
+    status = await fn(*lower_args)
     if status: await status.do_status(ctx)
 
 # ERROR HANDLING AND BOT STARTUP

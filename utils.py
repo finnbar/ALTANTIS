@@ -33,10 +33,10 @@ class Message(Status):
 
 # Direction utilities
 
-directions = {"N": (0, -1), "NE": (1, -1), "E": (1, 0), "SE": (1, 1),
-              "S": (0, 1), "SW": (-1, 1), "W": (-1, 0), "NW": (-1, -1)}
-reverse_dir = {"N": "S", "NE": "SW", "E": "W", "SE": "NW", "S": "N",
-               "SW": "NE", "W": "E", "NW": "SE"}
+directions = {"n": (0, -1), "ne": (1, -1), "e": (1, 0), "se": (1, 1),
+              "s": (0, 1), "sw": (-1, 1), "w": (-1, 0), "nw": (-1, -1)}
+reverse_dir = {"n": "s", "ne": "sw", "e": "w", "se": "nw", "s": "n",
+               "sw": "ne", "w": "e", "nw": "se"}
 
 import math
 
@@ -76,17 +76,17 @@ def determine_direction(pa, pb):
     y_val = ""
     # It's northern if the angle is between -7pi/8 and -pi/8.
     if -7*math.pi / 8 <= angle <= -math.pi / 8:
-        y_val = "N"
+        y_val = "n"
     # Southern case is similar: between pi/8 and 7pi/8.
     if 7*math.pi / 8 >= angle >= math.pi / 8:
-        y_val = "S"
+        y_val = "s"
     x_val = ""
     # Western if the absolute of the angle is larger than 5pi/8.
     if abs(angle) > 5*math.pi / 8:
-        x_val = "W"
+        x_val = "w"
     # Eastern if the absolute is less than 3pi/8.
     if abs(angle) < 3*math.pi / 8:
-        x_val = "E"
+        x_val = "e"
     return y_val + x_val
 
 # Textual utilities

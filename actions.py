@@ -40,23 +40,23 @@ async def set_activation(team, value):
     if sub:
         print("Setting power of", team, "to", value)
         if sub.power.activated() == value:
-            return Message(f"{team} activation unchanged.")
+            return Message(f"{team.title()} activation unchanged.")
         sub.power.activate(value)
         if sub.power.activated():
-            await sub.send_to_all(f"{team} is **ON** and running! Current direction: **{sub.movement.get_direction()}**.")
+            await sub.send_to_all(f"{team.title()} is **ON** and running! Current direction: **{sub.movement.get_direction().upper()}**.")
             return OKAY_REACT
-        await sub.send_to_all(f"{team} is **OFF** and halted!")
+        await sub.send_to_all(f"{team.title()} is **OFF** and halted!")
         return OKAY_REACT
     return FAIL_REACT
 
 # STATUS
 
-def print_map(team, options=["W", "D", "S"]):
+def print_map(team, options=["w", "d", "s"]):
     """
     Prints the map from the perspective of one submarine, or all if team is None.
     """
     subs = []
-    code_to_key = {"W": "Wall", "D": "Docking station", "S": "Storm", "T": "Treasure", "N": "NPC"}
+    code_to_key = {"w": "Wall", "d": "Docking station", "s": "Storm", "t": "Treasure", "n": "NPC"}
     if options is True:
         options = code_to_key.keys()
     options = list(filter(lambda v: v in code_to_key, options))
@@ -73,10 +73,10 @@ def print_map(team, options=["W", "D", "S"]):
     formatted += map_string + "\n```\n"
     subs_string = "**KEY**\n"
     for i in range(len(subs)):
-        subs_string += f"{i}: {subs[i].name}, "
+        subs_string += f"{i}: {subs[i].name.title()}, "
     formatted += subs_string[:-2] + "\n"
     for o in options:
-        formatted += f"{o}: {code_to_key[o]}\n"
+        formatted += f"{o.upper()}: {code_to_key[o]}\n"
     return Message(formatted[:-1])
 
 def zoom_in(x, y, loop):
@@ -137,7 +137,7 @@ async def upgrade_sub(team, amount):
     sub = get_sub(team)
     if sub:
         sub.power.modify_reactor(amount)
-        await sub.send_message(f"Submarine {team} was upgraded! Power cap increased by {amount}.", "engineer")
+        await sub.send_message(f"Submarine **{team.title()}** was upgraded! Power cap increased by {amount}.", "engineer")
         return OKAY_REACT
     return FAIL_REACT
 
@@ -145,7 +145,7 @@ async def upgrade_sub_system(team, system, amount):
     sub = get_sub(team)
     if sub:
         if sub.power.modify_system(system, amount):
-            await sub.send_message(f"Submarine {team} was upgraded! {system} max power increased by {amount}.", "engineer")
+            await sub.send_message(f"Submarine **{team.title()}** was upgraded! **{system.title()}** max power increased by {amount}.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
 
@@ -153,7 +153,7 @@ async def upgrade_sub_innate(team, system, amount):
     sub = get_sub(team)
     if sub:
         if sub.power.modify_innate(system, amount):
-            await sub.send_message(f"Submarine {team} was upgraded! {system} innate power increased by {amount}.", "engineer")
+            await sub.send_message(f"Submarine **{team.title()}** was upgraded! **{system.title()}** innate power increased by {amount}.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
 
@@ -161,7 +161,7 @@ async def add_system(team, system):
     sub = get_sub(team)
     if sub:
         if sub.power.add_system(system):
-            await sub.send_message(f"Submarine {team} was upgraded! New system {system} was installed.", "engineer")
+            await sub.send_message(f"Submarine **{team.title()}** was upgraded! New system **{system}** was installed.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
 
@@ -224,7 +224,7 @@ async def give_item_to_team(team, item, quantity):
     sub = get_sub(team)
     if sub:
         if sub.inventory.add(item, quantity):
-            await sub.send_message(f"Obtained {quantity}x {item}!", "captain")
+            await sub.send_message(f"Obtained {quantity}x {item.title()}!", "captain")
             return OKAY_REACT
     return FAIL_REACT
 
@@ -232,7 +232,7 @@ async def take_item_from_team(team, item, quantity):
     sub = get_sub(team)
     if sub:
         if sub.inventory.remove(item, quantity):
-            await sub.send_message(f"Lost {quantity}x {item}!", "captain")
+            await sub.send_message(f"Lost {quantity}x {item.title()}!", "captain")
             return OKAY_REACT
     return FAIL_REACT
 
@@ -290,11 +290,11 @@ async def register(category, x, y):
     Requires a category with the required subchannels.
     ONLY RUNNABLE BY CONTROL.
     """
-    print("Registering", category.name)
-    if add_team(category.name, category, x, y):
-        sub = get_sub(category.name)
+    print("Registering", category.name.lower())
+    if add_team(category.name.lower(), category, x, y):
+        sub = get_sub(category.name.lower())
         if sub:
-            await sub.send_to_all(f"Channel registered for sub **{category.name}**.")
+            await sub.send_to_all(f"Channel registered for sub **{category.name.title()}**.")
             return OKAY_REACT
     return FAIL_REACT
 

@@ -76,7 +76,7 @@ class EngineeringPuzzles():
             return False
         
         condition = self.puzzle_reason.capitalize()
-        if answer is not None and answer.lower() in self.current_puzzle[1]:
+        if answer is not None and answer in self.current_puzzle[1]:
             # Correct!
             if condition == "Repair":
                 await self.sub.send_to_all(self.sub.power.heal(1))

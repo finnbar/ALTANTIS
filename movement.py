@@ -10,7 +10,7 @@ import math, datetime
 class MovementControls():
     def __init__(self, sub, x, y):
         self.sub = sub
-        self.direction = "N"
+        self.direction = "n"
         self.x = x
         self.y = y
         # movement_progress is how much energy has been put towards a move.
@@ -28,8 +28,8 @@ class MovementControls():
             direction = self.direction # Direction can change as result of movement.
             message = self.move()
             move_status = (
-                f"Moved **{self.sub.name}** in direction **{direction}**!\n"
-                f"**{self.sub.name}** is now at position **{self.get_position()}**."
+                f"Moved **{self.sub.name.title()}** in direction **{direction.upper()}**!\n"
+                f"**{self.sub.name.title()}** is now at position **{self.get_position()}**."
             )
 
             # Do all the puzzles stuff.
@@ -83,7 +83,7 @@ class MovementControls():
             if time_until_next != math.inf:
                 message += f"Next game turn will occur in {int(time_until_next)}s.\n"
                 message += f"Next move estimated to occur in {int(time_until_move)}s ({turns_until_move} {turns_plural}).\n"
-            message += f"Currently moving **{self.direction}** ({direction_emoji[self.direction]}) and in position **({self.x}, {self.y})**.\n\n"
+            message += f"Currently moving **{self.direction.upper()}** ({direction_emoji[self.direction]}) and in position **({self.x}, {self.y})**.\n\n"
         else:
             message += f"Submarine is currently offline. {CROSS}\n\n"
         return message

@@ -22,7 +22,7 @@ class ScanSystem():
         Could add direction of motion, whether it's got cargo etc.
         """
         subname = ""
-        if strength > 0: subname = f" {self.sub.name}"
+        if strength > 0: subname = f" {self.sub.name.title()}"
         return f"Submarine{subname}"
 
     def scan(self):
@@ -50,7 +50,7 @@ class ScanSystem():
             if direction is None:
                 event = f"{event} in your current square!"
             else:
-                event = f"{event} in direction {direction}!"
+                event = f"{event} in direction {direction.upper()}!"
             events.append(event)
         shuffle(events)
         return events

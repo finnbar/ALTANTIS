@@ -56,7 +56,7 @@ New features:
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
-- [ ] Default to lowercase for all inputs.
+- [x] Default to lowercase for all inputs.
 - [ ] Control commands run in team channels default to affecting that team.
 - [ ] Emoji map.
 - [ ] !save (determine if this is a safe command to add)

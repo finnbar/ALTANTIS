@@ -42,10 +42,10 @@ class Weaponry():
                 hits = self.damaging(x, y)
             else:
                 hits = self.nondamaging(x, y)
-            direct_hits = list_to_and_separated(list(map(lambda sub: sub.name, hits["direct"])))
+            direct_hits = list_to_and_separated(list(map(lambda sub: sub.name.title(), hits["direct"])))
             if direct_hits == "":
                 direct_hits = "nobody"
-            indirect_hits = list_to_and_separated(list(map(lambda sub: sub.name, hits["indirect"])))
+            indirect_hits = list_to_and_separated(list(map(lambda sub: sub.name.title(), hits["indirect"])))
             if indirect_hits == "":
                 indirect_hits = "nobody"
             damaging_str = "damaging" if damaging else "non-damaging"

@@ -15,7 +15,7 @@ class Cell():
         self.attributes = {}
     
     def square_status(self):
-        return f"This square has treasure {self.treasure} and attributes {self.attributes}."
+        return f"This square has treasure {self.treasure.title()} and attributes {self.attributes}."
     
     def is_obstacle(self):
         # obstacle: this cell cannot be entered.
@@ -41,11 +41,11 @@ class Cell():
             broadcast.append("storm brewing")
         if self.treasure is not None:
             if strength > 2:
-                broadcast.append(f"{self.treasure.lower()}")
+                broadcast.append(f"{self.treasure.title()}")
             else:
                 broadcast.append("a treasure chest")
         if "docking" in self.attributes:
-            broadcast.append(f"docking station \"{self.attributes['docking'].lower()}\"")
+            broadcast.append(f"docking station \"{self.attributes['docking'].title()}\"")
         return list_to_and_separated(broadcast).capitalize()
     
     def on_entry(self, sub):
@@ -55,7 +55,7 @@ class Cell():
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
             sub.power.activate(False)
             (x, y) = sub.movement.get_position()
-            return f"Docked at **{self.attributes['docking']}** at position ({x}, {y})! The power has been stopped."
+            return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped."
         if "obstacle" in self.attributes:
             message = sub.power.damage(1)
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
@@ -63,13 +63,13 @@ class Cell():
         return ""
 
     def to_char(self, to_show):
-        if "T" in to_show and self.treasure is not None:
+        if "t" in to_show and self.treasure is not None:
             return "T"
-        if "W" in to_show and "obstacle" in self.attributes:
+        if "w" in to_show and "obstacle" in self.attributes:
             return "W"
-        if "D" in to_show and "docking" in self.attributes:
+        if "d" in to_show and "docking" in self.attributes:
             return "D"
-        if "S" in to_show and "storm" in self.attributes:
+        if "s" in to_show and "storm" in self.attributes:
             return "S"
         return "."
     
@@ -151,7 +151,7 @@ def explore_submap(pos, dist):
                 if direction is None:
                     event = f"{event} in your current square!"
                 else:
-                    event = f"{event} in direction {direction}!"
+                    event = f"{event} in direction {direction.upper()}!"
                 events.append(event)
     return events
 
@@ -162,7 +162,7 @@ def move_on_map(sub, direction, x, y):
     if not (0 <= new_x < X_LIMIT) or not (0 <= new_y < Y_LIMIT):
         # Crashed into the boundaries of the world, whoops.
         sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
-        return x, y, f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{sub.movement.direction}**) and did not move this turn!"
+        return x, y, f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{sub.movement.direction.upper()}**) and did not move this turn!"
     message = undersea_map[new_x][new_y].on_entry(sub)
     if undersea_map[new_x][new_y].is_obstacle():
         return x, y, message

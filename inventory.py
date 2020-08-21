@@ -65,8 +65,8 @@ class Inventory():
             return f"Cannot drop undroppable item (item with * at the end of its name)."
         if bury_treasure_at(item, self.sub.movement.get_position()):
             self.remove(item)
-            return f"1x {item} dropped!"
-        return f"Could not drop {item} here."
+            return f"1x {item.title()} dropped!"
+        return f"Could not drop {item.title()} here."
     
     def drop_crane(self):
         if self.sub.power.get_power("crane") == 0:
@@ -89,7 +89,7 @@ class Inventory():
         treasure = self.crane_holds
         self.add(treasure)
         self.crane_holds = None
-        await notify_control(f"**{self.sub.name}** picked up treasure **{treasure}**!")
+        await notify_control(f"**{self.sub.name.title()}** picked up treasure **{treasure}**!")
         return treasure
     
     async def crane_tick(self):
@@ -99,17 +99,17 @@ class Inventory():
                 treasure = self.crane_holds
                 bury_treasure_at(treasure, self.sub.movement.get_position())
                 self.crane_holds = None
-                return f"Dropped {treasure} because the crane was unpowered..."
+                return f"Dropped {treasure.title()} because the crane was unpowered..."
             return ""
         if self.schedule_crane and not self.crane_down:
             self.send_crane_down()
             if self.sub.power.get_power("crane") == 1:
                 return f"Crane went down and found a treasure chest! Coming up next turn!"
             treasure = await self.send_crane_up()
-            return f"Crane went down and up again, finding {treasure}!"
+            return f"Crane went down and up again, finding {treasure.title()}!"
         elif self.crane_down:
             treasure = await self.send_crane_up()
-            return f"Crane came back up with {treasure}!"
+            return f"Crane came back up with {treasure.title()}!"
         return ""
 
     def valid_offer(self, items):
@@ -137,7 +137,7 @@ class Inventory():
             return "nothing"
         offer_list = []
         for item in offer:
-            offer_list.append(f"{offer[item]}x {item}")
+            offer_list.append(f"{offer[item]}x {item.title()}")
         return list_to_and_separated(offer_list)
     
     async def begin_trade(self, partner, items):
@@ -167,13 +167,13 @@ class Inventory():
         self.my_turn = False
         offer_text = self.offer_as_text(offer)
         await partner.inventory.received_trade(self.sub, offer_text)
-        return f"You have offered **{offer_text}** to {partner.name}. Wait for them to respond to the trade, and then you may give a counteroffer with `!offer`, `!accept_trade` if you agree with what they've said, or `!reject_trade` if you don't want to trade anymore. You have until either sub next moves to complete the trade."
+        return f"You have offered **{offer_text}** to {partner.name.title()}. Wait for them to respond to the trade, and then you may give a counteroffer with `!offer`, `!accept_trade` if you agree with what they've said, or `!reject_trade` if you don't want to trade anymore. You have until either sub next moves to complete the trade."
 
     async def received_trade(self, sub, offer_text):
         self.accepting = False
         self.trading_partner = sub
         self.my_turn = True
-        await self.sub.send_message(f"**{sub.name}** asked for trade! They are offering **{offer_text}**. Respond with `!offer` to present your side of the trade, `!accept_trade` if you want to offer nothing in exchange, or `!reject_trade` if you don't want to trade. You have until either sub next moves to complete the trade.", "captain")
+        await self.sub.send_message(f"**{sub.name.title()}** asked for trade! They are offering **{offer_text}**. Respond with `!offer` to present your side of the trade, `!accept_trade` if you want to offer nothing in exchange, or `!reject_trade` if you don't want to trade. You have until either sub next moves to complete the trade.", "captain")
     
     async def reject_trade(self):
         """
@@ -185,8 +185,8 @@ class Inventory():
         partner_name = self.trading_partner.name
         self.trading_partner.inventory.reset_trade_state()
         self.reset_trade_state()
-        await self.trading_partner.send_message(f"Trade with **{self.sub.name}** cancelled due to rejection.", "captain")
-        return f"Trade with **{partner_name}** cancelled due to rejection."
+        await self.trading_partner.send_message(f"Trade with **{self.sub.name.title()}** cancelled due to rejection.", "captain")
+        return f"Trade with **{partner_name.title()}** cancelled due to rejection."
     
     def reset_trade_state(self):
         self.offer = {}
@@ -203,8 +203,8 @@ class Inventory():
         partner = self.trading_partner
         self.reset_trade_state()
         partner.inventory.reset_trade_state()
-        return {self.sub.name: f"Trade with {partner.name} cancelled due to timeout.",
-                partner.name: f"Trade with {self.sub.name} cancelled due to timeout."}
+        return {self.sub.name: f"Trade with {partner.name.title()} cancelled due to timeout.",
+                partner.name: f"Trade with {self.sub.name.title()} cancelled due to timeout."}
     
     async def make_offer(self, items):
         """
@@ -257,7 +257,7 @@ class Inventory():
 
         for item in self.inventory:
             if self.inventory[item] > 0:
-                message += f"{self.inventory[item]}x {item}\n"
+                message += f"{self.inventory[item]}x {item.title()}\n"
         
         if message == "":
             return ""
