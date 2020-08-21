@@ -47,15 +47,16 @@ Important non-gameplay features:
 New features:
 - [x] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
 - [x] Turn tracker should always be visible even when deactivated. (Maybe add an extra message.)
-- [ ] Add !scan to recall previous scan command.
-- [ ] !explode, which explodes (x,y) with a range and amount of damage.
+- [x] Add !scan to recall previous scan command.
+- [x] !drop item. Cannot drop Key Items (ending in *), which is a check that needs to be included.
 - [ ] NPCs/Structures in their own state dictionary (likely just a list - it's fine if this is a little slow, as it's called every few minutes). These NPCs have health, a treasure drop, and an optional `on_tick` ability which fires every turn.
+- [ ] !explode, which explodes (x,y) with a range and amount of damage.
 - [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
 - [ ] NPCs can trade.
-- [ ] !drop? Might need to have undroppable items. This relies on a minor overhaul of the items system (since they're currently just strings - maybe we can do something really sneaky here and make undroppable KEY ITEMS which are in all-caps).
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
+- [ ] Default to lowercase for all inputs.
 - [ ] Control commands run in team channels default to affecting that team.
 - [ ] Emoji map.
 - [ ] !save (determine if this is a safe command to add)

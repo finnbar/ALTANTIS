@@ -58,7 +58,19 @@ class Inventory():
                 return False
         return True
     
+    def drop(self, item):
+        if item not in self.inventory or self.inventory[item] <= 0:
+            return f"Cannot drop an item that you don't own."
+        if item[-1] == '*':
+            return f"Cannot drop undroppable item (item with * at the end of its name)."
+        if bury_treasure_at(item, self.sub.movement.get_position()):
+            self.remove(item)
+            return f"1x {item} dropped!"
+        return f"Could not drop {item} here."
+    
     def drop_crane(self):
+        if self.sub.power.get_power("crane") == 0:
+            return False
         if not self.schedule_crane and not self.crane_down:
             self.schedule_crane = True
             return True

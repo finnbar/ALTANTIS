@@ -228,8 +228,18 @@ class Comms(commands.Cog):
 
 class Inventory(commands.Cog):
     """
-    Commands for trading with subs on the same space as you.
+    Commands for trading with subs on the same space as you, and generally interacting with inventories.
     """
+    @commands.command(name="drop")
+    @commands.has_role(CAPTAIN)
+    async def drop(self, ctx, item):
+        """
+        Drops the item specified by <item> and optional quantity <quantity>.
+        You cannot drop items in ALL CAPS. (These are undroppable due to being
+        important or dangerous.)
+        """
+        await perform(drop_item, ctx, get_team(ctx.author), item)
+
     @commands.command(name="trade")
     @commands.has_role(CAPTAIN)
     async def trade(self, ctx, team, *args):

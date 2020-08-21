@@ -236,6 +236,12 @@ async def take_item_from_team(team, item, quantity):
             return OKAY_REACT
     return FAIL_REACT
 
+def drop_item(team, item):
+    sub = get_sub(team)
+    if sub:
+        return Message(sub.inventory.drop(item))
+    return FAIL_REACT
+
 # ENGINEERING
 
 async def give_team_puzzle(team, reason):
