@@ -3,31 +3,32 @@ The backend for all Discord actions, which allow players to control their sub.
 """
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
-from state import get_teams, get_sub, add_team, remove_team
+from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square
 from consts import direction_emoji
+from npc import add_npc
 
 # MOVEMENT
 
-def move(direction, team):
+def move(direction, subname):
     """
     Records the team's direction.
     We then react to the message accordingly.
     """
-    print("Setting direction of", team, "to", direction)
-    if team in get_teams():
+    print("Setting direction of", subname, "to", direction)
+    if subname in get_subs():
         # Store the move and return the correct emoji.
-        if get_sub(team).movement.set_direction(direction):
+        if get_sub(subname).movement.set_direction(direction):
             return React(direction_emoji[direction])
     return FAIL_REACT
 
-def teleport(team, x, y):
+def teleport(subname, x, y):
     """
     Teleports team to (x,y), checking if the space is in the world.
     """
-    print("Teleporting", team, "to", (x,y))
-    if team in get_teams():
-        sub = get_sub(team)
+    print("Teleporting", subname, "to", (x,y))
+    if subname in get_subs():
+        sub = get_sub(subname)
         if sub.movement.set_position(x, y):
             return OKAY_REACT
     return FAIL_REACT
@@ -61,7 +62,7 @@ def print_map(team, options=["w", "d", "s"]):
         options = code_to_key.keys()
     options = list(filter(lambda v: v in code_to_key, options))
     if team is None:
-        subs = [get_sub(sub) for sub in get_teams()]
+        subs = [get_sub(sub) for sub in get_subs()]
     else:
         sub = get_sub(team)
         if sub is None:
@@ -120,7 +121,7 @@ def unpower_systems(team, systems):
 async def deal_damage(team, amount, reason):
     sub = get_sub(team)
     if sub:
-        sub.power.damage(amount)
+        sub.damage(amount)
         if reason: await sub.send_to_all(reason)
         return OKAY_REACT
     return FAIL_REACT
@@ -271,7 +272,7 @@ def drop_crane(team):
 async def kill_sub(team, verify):
     sub = get_sub(team)
     if sub and sub.name == verify:
-        sub.power.damage(sub.power.total_power)
+        sub.damage(sub.power.total_power)
         await sub.send_to_all("Submarine took catastrophic damage and will die on next game loop.")
         return OKAY_REACT
     return FAIL_REACT
@@ -316,6 +317,9 @@ def remove_attribute_from(x, y, attribute):
     if square and square.remove_attribute(attribute):
         return OKAY_REACT
     return FAIL_REACT
+
+def add_npc_to_map(name, ntype, x, y):
+    return Message(add_npc(name, ntype, x, y))
 
 # WEAPONRY
 

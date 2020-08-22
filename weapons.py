@@ -2,9 +2,10 @@
 Allows subs to charge and fire (stunning) weapons.
 """
 
-from state import get_teams, get_sub
+from state import get_subs, get_sub
+from npc import get_npcs, get_npc
 from utils import diagonal_distance, list_to_and_separated
-from world import X_LIMIT, Y_LIMIT
+from world import in_world
 
 import math
 from random import shuffle
@@ -18,7 +19,7 @@ class Weaponry():
         self.planned_shots = []
     
     def prepare_shot(self, damaging, x, y):
-        if not (0 <= x < X_LIMIT and 0 <= y < Y_LIMIT):
+        if not in_world(x, y):
             return "Coordinate outside of world."
         if diagonal_distance(self.sub.movement.get_position(), (x,y)) > self.range:
             return "Coordinate outside of range."
@@ -42,10 +43,10 @@ class Weaponry():
                 hits = self.damaging(x, y)
             else:
                 hits = self.nondamaging(x, y)
-            direct_hits = list_to_and_separated(list(map(lambda sub: sub.name.title(), hits["direct"])))
+            direct_hits = list_to_and_separated(list(map(lambda entity: entity.name.title(), hits["direct"])))
             if direct_hits == "":
                 direct_hits = "nobody"
-            indirect_hits = list_to_and_separated(list(map(lambda sub: sub.name.title(), hits["indirect"])))
+            indirect_hits = list_to_and_separated(list(map(lambda entity: entity.name.title(), hits["indirect"])))
             if indirect_hits == "":
                 indirect_hits = "nobody"
             damaging_str = "damaging" if damaging else "non-damaging"
@@ -65,7 +66,7 @@ class Weaponry():
         # Returns a list of indirect and direct hits.
         indirect = []
         direct = []
-        for subname in get_teams():
+        for subname in get_subs():
             if subname == self.sub.name:
                 continue
 
@@ -76,19 +77,36 @@ class Weaponry():
                 direct.append(sub)
             elif distance == 1:
                 indirect.append(sub)
+        
+        for npcname in get_npcs():
+            npc = get_npc(npcname)
+            pos = npc.get_position()
+            distance = diagonal_distance(pos, (x, y))
+            if distance == 0:
+                direct.append(npc)
+            elif distance == 1:
+                indirect.append(npc)
+
         shuffle(indirect)
         shuffle(direct)
         return {"indirect": indirect, "direct": direct}
     
     def nondamaging(self, x, y):
-        return self.hits(x, y)
+        results = self.hits(x, y)
+        for target in results["direct"]:
+            if target.is_weak():
+                target.damage(1)
+        for target in results["indirect"]:
+            if target.is_weak():
+                target.damage(1)
+        return results
 
     def damaging(self, x, y):
         results = self.hits(x, y)
         for target in results["indirect"]:
-            target.power.damage(2)
+            target.damage(2)
         for target in results["direct"]:
-            target.power.damage(1)
+            target.damage(1)
         return results
     
     def status(self):

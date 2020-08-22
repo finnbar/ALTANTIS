@@ -2,9 +2,10 @@
 Runs the game, performing the right actions at fixed time intervals.
 """
 
-from state import get_teams, get_sub, state_to_dict, state_from_dict
+from state import get_subs, get_sub, state_to_dict, state_from_dict
 from world import map_to_dict, map_from_dict
 from utils import OKAY_REACT, FAIL_REACT
+from npc import npc_tick
 
 import json
 
@@ -23,8 +24,8 @@ async def perform_timestep(counter):
     # Get all active subs. (Can you tell I'm a functional programmer?)
     # Note: we still collect all messages for all subs, as there are some
     # messages that inactive subs should receive.
-    subsubset = list(filter(is_active_sub, get_teams()))
-    submessages = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_teams()}
+    subsubset = list(filter(is_active_sub, get_subs()))
+    submessages = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_subs()}
     message_opening = f"---------**TURN {counter}**----------\n"
 
     # Power management
@@ -43,6 +44,9 @@ async def perform_timestep(counter):
         if weapons_message:
             weapons_message = f"{weapons_message}\n"
             submessages[subname]["captain"] += weapons_message
+    
+    # NPCs
+    await npc_tick()
 
     # The crane
     for subname in subsubset:
@@ -80,7 +84,7 @@ async def perform_timestep(counter):
             submessages[subname]["engineer"] += damage_message
             submessages[subname]["scientist"] += damage_message
 
-    for subname in get_teams():
+    for subname in get_subs():
         messages = submessages[subname]
         sub = get_sub(subname)
         if messages["captain"] == "":

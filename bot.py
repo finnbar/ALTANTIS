@@ -447,6 +447,14 @@ class MapModification(commands.Cog):
         (CONTROL) Remove <attribute> from the square <x> <y>.
         """
         await perform_unsafe(remove_attribute_from, ctx, x, y, attribute)
+    
+    @commands.command(name="add_npc")
+    @commands.has_role(CONTROL_ROLE)
+    async def add_npc(self, ctx, npcname, npctype, x : int, y : int):
+        """
+        (CONTROL) Add an NPC <npcname> of <npctype> to the map at (<x>, <y>).
+        """
+        await perform_unsafe(add_npc_to_map, ctx, npcname, npctype, x, y)
 
 class Weaponry(commands.Cog):
     """
@@ -476,7 +484,7 @@ def get_team(author):
     Gets the first role that has a submarine associated with it, or None.
     """
     roles = list(map(lambda x: x.name.lower(), author.roles))
-    for team in get_teams():
+    for team in get_subs():
         if team in roles:
             return team
     return None

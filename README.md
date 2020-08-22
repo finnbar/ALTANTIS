@@ -1,6 +1,8 @@
 # ALTANTIS
 A possible bot for an upcoming Megagame run by Warwick Tabletop.
 
+**If you are planning to play in the Megagame, I recommend that you do not read the source code. Most spoilers aren't tracked by Git so won't appear here, but some parts of the code are inherently spoilery.**
+
 ## README
 You'll need to do a few things to run this bot. In no particular order:
 
@@ -49,7 +51,10 @@ New features:
 - [x] Turn tracker should always be visible even when deactivated. (Maybe add an extra message.)
 - [x] Add !scan to recall previous scan command.
 - [x] !drop item. Cannot drop Key Items (ending in *), which is a check that needs to be included.
-- [ ] NPCs/Structures in their own state dictionary (likely just a list - it's fine if this is a little slow, as it's called every few minutes). These NPCs have health, a treasure drop, and an optional `on_tick` ability which fires every turn.
+- [x] NPCs/Structures in their own state dictionary (likely just a list - it's fine if this is a little slow, as it's called every few minutes). These NPCs have health, a treasure drop, and an optional `on_tick` ability which fires every turn.
+- [ ] NPCs/Structures can receive messages. (Effectively bringing them to submarine power levels, but without `power`, `puzzles`, message sending, only limited movement, `weapons`, `inventory` or `scanning`.)
+- [ ] Weapons messages should tell you if you did a murder.
+- [ ] Squares should be able to hold multiple treasures, with cranes "lucky dipping" to pick n treasures (n power).
 - [ ] !explode, which explodes (x,y) with a range and amount of damage.
 - [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
 - [ ] NPCs can trade.

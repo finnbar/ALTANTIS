@@ -4,7 +4,7 @@ Allows the sub to scan and be scanned.
 
 from utils import diagonal_distance, determine_direction
 from world import explore_submap
-from state import get_sub, get_teams
+from state import get_sub, get_subs
 
 from random import shuffle
 
@@ -34,24 +34,7 @@ class ScanSystem():
         if scanners_range < 0:
             return []
         my_position = self.sub.movement.get_position()
-        events = explore_submap(my_position, scanners_range)
-        for subname in get_teams():
-            if subname == self.sub.name:
-                continue
-        
-            sub = get_sub(subname)
-            sub_position = sub.movement.get_position()
-            dist = diagonal_distance(my_position, sub_position)
-            if dist > scanners_range:
-                continue
-
-            event = sub.scan.outward_broadcast(scanners_range - dist)
-            direction = determine_direction(my_position, sub_position)
-            if direction is None:
-                event = f"{event} in your current square!"
-            else:
-                event = f"{event} in direction {direction.upper()}!"
-            events.append(event)
+        events = explore_submap(my_position, scanners_range, [self.sub.name])
         shuffle(events)
         return events
     

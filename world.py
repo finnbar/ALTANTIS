@@ -3,7 +3,7 @@ Deals with the world map, which submarines explore.
 """
 
 from utils import diagonal_distance, directions, reverse_dir, determine_direction, list_to_and_separated
-from state import filtered_teams, get_sub
+import state, npc
 
 class Cell():
     def __init__(self):
@@ -57,7 +57,7 @@ class Cell():
             (x, y) = sub.movement.get_position()
             return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped."
         if "obstacle" in self.attributes:
-            message = sub.power.damage(1)
+            message = sub.damage(1)
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
             return f"The submarine hit a wall and took one damage!\n{message}"
         return ""
@@ -98,44 +98,59 @@ Y_LIMIT = 40
 
 undersea_map = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
 
+def in_world(x, y):
+    return 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT
+
 def possible_directions():
     return directions.keys()
 
 def get_square(x, y):
-    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+    if in_world(x, y):
         return undersea_map[x][y]
     return None
 
 def bury_treasure_at(name, pos):
     (x, y) = pos
-    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+    if in_world(x, y):
         return undersea_map[x][y].bury_treasure(name)
     return False
 
 def pick_up_treasure(pos):
     (x, y) = pos
-    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+    if in_world(x, y):
         return undersea_map[x][y].pick_up()
     return None
 
 def investigate_square(x, y, loop):
-    if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+    if in_world(x, y):
         report = f"Report for square **({x}, {y})**\n"
         report += get_square(x, y).square_status() + "\n\n"
         # See if any subs are here, and if so print their status.
-        subs_in_square = filtered_teams(lambda sub: sub.movement.x == x and sub.movement.y == y)
+        subs_in_square = state.filtered_teams(lambda sub: sub.movement.x == x and sub.movement.y == y)
         for subname in subs_in_square:
-            sub = get_sub(subname)
+            sub = state.get_sub(subname)
             report += sub.status_message(loop) + "\n\n"
         return report
 
-def explore_submap(pos, dist):
+def all_in_square(x, y):
+    """
+    Gets all entities (subs and NPCs) in the chosen square.
+    """
+    subs_in_square = state.filtered_teams(lambda sub: sub.movement.x == x and sub.movement.y == y)
+    sub_objects = list(map(state.get_sub, subs_in_square))
+    npcs_in_square = npc.filtered_npcs(lambda npc: npc.x == x and npc.y == y)
+    npc_objects = list(map(npc.get_npc, npcs_in_square))
+    return sub_objects + npc_objects
+
+def explore_submap(pos, dist, exclusions=[]):
     """
     Explores the area centered around pos = (cx, cy) spanning distance dist.
     Returns all outward_broadcast events (as a list) formatted for output.
+    Ignores any NPCs or subs with a name included in exclusions.
     """
     events = []
     (cx, cy) = pos
+    # First, map squares.
     for i in range(-dist, dist+1):
         x = cx + i
         if x < 0 or x >= X_LIMIT:
@@ -153,13 +168,55 @@ def explore_submap(pos, dist):
                 else:
                     event = f"{event} in direction {direction.upper()}!"
                 events.append(event)
+
+    # Then, submarines.
+    for subname in state.get_subs():
+        if subname in exclusions:
+            continue
+
+        sub = state.get_sub(subname)
+        sub_pos = sub.movement.get_position()
+        sub_dist = diagonal_distance(pos, sub_pos)
+
+        # If out of range, drop it.
+        if sub_dist > dist:
+            continue
+        
+        event = sub.scan.outward_broadcast(dist - sub_dist)
+        direction = determine_direction(pos, sub_pos)
+        if direction is None:
+            event = f"{event} in your current square!"
+        else:
+            event = f"{event} in direction {direction.upper()}!"
+        events.append(event)
+    
+    # Finally, NPCs.
+    for npcname in npc.get_npcs():
+        if npcname in exclusions:
+            continue
+        
+        npc_obj = npc.get_npc(npcname)
+        npc_pos = npc_obj.get_position()
+        npc_dist = diagonal_distance(pos, npc_pos)
+
+        if npc_dist > dist:
+            continue
+
+        event = npc_obj.outward_broadcast(dist - npc_dist)
+        direction = determine_direction(pos, npc_pos)
+        if direction is None:
+            event = f"{event} in your current square!"
+        else:
+            event = f"{event} in direction {direction.upper()}!"
+        events.append(event)
+
     return events
 
 def move_on_map(sub, direction, x, y):
     motion = directions[direction]
     new_x = x + motion[0]
     new_y = y + motion[1]
-    if not (0 <= new_x < X_LIMIT) or not (0 <= new_y < Y_LIMIT):
+    if not in_world(new_x, new_y):
         # Crashed into the boundaries of the world, whoops.
         sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
         return x, y, f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{sub.movement.direction.upper()}**) and did not move this turn!"

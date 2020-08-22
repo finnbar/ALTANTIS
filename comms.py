@@ -3,7 +3,7 @@ Allows submarines to communicate with one another.
 """
 
 from utils import diagonal_distance
-from state import get_teams, get_sub
+from state import get_subs, get_sub
 
 from random import random
 from time import time as now
@@ -39,7 +39,7 @@ class CommsSystem():
     async def broadcast(self, content):
         if self.last_comms + COMMS_COOLDOWN > now():
             return False
-        for subname in get_teams():
+        for subname in get_subs():
             if subname == self.sub.name:
                 continue
 

@@ -2,18 +2,18 @@
 Manages individual submarines, including their subsystems.
 """
 
-from random import choice, random, shuffle
 from consts import GAME_SPEED
+from utils import Entity
 
 from discord import File as DFile
-
+from random import choice, random, shuffle
 import math, datetime
 
 MAX_SPEED = 4
 
 subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory", "weapons"]
 
-class Submarine():
+class Submarine(Entity):
     def __init__(self, name, channels, x, y):
         # To avoid circular dependencies.
         # The one dependency is that Scan and Comms need the list of available
@@ -62,6 +62,9 @@ class Submarine():
         for channel in self.channels:
             await self.channels[channel].send(content)
         return True
+    
+    def damage(self, amount):
+        self.power.damage(amount)
     
     def to_dict(self):
         """

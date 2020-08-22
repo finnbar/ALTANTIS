@@ -6,7 +6,7 @@ from sub import sub_from_dict, Submarine
 
 state = {}
 
-def get_teams():
+def get_subs():
     """
     Gets all possible teams.
     """
@@ -33,7 +33,7 @@ def add_team(name, category, x, y):
     """
     Adds a team with the name, if able.
     """
-    if name not in get_teams():
+    if name not in get_subs():
         child_channels = category.text_channels
         channel_dict = {}
         for channel in child_channels:
@@ -46,7 +46,7 @@ def remove_team(name):
     """
     Removes the team with that name, if able.
     """
-    if name in get_teams():
+    if name in get_subs():
         del state[name]
         return True
     return False

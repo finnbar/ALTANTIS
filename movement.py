@@ -2,7 +2,7 @@
 Allows the sub to move.
 """
 
-from world import move_on_map, possible_directions, get_square, X_LIMIT, Y_LIMIT, explore_submap
+from world import move_on_map, possible_directions, get_square, in_world
 from consts import GAME_SPEED, direction_emoji, TICK, CROSS
 
 import math, datetime
@@ -54,7 +54,7 @@ class MovementControls():
         return self.direction
 
     def set_position(self, x, y):
-        if 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT:
+        if in_world(x, y):
             self.x = x
             self.y = y
             return True

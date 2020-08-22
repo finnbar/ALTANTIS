@@ -113,3 +113,29 @@ def to_pair_list(items):
     for i in range(0, len(items), 2):
         pairs.append((items[i], int(items[i+1])))
     return pairs
+
+# Helper class for dealing with NPCs and Submarines together.
+
+class Entity():
+    def __init__(self, name, x, y):
+        self.name = name
+        self.x = x
+        self.y = y
+
+    def get_position(self):
+        return (self.x, self.y)
+
+    def damage(self, amount):
+        raise NotImplementedError
+
+    async def send_message(self, content, channel):
+        raise NotImplementedError
+
+    def outward_broadcast(self, strength):
+        return ""
+
+    def is_weak(self):
+        """
+        Whether the submarine is affected by stunning shots.
+        """
+        return False
