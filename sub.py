@@ -69,6 +69,18 @@ class Submarine(Entity):
     def damage(self, amount):
         self.power.damage(amount)
     
+    def add_keyword(self, keyword):
+        if keyword not in self.keywords:
+            self.keywords.append(keyword)
+            return True
+        return False
+
+    def remove_keyword(self, keyword):
+        if keyword in self.keywords:
+            self.keywords.remove(keyword)
+            return True
+        return False
+    
     def to_dict(self):
         """
         Converts this submarine instance to a serialisable dictionary.

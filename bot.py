@@ -117,7 +117,7 @@ class Status(commands.Cog):
 
 class PowerManagement(commands.Cog):
     """
-    Commands for powering, unpowering, upgrading, downgrading, healing and damaging subsystems.
+    Commands for powering, unpowering, healing and damaging subsystems.
     """
     @commands.command(name="power")
     @commands.has_role(ENGINEER)
@@ -171,6 +171,10 @@ class PowerManagement(commands.Cog):
         """
         await perform_async(heal_up, ctx, team, amount, reason)
 
+class UpgradeManagement(commands.Cog):
+    """
+    Commands for upgrading and downgrading submarines.
+    """
     @commands.command(name="upgrade")
     @commands.has_role(CONTROL_ROLE)
     async def upgrade(self, ctx, team, amount : int):
@@ -205,6 +209,22 @@ class PowerManagement(commands.Cog):
         (CONTROL) Gives <team> access to new system <system>.
         """
         await perform_async_unsafe(add_system, ctx, team, system)
+    
+    @commands.command(name="install_keyword")
+    @commands.has_role(CONTROL_ROLE)
+    async def install_keyword(self, ctx, team, keyword):
+        """
+        (CONTROL) Gives <team> a brand new <keyword>! (This is for upgrades outside of power.)
+        """
+        await perform_async_unsafe(add_keyword_to_sub, ctx, team, keyword)
+
+    @commands.command(name="uninstall_keyword")
+    @commands.has_role(CONTROL_ROLE)
+    async def uninstall_keyword(self, ctx, team, keyword):
+        """
+        (CONTROL) Removes <keyword> from <team>. (This is for upgrades outside of power.)
+        """
+        await perform_async_unsafe(remove_keyword_from_sub, ctx, team, keyword)
 
 class Comms(commands.Cog):
     """
@@ -575,6 +595,7 @@ bot.add_cog(MapModification())
 bot.add_cog(Movement())
 bot.add_cog(PowerManagement())
 bot.add_cog(Status())
+bot.add_cog(UpgradeManagement())
 bot.add_cog(Weaponry())
 
 print("ALTANTIS READY")

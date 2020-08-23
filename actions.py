@@ -134,6 +134,8 @@ async def heal_up(team, amount, reason):
         return OKAY_REACT
     return FAIL_REACT
 
+# UPGRADING
+
 async def upgrade_sub(team, amount):
     sub = get_sub(team)
     if sub:
@@ -163,6 +165,22 @@ async def add_system(team, system):
     if sub:
         if sub.power.add_system(system):
             await sub.send_message(f"Submarine **{team.title()}** was upgraded! New system **{system}** was installed.", "engineer")
+            return OKAY_REACT
+    return FAIL_REACT
+
+async def add_keyword_to_sub(team, keyword):
+    sub = get_sub(team)
+    if sub:
+        if sub.add_keyword(keyword):
+            await sub.send_message(f"Submarine **{team.title()}** was upgraded with the keyword **{keyword}**!", "engineer")
+            return OKAY_REACT
+    return FAIL_REACT
+
+async def remove_keyword_from_sub(team, keyword):
+    sub = get_sub(team)
+    if sub:
+        if sub.remove_keyword(keyword):
+            await sub.send_message(f"Submarine **{team.title()}** was downgraded, as keyword **{keyword}** was removed.", "engineer")
             return OKAY_REACT
     return FAIL_REACT
 
