@@ -2,7 +2,7 @@
 All possible NPC types.
 """
 
-import npc, world
+import npc, world, control
 
 class Squid(npc.NPC):
     def __init__(self, name, x, y):
@@ -12,7 +12,7 @@ class Squid(npc.NPC):
         self.treasure = "gold"
     
     async def on_tick(self):
-        await self.damage_tick()
+        await super().damage_tick()
         if self.tick_count >= 3:
             self.tick_count -= 3
             for entity in world.all_in_square(self.x, self.y):
@@ -21,3 +21,11 @@ class Squid(npc.NPC):
                     entity.damage(1)
         else:
             self.tick_count += 1
+
+class NewsBouy(npc.NPC):
+    def __init__(self, name, x, y):
+        super().__init__(name, x, y)
+        self.health = 5
+
+    async def send_message(self, content, _):
+        await control.notify_news(content)

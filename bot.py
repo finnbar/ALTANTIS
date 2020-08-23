@@ -12,7 +12,7 @@ from actions import *
 from game import perform_timestep, load_game
 from utils import OKAY_REACT
 from consts import *
-from control import init_control_notifs
+from control import init_control_notifs, init_news_notifs
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -418,6 +418,15 @@ class GameManagement(commands.Cog):
         (CONTROL) Sets up a channel for control alerts, which notify control directly of important occurrences.
         """
         init_control_notifs(ctx.channel)
+        await OKAY_REACT.do_status(ctx)
+
+    @commands.command(name="set_news_channel")
+    @commands.has_role(CONTROL_ROLE)
+    async def set_news_channel(self, ctx):
+        """
+        (CONTROL) Sets up a channel for news alerts, which allows the news to listen in via their bouys.
+        """
+        init_news_notifs(ctx.channel)
         await OKAY_REACT.do_status(ctx)
 
 class MapModification(commands.Cog):

@@ -18,21 +18,22 @@ class NPC(Entity):
         self.damage_to_apply = 0
     
     async def on_tick(self):
-        raise NotImplementedError
+        await self.damage_tick()
 
     async def send_message(self, content, _):
         await notify_control(f"Event from {self.name.title()}! {content}")
 
     async def damage_tick(self):
-        self.health -= self.damage_to_apply
-        if self.health <= 0:
-            if self.treasure:
-                world.bury_treasure_at(self.treasure, (self.x, self.y))
-            await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage and **died**!")
-            kill_npc(self.name)
-        else:
-            await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage!")
-        self.damage_to_apply = 0
+        if self.damage_to_apply > 0:
+            self.health -= self.damage_to_apply
+            if self.health <= 0:
+                if self.treasure:
+                    world.bury_treasure_at(self.treasure, (self.x, self.y))
+                await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage and **died**!")
+                kill_npc(self.name)
+            else:
+                await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage!")
+            self.damage_to_apply = 0
 
     def damage(self, amount):
         self.damage_to_apply += amount
@@ -56,7 +57,7 @@ import npc_templates as _npc
 
 # Available NPC types. Note that "NPC" is used liberally here - it can refer to
 # monsters, non-player characters, and structures such as mines.
-npc_types = {"squid": _npc.Squid}
+npc_types = {"squid": _npc.Squid, "bouy": _npc.NewsBouy}
 
 # All NPCs, listed by name.
 npcs = {}

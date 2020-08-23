@@ -4,6 +4,7 @@ Allows submarines to communicate with one another.
 
 from utils import diagonal_distance
 from state import get_subs, get_sub
+from npc import get_npcs, get_npc
 
 from random import random
 from time import time as now
@@ -39,16 +40,26 @@ class CommsSystem():
     async def broadcast(self, content):
         if self.last_comms + COMMS_COOLDOWN > now():
             return False
+        
+        my_pos = self.sub.movement.get_position()
         for subname in get_subs():
             if subname == self.sub.name:
                 continue
 
             sub = get_sub(subname)
 
-            dist = diagonal_distance(self.sub.movement.get_position(), sub.movement.get_position())
+            dist = diagonal_distance(my_pos, sub.movement.get_position())
             garbled = self.garble(content, dist)
             if garbled is not None:
-                await sub.send_message(f"**Message received from {self.sub.name}**:\n`{garbled}`\n**END MESSAGE**", "captain")
+                await sub.send_message(f"**Message received from {self.sub.name.title()}**:\n`{garbled}`\n**END MESSAGE**", "captain")
+
+        for npcname in get_npcs():
+            npc = get_npc(npcname)
+
+            dist = diagonal_distance(my_pos, npc.get_position())
+            garbled = self.garble(content, dist)
+            if garbled is not None:
+                await npc.send_message(f"**Message received from {self.sub.name.title()}**:\n`{garbled}`\n**END MESSAGE**", "")
         self.last_comms = now()
         return True
     
