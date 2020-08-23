@@ -40,7 +40,8 @@ class ScanSystem():
         if scanners_range < 0:
             return []
         my_position = self.sub.movement.get_position()
-        events = explore_submap(my_position, scanners_range, [self.sub.name])
+        with_distance = "triangulation" in self.sub.upgrades.keywords
+        events = explore_submap(my_position, scanners_range, [self.sub.name], with_distance)
         shuffle(events)
         return events
     

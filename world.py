@@ -200,7 +200,7 @@ async def explode(pos, power, exclusions=[]):
             await npc_obj.send_message(f"Explosion in {pos}!", "captain")
             npc_obj.damage(damage)
 
-def explore_submap(pos, dist, exclusions=[]):
+def explore_submap(pos, dist, exclusions=[], with_distance=False):
     """
     Explores the area centered around pos = (cx, cy) spanning distance dist.
     Returns all outward_broadcast events (as a list) formatted for output.
@@ -224,7 +224,10 @@ def explore_submap(pos, dist, exclusions=[]):
                 if direction is None:
                     event = f"{event} in your current square!"
                 else:
-                    event = f"{event} in direction {direction.upper()}!"
+                    distance_measure = ""
+                    if with_distance:
+                        distance_measure = f" at a distance of {this_dist} away"
+                    event = f"{event} in direction {direction.upper()}{distance_measure}!"
                 events.append(event)
 
     # Then, submarines.
