@@ -23,6 +23,9 @@ class MovementControls():
         """
         self.movement_progress += self.sub.power.get_power("engines")
         threshold = get_square(self.x, self.y).difficulty()
+        if "blessing" in self.sub.keywords:
+            # Bound difficulty above by four (normal waters)
+            threshold = min(4, threshold)
         if self.movement_progress >= threshold:
             self.movement_progress -= threshold
             direction = self.direction # Direction can change as result of movement.
