@@ -31,7 +31,10 @@ class NPC(Entity):
             entity.damage(amount)
 
     def attackable(self, entity):
-        return not "camo" in entity.keywords
+        if type(entity) == NPC:
+            return not "camo" in entity.keywords
+        else:
+            return not "camo" in entity.upgrades.keywords
 
     async def send_message(self, content, _):
         await notify_control(f"Event from {self.name.title()}! {content}")

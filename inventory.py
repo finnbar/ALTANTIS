@@ -106,7 +106,7 @@ class Inventory():
             return ""
         if self.schedule_crane and not self.crane_down:
             self.send_crane_down()
-            if not "fastcrane" in self.sub.keywords:
+            if not "fastcrane" in self.sub.upgrades.keywords:
                 treasure_count = len(self.crane_holds)
                 plural = ""
                 if treasure_count > 1:

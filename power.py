@@ -35,17 +35,27 @@ class PowerManager():
 
     def activated(self):
         return self.active
+    
+    def get_innate_power(self, system):
+        """
+        Returns the innate power of a system.
+        """
+        power = 0
+        if system in self.innate_power:
+            power += self.innate_power[system]
+        if "overclocked" in self.sub.upgrades.keywords:
+            power += 1
+        return power
 
     def get_power(self, system):
         """
         Returns the power given to a system, both innately and otherwise.
         """
-        used = 0
+        power = 0
         if system in self.power:
-            used += self.power[system]
-        if system in self.innate_power:
-            used += self.innate_power[system]
-        return used
+            power += self.power[system]
+        power += self.get_innate_power(system)
+        return power
     
     def add_system(self, systemname):
         """
@@ -222,12 +232,9 @@ class PowerManager():
         for system in self.power:
             use = self.power[system]
             maxi = self.power_max[system]
-            innate = 0
+            innate = self.get_innate_power(system)
             scheduled = self.scheduled_power[system]
             difference = scheduled - use
-
-            if system in self.innate_power:
-                innate = self.innate_power[system]
 
             # Don't print out information on systems that cannot be powered.
             if maxi + innate <= 0:

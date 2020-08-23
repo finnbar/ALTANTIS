@@ -23,7 +23,7 @@ class ScanSystem():
         """
         subname = ""
         unused_power = self.sub.power.unused_power()
-        if "stealthy" in self.sub.keywords and strength < min(3, unused_power):
+        if "stealthy" in self.sub.upgrades.keywords and strength < min(3, unused_power):
             return ""
         if strength > 0:
             subname = f" {self.sub.name.title()}"

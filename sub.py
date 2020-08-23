@@ -3,7 +3,7 @@ Manages individual submarines, including their subsystems.
 """
 
 from consts import GAME_SPEED
-from utils import Entity, list_to_and_separated
+from utils import Entity, list_to_and_separated, to_titled_list
 
 from discord import File as DFile
 from random import choice, random, shuffle
@@ -11,7 +11,7 @@ import math, datetime
 
 MAX_SPEED = 4
 
-subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory", "weapons"]
+subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory", "weapons", "upgrades"]
 
 class Submarine(Entity):
     def __init__(self, name, channels, x, y):
@@ -25,6 +25,7 @@ class Submarine(Entity):
         from movement import MovementControls
         from inventory import Inventory
         from weapons import Weaponry
+        from upgrades import Upgrades
 
         self.name = name
         self.channels = channels
@@ -35,14 +36,7 @@ class Submarine(Entity):
         self.scan = ScanSystem(self)
         self.inventory = Inventory(self)
         self.weapons = Weaponry(self)
-
-        # Used for special abilities gifted by control.
-        self.keywords = []
-
-    def upgrades_status(self):
-        if len(self.keywords) > 0:
-            return f"You have active upgrades {list_to_and_separated(self.keywords)}.\n"
-        return ""
+        self.upgrades = Upgrades(self)
 
     def status_message(self, loop):
         message = (
@@ -54,7 +48,7 @@ class Submarine(Entity):
         message += self.power.status()
         message += self.inventory.status()
         message += self.weapons.status()
-        message += self.upgrades_status()
+        message += self.upgrades.upgrade_status()
 
         return message + "\nNo more to report."
     
@@ -74,18 +68,6 @@ class Submarine(Entity):
     
     def damage(self, amount):
         self.power.damage(amount)
-    
-    def add_keyword(self, keyword):
-        if keyword not in self.keywords:
-            self.keywords.append(keyword)
-            return True
-        return False
-
-    def remove_keyword(self, keyword):
-        if keyword in self.keywords:
-            self.keywords.remove(keyword)
-            return True
-        return False
     
     def to_dict(self):
         """

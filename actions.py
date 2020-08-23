@@ -168,10 +168,10 @@ async def add_system(team, system):
             return OKAY_REACT
     return FAIL_REACT
 
-async def add_keyword_to_sub(team, keyword):
+async def add_keyword_to_sub(team, keyword, turn_limit):
     sub = get_sub(team)
     if sub:
-        if sub.add_keyword(keyword):
+        if sub.upgrades.add_keyword(keyword, turn_limit):
             await sub.send_message(f"Submarine **{team.title()}** was upgraded with the keyword **{keyword}**!", "engineer")
             return OKAY_REACT
     return FAIL_REACT
@@ -179,7 +179,7 @@ async def add_keyword_to_sub(team, keyword):
 async def remove_keyword_from_sub(team, keyword):
     sub = get_sub(team)
     if sub:
-        if sub.remove_keyword(keyword):
+        if sub.upgrades.remove_keyword(keyword):
             await sub.send_message(f"Submarine **{team.title()}** was downgraded, as keyword **{keyword}** was removed.", "engineer")
             return OKAY_REACT
     return FAIL_REACT

@@ -7,6 +7,7 @@ import os
 
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
+from typing import Optional
 
 from actions import *
 from game import perform_timestep, load_game
@@ -212,11 +213,11 @@ class UpgradeManagement(commands.Cog):
     
     @commands.command(name="install_keyword")
     @commands.has_role(CONTROL_ROLE)
-    async def install_keyword(self, ctx, team, keyword):
+    async def install_keyword(self, ctx, team, keyword, turn_limit : Optional[int] = None):
         """
         (CONTROL) Gives <team> a brand new <keyword>! (This is for upgrades outside of power.)
         """
-        await perform_async_unsafe(add_keyword_to_sub, ctx, team, keyword)
+        await perform_async_unsafe(add_keyword_to_sub, ctx, team, keyword, turn_limit)
 
     @commands.command(name="uninstall_keyword")
     @commands.has_role(CONTROL_ROLE)

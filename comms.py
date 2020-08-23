@@ -29,7 +29,7 @@ class CommsSystem():
         comms_power = self.sub.power.get_power("comms")
         if comms_power == 0:
             return None
-        if "clarity" in self.sub.keywords:
+        if "clarity" in self.sub.upgrades.keywords:
             distance -= 2*comms_power
             distance = max(0, distance)
         message_error = min(distance * GARBLE / comms_power, 100)

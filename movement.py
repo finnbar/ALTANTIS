@@ -23,7 +23,7 @@ class MovementControls():
         """
         self.movement_progress += self.sub.power.get_power("engines")
         threshold = get_square(self.x, self.y).difficulty()
-        if "blessing" in self.sub.keywords:
+        if "blessing" in self.sub.upgrades.keywords:
             # Bound difficulty above by four (normal waters)
             threshold = min(4, threshold)
         if self.movement_progress >= threshold:

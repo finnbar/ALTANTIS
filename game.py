@@ -73,6 +73,11 @@ async def perform_timestep(counter):
         if scan_message != "":
             submessages[subname]["captain"] += scan_message
             submessages[subname]["scientist"] += scan_message
+    
+    # Postponed events
+    for subname in subsubset:
+        sub = get_sub(subname)
+        await sub.upgrades.postponed_tick()
 
     # Damage
     for subname in get_subs():
