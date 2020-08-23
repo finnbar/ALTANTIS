@@ -5,6 +5,7 @@ Allows submarines to manage their power usage.
 from random import choice
 from control import notify_control
 from consts import TICK, CROSS, PLUS
+from world import all_in_submap
 
 class PowerManager():
     def __init__(self, sub):
@@ -185,9 +186,16 @@ class PowerManager():
         damage_message = ""
         for hit in self.scheduled_damage:
             damage_message += self.run_damage(hit)
-            await notify_control(f"**{self.sub.name}** took **{hit} damage**!")
+            await notify_control(f"**{self.sub.name.title()}** took **{hit} damage**!")
         self.scheduled_damage = []
+        if self.total_power <= 0:
+            await self.deathrattle()
         return damage_message
+    
+    async def deathrattle(self):
+        hears_rattle = all_in_submap(self.sub.movement.get_position(), 5, [self.sub.name])
+        for entity in hears_rattle:
+            await entity.send_message(f"SUBMARINE **{self.sub.name.upper()}** ({self.sub.movement.x}, {self.sub.movement.y}) HAS DIED", "captain")
 
     def heal(self, amount):
         self.total_power = min(self.total_power + amount, self.total_power_max)
@@ -222,7 +230,7 @@ class PowerManager():
             if maxi + innate <= 0:
                 continue
         
-            system_name = system.capitalize() + (" " * (max_system_length - len(system)))
+            system_name = system.title() + (" " * (max_system_length - len(system)))
 
             current_power = ""
             if innate > 0:

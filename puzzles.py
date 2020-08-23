@@ -75,7 +75,7 @@ class EngineeringPuzzles():
         if self.current_puzzle is None:
             return False
         
-        condition = self.puzzle_reason.capitalize()
+        condition = self.puzzle_reason.title()
         if answer is not None and answer in self.current_puzzle[1]:
             # Correct!
             if condition == "Repair":

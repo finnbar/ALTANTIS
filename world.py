@@ -142,14 +142,30 @@ def investigate_square(x, y, loop):
             report += sub.status_message(loop) + "\n\n"
         return report
 
-def all_in_square(x, y):
+def all_in_square(pos):
     """
     Gets all entities (subs and NPCs) in the chosen square.
     """
+    (x, y) = pos
     subs_in_square = state.filtered_teams(lambda sub: sub.movement.x == x and sub.movement.y == y)
     sub_objects = list(map(state.get_sub, subs_in_square))
     npcs_in_square = npc.filtered_npcs(lambda npc: npc.x == x and npc.y == y)
     npc_objects = list(map(npc.get_npc, npcs_in_square))
+    return sub_objects + npc_objects
+
+def all_in_submap(pos, dist, exclusions=[]):
+    """
+    Gets all entities some distance from the chosen square.
+    Ignores any entities in exclusions.
+    """
+    subs_in_range = state.filtered_teams(
+        lambda sub: diagonal_distance(sub.movement.get_position(), pos) <= dist and sub.name not in exclusions
+    )
+    sub_objects = list(map(state.get_sub, subs_in_range))
+    npcs_in_range = npc.filtered_npcs(
+        lambda npc: diagonal_distance(npc.get_position(), pos) <= dist and npc.name not in exclusions
+    )
+    npc_objects = list(map(npc.get_npc, npcs_in_range))
     return sub_objects + npc_objects
 
 def explore_submap(pos, dist, exclusions=[]):

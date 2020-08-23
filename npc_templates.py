@@ -15,7 +15,7 @@ class Squid(npc.NPC):
         await super().damage_tick()
         if self.tick_count >= 3:
             self.tick_count -= 3
-            for entity in world.all_in_square(self.x, self.y):
+            for entity in world.all_in_square(self.get_position()):
                 if entity.name != self.name:
                     await entity.send_message(f"The squid {self.name.title()} blooped you for one damage!", "scientist")
                     entity.damage(1)

@@ -30,10 +30,16 @@ class NPC(Entity):
                 if self.treasure:
                     world.bury_treasure_at(self.treasure, (self.x, self.y))
                 await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage and **died**!")
+                await self.deathrattle()
                 kill_npc(self.name)
             else:
                 await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage!")
             self.damage_to_apply = 0
+
+    async def deathrattle(self):
+        hears_rattle = world.all_in_submap(self.get_position(), 5, [self.name])
+        for entity in hears_rattle:
+            await entity.send_message(f"ENTITY **{self.name.upper()}** ({self.x}, {self.y}) HAS DIED", "captain")
 
     def damage(self, amount):
         self.damage_to_apply += amount
