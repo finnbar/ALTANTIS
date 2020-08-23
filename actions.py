@@ -4,7 +4,7 @@ The backend for all Discord actions, which allow players to control their sub.
 
 from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
 from state import get_subs, get_sub, add_team, remove_team
-from world import draw_map, bury_treasure_at, get_square, investigate_square
+from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
 from consts import direction_emoji
 from npc import add_npc
 
@@ -282,6 +282,10 @@ def delete_team(team):
     if remove_team(team):
         return OKAY_REACT
     return FAIL_REACT
+
+async def explode_square(x, y, power):
+    await explode((x, y), power)
+    return OKAY_REACT
 
 # GAME MANAGEMENT
 

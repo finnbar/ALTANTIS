@@ -168,6 +168,38 @@ def all_in_submap(pos, dist, exclusions=[]):
     npc_objects = list(map(npc.get_npc, npcs_in_range))
     return sub_objects + npc_objects
 
+async def explode(pos, power, exclusions=[]):
+    """
+    Makes an explosion in pos, dealing power damage to the centre square,
+    power-1 to the surrounding ones, power-2 to those that surround and
+    so on.
+    """
+    for subname in state.get_subs():
+        if subname in exclusions:
+            continue
+
+        sub = state.get_sub(subname)
+        sub_pos = sub.movement.get_position()
+        sub_dist = diagonal_distance(pos, sub_pos)
+        damage = power - sub_dist
+
+        if damage > 0:
+            await sub.send_message(f"Explosion in {sub_pos}!", "captain")
+            sub.damage(damage)
+    
+    for npcname in npc.get_npcs():
+        if npcname in exclusions:
+            continue
+        
+        npc_obj = npc.get_npc(npcname)
+        npc_pos = npc_obj.get_position()
+        npc_dist = diagonal_distance(pos, npc_pos)
+        damage = power - npc_dist
+
+        if damage > 0:
+            await npc_obj.send_message(f"Explosion in {sub_pos}!", "captain")
+            npc_obj.damage(damage)
+
 def explore_submap(pos, dist, exclusions=[]):
     """
     Explores the area centered around pos = (cx, cy) spanning distance dist.

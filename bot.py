@@ -369,6 +369,16 @@ class DangerZone(commands.Cog):
         Do NOT use this unless you are absolutely sure.
         """
         await perform_unsafe(delete_team, ctx, team)
+    
+    @commands.command(name="explode")
+    @commands.has_role(CONTROL_ROLE)
+    async def explode(self, ctx, x : int, y : int, amount : int):
+        """
+        (CONTROL) Causes an explosion in (x, y), dealing amount damage to the central square.
+        It also deals amount-1 damage to the surrounding squares, amount-2 to those surrounding and so on.
+        DO NOT RUN !explode x y 40 OR ANY SIMILARLY LARGE AMOUNT OF DAMAGE AS THAT WILL KILL EVERYTHING.
+        """
+        await perform_async_unsafe(explode_square, ctx, x, y, amount)
 
 class GameManagement(commands.Cog):
     """

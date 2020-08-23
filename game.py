@@ -75,7 +75,7 @@ async def perform_timestep(counter):
             submessages[subname]["scientist"] += scan_message
 
     # Damage
-    for subname in subsubset:
+    for subname in get_subs():
         sub = get_sub(subname)
         damage_message = await sub.power.damage_tick()
         if damage_message:
