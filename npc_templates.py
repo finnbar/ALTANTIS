@@ -15,9 +15,8 @@ class Squid(npc.NPC):
         if self.tick_count >= 3:
             self.tick_count -= 3
             for entity in world.all_in_square(self.get_position()):
-                if entity.name != self.name and self.attackable(entity):
-                    await entity.send_message(f"The squid {self.name.title()} blooped you for one damage!", "scientist")
-                    entity.damage(1)
+                if entity.name != self.name:
+                    await self.do_attack(entity, 1, f"The squid {self.name.title()} blooped you for one damage!")
         else:
             self.tick_count += 1
 

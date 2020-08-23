@@ -3,7 +3,7 @@ Manages individual submarines, including their subsystems.
 """
 
 from consts import GAME_SPEED
-from utils import Entity
+from utils import Entity, list_to_and_separated
 
 from discord import File as DFile
 from random import choice, random, shuffle
@@ -39,6 +39,11 @@ class Submarine(Entity):
         # Used for special abilities gifted by control.
         self.keywords = []
 
+    def upgrades_status(self):
+        if len(self.keywords) > 0:
+            return f"You have active upgrades {list_to_and_separated(self.keywords)}.\n"
+        return ""
+
     def status_message(self, loop):
         message = (
             f"Status for **{self.name.title()}**\n"
@@ -49,6 +54,7 @@ class Submarine(Entity):
         message += self.power.status()
         message += self.inventory.status()
         message += self.weapons.status()
+        message += self.upgrades_status()
 
         return message + "\nNo more to report."
     

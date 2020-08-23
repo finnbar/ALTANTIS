@@ -25,6 +25,11 @@ class NPC(Entity):
     async def attack(self):
         pass
 
+    async def do_attack(self, entity, amount, message):
+        if self.attackable(entity):
+            await entity.send_message(message, "scientist")
+            entity.damage(amount)
+
     def attackable(self, entity):
         return not "camo" in entity.keywords
 
