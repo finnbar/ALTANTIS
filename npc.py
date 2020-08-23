@@ -16,9 +16,17 @@ class NPC(Entity):
         self.name = name
         self.stealth = 0
         self.damage_to_apply = 0
+        self.keywords = []
     
     async def on_tick(self):
         await self.damage_tick()
+        await self.attack()
+    
+    async def attack(self):
+        pass
+
+    def attackable(self, entity):
+        return not "camo" in entity.keywords
 
     async def send_message(self, content, _):
         await notify_control(f"Event from {self.name.title()}! {content}")
