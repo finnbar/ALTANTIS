@@ -184,7 +184,7 @@ async def explode(pos, power, exclusions=[]):
         damage = power - sub_dist
 
         if damage > 0:
-            await sub.send_message(f"Explosion in {sub_pos}!", "captain")
+            await sub.send_message(f"Explosion in {pos}!", "captain")
             sub.damage(damage)
     
     for npcname in npc.get_npcs():
@@ -197,7 +197,7 @@ async def explode(pos, power, exclusions=[]):
         damage = power - npc_dist
 
         if damage > 0:
-            await npc_obj.send_message(f"Explosion in {sub_pos}!", "captain")
+            await npc_obj.send_message(f"Explosion in {pos}!", "captain")
             npc_obj.damage(damage)
 
 def explore_submap(pos, dist, exclusions=[]):
