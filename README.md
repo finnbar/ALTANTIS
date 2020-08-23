@@ -57,12 +57,12 @@ New features:
 - [ ] Weapons messages should tell you if you did a murder.
 - [ ] !explode, which explodes (x,y) with a range and amount of damage.
 - [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
+- [ ] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
 - [ ] NPCs can trade.
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
 - [x] Default to lowercase for all inputs.
-- [ ] Control commands run in team channels default to affecting that team.
 - [ ] Emoji map.
 - [ ] !save (determine if this is a safe command to add)
 - [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).

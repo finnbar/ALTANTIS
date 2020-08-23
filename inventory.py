@@ -5,7 +5,7 @@ Also features The Crane.
 
 from consts import CURRENCY_NAME
 from world import pick_up_treasure, bury_treasure_at
-from utils import list_to_and_separated
+from utils import list_to_and_separated, to_titled_list
 from control import notify_control
 
 class Inventory():
@@ -19,7 +19,7 @@ class Inventory():
         # crane_down is the state of the crane.
         self.crane_down = False
         # crane_holds is what the crane contains.
-        self.crane_holds = None
+        self.crane_holds = []
         # schedule_crane is whether the crane command has been called.
         self.schedule_crane = False
 
@@ -81,15 +81,17 @@ class Inventory():
         self.crane_down = True
         self.schedule_crane = False
         # Attempt to pick up the item.
-        self.crane_holds = pick_up_treasure(self.sub.movement.get_position())
+        crane_power = self.sub.power.get_power("crane")
+        self.crane_holds = pick_up_treasure(self.sub.movement.get_position(), crane_power)
     
     async def send_crane_up(self):
         # The crane comes back up! Oh no
         self.crane_down = False
         treasure = self.crane_holds
-        self.add(treasure)
+        for treas in treasure:
+            self.add(treas)
         self.crane_holds = None
-        await notify_control(f"**{self.sub.name.title()}** picked up treasure **{treasure}**!")
+        await notify_control(f"**{self.sub.name.title()}** picked up treasure **{to_titled_list(treasure)}**!")
         return treasure
     
     async def crane_tick(self):
@@ -97,19 +99,24 @@ class Inventory():
             # Drop what's currently being held.
             if self.crane_holds:
                 treasure = self.crane_holds
-                bury_treasure_at(treasure, self.sub.movement.get_position())
-                self.crane_holds = None
-                return f"Dropped {treasure.title()} because the crane was unpowered..."
+                for treas in treasure:
+                    bury_treasure_at(treas, self.sub.movement.get_position())
+                self.crane_holds = []
+                return f"Dropped {to_titled_list(treasure)} because the crane was unpowered..."
             return ""
         if self.schedule_crane and not self.crane_down:
             self.send_crane_down()
-            if self.sub.power.get_power("crane") == 1:
-                return f"Crane went down and found a treasure chest! Coming up next turn!"
+            if not "fastcrane" in self.sub.keywords:
+                treasure_count = len(self.crane_holds)
+                plural = ""
+                if treasure_count > 1:
+                    plural = "s"
+                return f"Crane went down and found {treasure_count} treasure chest{plural}! Coming up next turn!"
             treasure = await self.send_crane_up()
-            return f"Crane went down and up again, finding {treasure.title()}!"
+            return f"Crane went down and up again, finding {to_titled_list(treasure)}!"
         elif self.crane_down:
             treasure = await self.send_crane_up()
-            return f"Crane came back up with {treasure.title()}!"
+            return f"Crane came back up with {to_titled_list(treasure)}!"
         return ""
 
     def valid_offer(self, items):

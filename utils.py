@@ -106,6 +106,9 @@ def list_to_and_separated(items):
     result[-2] = " and "
     return "".join(result)
 
+def to_titled_list(items):
+    return list_to_and_separated(list(map(lambda x: x.title(), items)))
+
 def to_pair_list(items):
     pairs = []
     if len(items) % 2 == 1:

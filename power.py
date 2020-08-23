@@ -108,8 +108,9 @@ class PowerManager():
         """
         Upgrades or downgrades reactor by amount.
         """
-        if self.power_max - amount < 0:
+        if self.total_power_max + amount < 0:
             return False
+        self.total_power_max += amount
         if amount > 0:
             self.heal(amount)
         else:

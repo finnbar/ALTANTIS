@@ -5,32 +5,39 @@ Deals with the world map, which submarines explore.
 from utils import diagonal_distance, directions, reverse_dir, determine_direction, list_to_and_separated
 import state, npc
 
+from random import choice
+
 class Cell():
     def __init__(self):
-        # The item this square contains.
-        self.treasure = None
+        # The items this square contains.
+        self.treasure = []
         # Fundamentally describes how the square acts. These are described
         # throughout the class. A cell with no attributes acts like Empty from
         # the previous version - has no extra difficulty etc.
         self.attributes = {}
     
+    def treasure_string(self):
+        return list_to_and_separated(list(map(lambda t: t.title(), self.treasure)))
+    
     def square_status(self):
-        return f"This square has treasure {self.treasure.title()} and attributes {self.attributes}."
+        return f"This square has treasures {self.treasure_string()} and attributes {self.attributes}."
     
     def is_obstacle(self):
         # obstacle: this cell cannot be entered.
         return "obstacle" in self.attributes
     
-    def pick_up(self):
-        treas = self.treasure
-        self.treasure = None
-        return treas
+    def pick_up(self, power):
+        power = min(power, len(self.treasure))
+        treasures = []
+        for _ in range(power):
+            treas = choice(self.treasure)
+            self.treasure.remove(treas)
+            treasures.append(treas)
+        return treasures
     
     def bury_treasure(self, treasure):
-        if self.treasure is None:
-            self.treasure = treasure
-            return True
-        return False
+        self.treasure.append(treasure)
+        return True
     
     def outward_broadcast(self, strength):
         # This is what the sub sees when scanning this cell.
@@ -39,11 +46,14 @@ class Cell():
         broadcast = []
         if "storm" in self.attributes:
             broadcast.append("storm brewing")
-        if self.treasure is not None:
+        if len(self.treasure) > 0:
             if strength > 2:
-                broadcast.append(f"{self.treasure.title()}")
+                broadcast.append(self.treasure_string())
             else:
-                broadcast.append("a treasure chest")
+                plural = ""
+                if len(self.treasure) > 1:
+                    plural = "s"
+                broadcast.append(f"{len(self.treasure)} treasure{plural}")
         if "docking" in self.attributes:
             broadcast.append(f"docking station \"{self.attributes['docking'].title()}\"")
         return list_to_and_separated(broadcast).capitalize()
@@ -63,7 +73,7 @@ class Cell():
         return ""
 
     def to_char(self, to_show):
-        if "t" in to_show and self.treasure is not None:
+        if "t" in to_show and len(self.treasure) > 0:
             return "T"
         if "w" in to_show and "obstacle" in self.attributes:
             return "W"
@@ -115,11 +125,11 @@ def bury_treasure_at(name, pos):
         return undersea_map[x][y].bury_treasure(name)
     return False
 
-def pick_up_treasure(pos):
+def pick_up_treasure(pos, power):
     (x, y) = pos
     if in_world(x, y):
-        return undersea_map[x][y].pick_up()
-    return None
+        return undersea_map[x][y].pick_up(power)
+    return []
 
 def investigate_square(x, y, loop):
     if in_world(x, y):

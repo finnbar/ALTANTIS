@@ -36,6 +36,9 @@ class Submarine(Entity):
         self.inventory = Inventory(self)
         self.weapons = Weaponry(self)
 
+        # Used for special abilities gifted by control.
+        self.keywords = []
+
     def status_message(self, loop):
         message = (
             f"Status for **{self.name.title()}**\n"
