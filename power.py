@@ -63,6 +63,9 @@ class PowerManager():
             use += power[system]
         return use
     
+    def unused_power(self):
+        return self.total_power - self.power_use(self.power)
+    
     def apply_power_schedule(self):
         # Check for changes and add these to the string.
         message = ""

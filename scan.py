@@ -22,7 +22,13 @@ class ScanSystem():
         Could add direction of motion, whether it's got cargo etc.
         """
         subname = ""
-        if strength > 0: subname = f" {self.sub.name.title()}"
+        unused_power = self.sub.power.unused_power()
+        if "stealthy" in self.sub.keywords and strength < min(3, unused_power):
+            return ""
+        if strength > 0:
+            subname = f" {self.sub.name.title()}"
+        else:
+            subname = " ???"
         return f"Submarine{subname}"
 
     def scan(self):
