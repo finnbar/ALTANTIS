@@ -32,16 +32,18 @@ class Upgrades():
                 # Resolve the event.
                 # As Python cannot serialise functions, we have to define cases.
                 if fn[0] == "remove_equip":
-                    await self.remove_equip(fn[1])
+                    (_, keyword, damage) = fn
+                    await self.remove_equip(keyword, damage)
             else:
                 unresolved.append((count-1, desc, fn))
         self.postponed_events = unresolved
 
-    def add_keyword(self, keyword, turn_limit=None):
+    def add_keyword(self, keyword, turn_limit=None, damage=1):
         if keyword not in self.keywords:
             self.keywords.append(keyword)
             if turn_limit is not None:
-                self.postponed_events.append((turn_limit, f"**{keyword}** explodes", ("remove_equip", keyword)))
+                verb = "dissapates" if damage <= 0 else "explodes"
+                self.postponed_events.append((turn_limit, f"**{keyword}** {verb}", ("remove_equip", keyword, damage)))
             return True
         return False
 
@@ -51,8 +53,13 @@ class Upgrades():
             return True
         return False
     
-    async def remove_equip(self, keyword):
+    async def remove_equip(self, keyword, damage=1):
         if self.remove_keyword(keyword):
-            self.sub.damage(1)
-            await self.sub.send_message(f"**{keyword.title()}** exploded and dealt one damage!", "engineer")
+            self.sub.damage(damage)
+            result = "fizzled out"
+            if damage == 1:
+                result = "exploded and dealt one damage"
+            else:
+                result = f"dramatically exploded and dealt {damage} damage"
+            await self.sub.send_message(f"**{keyword.title()}** {result}!", "engineer")
     
