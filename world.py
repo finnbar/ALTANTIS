@@ -74,14 +74,16 @@ class Cell():
 
     def to_char(self, to_show):
         if "t" in to_show and len(self.treasure) > 0:
-            return "T"
+            return '✨'
         if "w" in to_show and "obstacle" in self.attributes:
-            return "W"
+            return '🔳'
         if "d" in to_show and "docking" in self.attributes:
-            return "D"
+            return '🅿'
         if "s" in to_show and "storm" in self.attributes:
-            return "S"
-        return "."
+            return '🌀'
+        if "c" in to_show and "calm" in self.attributes:
+            return '🟪'
+        return '\🟦'
     
     def difficulty(self):
         if "storm" in self.attributes:
@@ -289,21 +291,26 @@ def move_on_map(sub, direction, x, y):
 def draw_map(subs, to_show):
     """
     Draws an ASCII version of the map.
-    `subs` is a list of submarines, which are marked 0-9 on the map.
+    `subs` is a list of submarines, which are marked 0-10 on the map.
+    Returns an array of rows for assembly later in the pipeline.
     """
-    map_string = ""
+    map_arr = []
+    number_emoji = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
     for y in range(Y_LIMIT):
         row = ""
         for x in range(X_LIMIT):
             tile_char = undersea_map[x][y].to_char(to_show)
-            # NOTE: NPC checking will go here, if "N" in to_show
+            if "n" in to_show:
+                npcs_in_square = npc.filtered_npcs(lambda n: n.x == x and n.y == y)
+                if len(npcs_in_square) > 0:
+                    tile_char = npcs_in_square[0].to_char()
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
-                    tile_char = str(i)
+                    tile_char = number_emoji[i]
             row += tile_char
-        map_string += row + "\n"
-    return map_string
+        map_arr.append(row)
+    return map_arr
 
 def map_to_dict():
     """

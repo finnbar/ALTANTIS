@@ -74,6 +74,9 @@ class NPC(Entity):
     
     def is_weak(self):
         return True
+    
+    def to_char(self):
+        return '🦑'
 
 import npc_templates as _npc
 

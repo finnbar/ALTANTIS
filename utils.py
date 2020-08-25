@@ -31,6 +31,14 @@ class Message(Status):
     async def do_status(self, ctx):
         await ctx.send(self.contents)
 
+class Messages(Status):
+    def __init__(self, messages):
+        self.messages = messages
+    
+    async def do_status(self, ctx):
+        for message in self.messages:
+            await ctx.send(message)
+
 # Direction utilities
 
 directions = {"n": (0, -1), "ne": (1, -1), "e": (1, 0), "se": (1, 1),

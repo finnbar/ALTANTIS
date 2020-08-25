@@ -2,7 +2,7 @@
 The backend for all Discord actions, which allow players to control their sub.
 """
 
-from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
+from utils import React, Message, Messages, OKAY_REACT, FAIL_REACT, to_pair_list
 from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
 from consts import direction_emoji
@@ -55,9 +55,10 @@ async def set_activation(team, value):
 def print_map(team, options=["w", "d", "s"]):
     """
     Prints the map from the perspective of one submarine, or all if team is None.
+    Splits the map into two messages.
     """
     subs = []
-    code_to_key = {"w": "Wall", "d": "Docking station", "s": "Storm", "t": "Treasure", "n": "NPC"}
+    code_to_key = {"w": "Wall", "d": "Docking station", "s": "Storm", "t": "Treasure", "n": "NPC", "c": "Calm"}
     if options is True:
         options = code_to_key.keys()
     options = list(filter(lambda v: v in code_to_key, options))
@@ -69,16 +70,19 @@ def print_map(team, options=["w", "d", "s"]):
             return FAIL_REACT
         subs = [sub]
     print("Printing map for", subs)
-    formatted = f"```\n"
-    map_string = draw_map(subs, options)
-    formatted += map_string + "\n```\n"
+    first_message = ""
+    map_arr = draw_map(subs, options)
+    first_half = map_arr[:len(map_arr)//2]
+    first_message = "\n".join(first_half)
+    second_half = map_arr[len(map_arr)//2:]
+    second_message = "\n".join(second_half) + "\n\n"
     subs_string = "**KEY**\n"
     for i in range(len(subs)):
         subs_string += f"{i}: {subs[i].name.title()}, "
-    formatted += subs_string[:-2] + "\n"
+    second_message += subs_string[:-2] + "\n"
     for o in options:
-        formatted += f"{o.upper()}: {code_to_key[o]}\n"
-    return Message(formatted[:-1])
+        second_message += f"{o.upper()}: {code_to_key[o]}\n"
+    return Messages([first_message, second_message[:-1]])
 
 def zoom_in(x, y, loop):
     return Message(investigate_square(x, y, loop))
