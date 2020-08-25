@@ -81,6 +81,8 @@ class Cell():
             return "D"
         if "s" in to_show and "storm" in self.attributes:
             return "S"
+        if "c" in to_show and "calm" in self.attributes:
+            return "C"
         return "."
     
     def difficulty(self):
@@ -296,7 +298,10 @@ def draw_map(subs, to_show):
         row = ""
         for x in range(X_LIMIT):
             tile_char = undersea_map[x][y].to_char(to_show)
-            # NOTE: NPC checking will go here, if "N" in to_show
+            if "n" in to_show:
+                npcs_in_square = npc.filtered_npcs(lambda n: n.x == x and n.y == y)
+                if len(npcs_in_square) > 0:
+                    tile_char = "N"
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:

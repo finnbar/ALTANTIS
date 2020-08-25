@@ -57,7 +57,7 @@ def print_map(team, options=["w", "d", "s"]):
     Prints the map from the perspective of one submarine, or all if team is None.
     """
     subs = []
-    code_to_key = {"w": "Wall", "d": "Docking station", "s": "Storm", "t": "Treasure", "n": "NPC"}
+    code_to_key = {"w": "Wall", "d": "Docking station", "s": "Storm", "t": "Treasure", "n": "NPC", "c": "Calm"}
     if options is True:
         options = code_to_key.keys()
     options = list(filter(lambda v: v in code_to_key, options))
