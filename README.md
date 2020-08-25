@@ -56,7 +56,7 @@ New features:
 - [x] Squares should be able to hold multiple treasures, with cranes "lucky dipping" to pick n treasures (n power).
 - [x] Weapons messages should tell you if you did a murder.
 - [x] !explode, which explodes (x,y) with a range and amount of damage.
-- [x] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
+- [ ] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
 - [ ] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
 - [ ] NPCs can trade.
 
