@@ -63,7 +63,7 @@ New features:
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
 - [x] Default to lowercase for all inputs.
-- [ ] Emoji map.
+- [ ] Emoji map. (POSTPONED WHILE THOMAS BUILDS A TINY WEBSITE)
 - [ ] !save (determine if this is a safe command to add)
 - [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
 

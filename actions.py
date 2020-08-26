@@ -5,8 +5,10 @@ The backend for all Discord actions, which allow players to control their sub.
 from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
 from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
-from consts import direction_emoji
+from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN
 from npc import add_npc
+
+import httpx
 
 # MOVEMENT
 
@@ -52,15 +54,15 @@ async def set_activation(team, value):
 
 # STATUS
 
-def print_map(team, options=["w", "d", "s"]):
+async def print_map(team, options=["w", "d", "s"]):
     """
     Prints the map from the perspective of one submarine, or all if team is None.
     """
     subs = []
-    code_to_key = {"w": "Wall", "d": "Docking station", "s": "Storm", "t": "Treasure", "n": "NPC", "c": "Calm"}
+    max_options = ["w", "d", "s", "t", "n", "c"]
     if options is True:
-        options = code_to_key.keys()
-    options = list(filter(lambda v: v in code_to_key, options))
+        options = max_options
+    options = list(filter(lambda v: v in max_options, options))
     if team is None:
         subs = [get_sub(sub) for sub in get_subs()]
     else:
@@ -68,17 +70,15 @@ def print_map(team, options=["w", "d", "s"]):
         if sub is None:
             return FAIL_REACT
         subs = [sub]
-    print("Printing map for", subs)
-    formatted = f"```\n"
     map_string = draw_map(subs, options)
-    formatted += map_string + "\n```\n"
-    subs_string = "**KEY**\n"
-    for i in range(len(subs)):
-        subs_string += f"{i}: {subs[i].name.title()}, "
-    formatted += subs_string[:-2] + "\n"
-    for o in options:
-        formatted += f"{o.upper()}: {code_to_key[o]}\n"
-    return Message(formatted[:-1])
+    async with httpx.AsyncClient() as client:
+        url = MAP_DOMAIN+"/api/map/"
+        print(url)
+        res = await client.post(url, data={"map": map_string, "key": MAP_TOKEN})
+        if res.status_code == 200:
+            final_url = MAP_DOMAIN+res.json()['url']
+            return Message(f"The map is visible here: {final_url}")
+    return FAIL_REACT
 
 def zoom_in(x, y, loop):
     return Message(investigate_square(x, y, loop))

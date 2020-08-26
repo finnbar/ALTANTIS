@@ -3,10 +3,7 @@ The main entry point for our bot, which tells Discord what commands the bot can
 perform and how to do so.
 """
 
-import os
-
 from discord.ext import commands, tasks
-from dotenv import load_dotenv
 from typing import Optional
 
 from actions import *
@@ -14,9 +11,6 @@ from game import perform_timestep, load_game
 from utils import OKAY_REACT
 from consts import *
 from control import init_control_notifs, init_news_notifs
-
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix="!")
 
@@ -81,7 +75,7 @@ class Status(commands.Cog):
         """
         Shows a map of the world, including your submarine!
         """
-        await perform(print_map, ctx, get_team(ctx.author))
+        await perform_async(print_map, ctx, get_team(ctx.author))
 
     @commands.command(name="mapall")
     @commands.has_role(CONTROL_ROLE)
@@ -90,9 +84,9 @@ class Status(commands.Cog):
         (CONTROL) Shows a map of the world, including all submarines.
         """
         if opts == ():
-            await perform_unsafe(print_map, ctx, None, True)
+            await perform_async_unsafe(print_map, ctx, None, True)
         else:
-            await perform_unsafe(print_map, ctx, None, list(opts))
+            await perform_async_unsafe(print_map, ctx, None, list(opts))
     
     @commands.command(name="zoom")
     @commands.has_role(CONTROL_ROLE)

@@ -17,3 +17,13 @@ direction_emoji = {"n": "⬆", "e": "➡", "s": "⬇",
 TICK = "<:greentick:745348214210822255>"
 CROSS = "<:redcross:745348213149532170>"
 PLUS = "<:greenplus:745389551597519061>"
+
+# env stuff
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+MAP_TOKEN = os.getenv('MAP_TOKEN')
+MAP_DOMAIN = os.getenv('MAP_DOMAIN')
+TOKEN = os.getenv('DISCORD_TOKEN')
