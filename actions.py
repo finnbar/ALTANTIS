@@ -8,7 +8,7 @@ from world import draw_map, bury_treasure_at, get_square, investigate_square, ex
 from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN
 from npc import add_npc
 
-import httpx
+import httpx, json
 
 # MOVEMENT
 
@@ -70,11 +70,11 @@ async def print_map(team, options=["w", "d", "s"]):
         if sub is None:
             return FAIL_REACT
         subs = [sub]
-    map_string = draw_map(subs, options)
+    map_string, map_arr = draw_map(subs, options)
+    map_json = json.dumps(map_arr)
     async with httpx.AsyncClient() as client:
         url = MAP_DOMAIN+"/api/map/"
-        print(url)
-        res = await client.post(url, data={"map": map_string, "key": MAP_TOKEN})
+        res = await client.post(url, data={"map": map_string, "key": MAP_TOKEN, "names": map_json})
         if res.status_code == 200:
             final_url = MAP_DOMAIN+res.json()['url']
             return Message(f"The map is visible here: {final_url}")

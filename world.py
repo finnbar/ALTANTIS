@@ -85,6 +85,18 @@ class Cell():
             return "C"
         return "."
     
+    def map_name(self, to_show):
+        # For Thomas' map drawing code.
+        # Gives names to squares that make sense.
+        name = ""
+        if "t" in to_show and len(self.treasure) > 0:
+            name = self.treasure_string()
+        if "d" in to_show and "docking" in self.attributes:
+            name = self.attributes["docking"].title()
+        if name != "":
+            return name
+        return None
+    
     def difficulty(self):
         if "storm" in self.attributes:
             return 8
@@ -291,24 +303,31 @@ def move_on_map(sub, direction, x, y):
 def draw_map(subs, to_show):
     """
     Draws an ASCII version of the map.
+    Also returns a JSON of additional information.
     `subs` is a list of submarines, which are marked 0-9 on the map.
     """
     map_string = ""
+    map_json = []
     for y in range(Y_LIMIT):
         row = ""
         for x in range(X_LIMIT):
             tile_char = undersea_map[x][y].to_char(to_show)
+            tile_name = undersea_map[x][y].map_name(to_show)
             if "n" in to_show:
                 npcs_in_square = npc.filtered_npcs(lambda n: n.x == x and n.y == y)
                 if len(npcs_in_square) > 0:
                     tile_char = "N"
+                    tile_name = list_to_and_separated(list(map(lambda n: n.name.title(), npcs_in_square)))
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
                     tile_char = str(i)
+                    tile_name = subs[i].name.title()
             row += tile_char
+            if tile_name is not None:
+                map_json.append({"x": x, "y": y, "name": tile_name})
         map_string += row + "\n"
-    return map_string
+    return map_string, map_json
 
 def map_to_dict():
     """
