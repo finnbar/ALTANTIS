@@ -31,22 +31,14 @@ class Movement(commands.Cog):
         """
         await perform(move, ctx, direction, get_team(ctx.channel))
 
-    @commands.command(name="force_setdir")
-    @commands.has_role(CONTROL_ROLE)
-    async def control_move(self, ctx, team, direction):
-        """
-        (CONTROL) Forces <team>'s submarine to a given direction. Does not inform them.
-        """
-        await perform_unsafe(move, ctx, direction, team)
-
     @commands.command(name="teleport")
     @commands.has_role(CONTROL_ROLE)
-    async def teleport_sub(self, ctx, team, x : int, y : int):
+    async def teleport_sub(self, ctx, x : int, y : int):
         """
-        (CONTROL) Teleports <teams>'s submarine to a given (<x>, <y>). Does not inform them.
+        (CONTROL) Teleports the submarine of the team of the channel to a given (<x>, <y>). Does not inform them.
         Also does _not_ check if the position is blocked, but does check if it's a valid point in the world.
         """
-        await perform_unsafe(teleport, ctx, team, x, y)
+        await perform_unsafe(teleport, ctx, get_team(ctx.channel), x, y)
 
     @commands.command(name="activate")
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
@@ -124,14 +116,6 @@ class PowerManagement(commands.Cog):
         """
         await perform(power_systems, ctx, get_team(ctx.channel), list(systems))
 
-    @commands.command(name="force_power")
-    @commands.has_role(CONTROL_ROLE)
-    async def control_power(self, ctx, team, *systems):
-        """
-        (CONTROL) Forces <team> to give one power to all of <systems>.
-        """
-        await perform_unsafe(power_systems, ctx, team, list(systems))
-
     @commands.command(name="unpower")
     @commands.has_any_role(ENGINEER, CONTROL_ROLE)
     async def unpower(self, ctx, *systems):
@@ -142,29 +126,21 @@ class PowerManagement(commands.Cog):
         """
         await perform(unpower_systems, ctx, get_team(ctx.channel), list(systems))
 
-    @commands.command(name="force_unpower")
-    @commands.has_role(CONTROL_ROLE)
-    async def control_unpower(self, ctx, team, *systems):
-        """
-        (CONTROL) Forces <team> to remove one power from all of <systems>.
-        """
-        await perform_unsafe(unpower_systems, ctx, team, list(systems))
-    
     @commands.command(name="damage")
     @commands.has_role(CONTROL_ROLE)
-    async def damage(self, ctx, team, amount : int, reason=""):
+    async def damage(self, ctx, amount : int, reason=""):
         """
-        (CONTROL) Forces <team> to take <amount> damage at next loop. You can optionally specify a <reason> which will be messaged to them before.
+        (CONTROL) Forces this team to take <amount> damage at next loop. You can optionally specify a <reason> which will be messaged to them before.
         """
-        await perform_async(deal_damage, ctx, team, amount, reason)
+        await perform_async(deal_damage, ctx, get_team(ctx.channel), amount, reason)
 
     @commands.command(name="heal")
     @commands.has_role(CONTROL_ROLE)
-    async def perform_healing(self, ctx, team, amount : int, reason=""):
+    async def perform_healing(self, ctx, amount : int, reason=""):
         """
-        (CONTROL) Forces <team> to take <amount> healing at next loop. You can optionally specify a <reason> which will be messaged to them before.
+        (CONTROL) Forces this team to take <amount> healing at next loop. You can optionally specify a <reason> which will be messaged to them before.
         """
-        await perform_async(heal_up, ctx, team, amount, reason)
+        await perform_async(heal_up, ctx, get_team(ctx.channel), amount, reason)
 
 class UpgradeManagement(commands.Cog):
     """
@@ -172,54 +148,54 @@ class UpgradeManagement(commands.Cog):
     """
     @commands.command(name="upgrade")
     @commands.has_role(CONTROL_ROLE)
-    async def upgrade(self, ctx, team, amount : int):
+    async def upgrade(self, ctx, amount : int):
         """
-        (CONTROL) Upgrades <team>'s reactor by <amount>.
+        (CONTROL) Upgrades this team's reactor by <amount>.
         You can specify a negative number, but this will not check that the resulting state makes sense (that is, the team is not using more power than they have) - in general you should use !damage instead.
         """
-        await perform_async_unsafe(upgrade_sub, ctx, team, amount)
+        await perform_async_unsafe(upgrade_sub, ctx, get_team(ctx.channel), amount)
 
     @commands.command(name="upgrade_system")
     @commands.has_role(CONTROL_ROLE)
-    async def upgrade_system(self, ctx, team, system, amount : int):
+    async def upgrade_system(self, ctx, system, amount : int):
         """
-        (CONTROL) Upgrades <team>'s system by <amount>.
+        (CONTROL) Upgrades this team's system by <amount>.
         You can specify a negative number to downgrade, and it will check that this makes sense.
         """
-        await perform_async_unsafe(upgrade_sub_system, ctx, team, system, amount)
+        await perform_async_unsafe(upgrade_sub_system, ctx, get_team(ctx.channel), system, amount)
 
     @commands.command(name="upgrade_innate")
     @commands.has_role(CONTROL_ROLE)
-    async def upgrade_innate(self, ctx, team, system, amount : int):
+    async def upgrade_innate(self, ctx, system, amount : int):
         """
-        (CONTROL) Upgrades <team>'s innate system by <amount>.
+        (CONTROL) Upgrades this team's innate system by <amount>.
         You can specify a negative number to downgrade, and it will check that this makes sense.
         """
-        await perform_async_unsafe(upgrade_sub_innate, ctx, team, system, amount)
+        await perform_async_unsafe(upgrade_sub_innate, ctx, get_team(ctx.channel), system, amount)
 
     @commands.command(name="install_system")
     @commands.has_role(CONTROL_ROLE)
-    async def new_system(self, ctx, team, system):
+    async def new_system(self, ctx, system):
         """
-        (CONTROL) Gives <team> access to new system <system>.
+        (CONTROL) Gives this team access to new system <system>.
         """
-        await perform_async_unsafe(add_system, ctx, team, system)
+        await perform_async_unsafe(add_system, ctx, get_team(ctx.channel), system)
     
     @commands.command(name="install_keyword")
     @commands.has_role(CONTROL_ROLE)
-    async def install_keyword(self, ctx, team, keyword, turn_limit : Optional[int] = None, damage : Optional[int] = 1):
+    async def install_keyword(self, ctx, keyword, turn_limit : Optional[int] = None, damage : Optional[int] = 1):
         """
-        (CONTROL) Gives <team> a brand new <keyword>! (This is for upgrades outside of power.)
+        (CONTROL) Gives this team a brand new <keyword>! (This is for upgrades outside of power.)
         """
-        await perform_async_unsafe(add_keyword_to_sub, ctx, team, keyword, turn_limit, damage)
+        await perform_async_unsafe(add_keyword_to_sub, ctx, get_team(ctx.channel), keyword, turn_limit, damage)
 
     @commands.command(name="uninstall_keyword")
     @commands.has_role(CONTROL_ROLE)
-    async def uninstall_keyword(self, ctx, team, keyword):
+    async def uninstall_keyword(self, ctx, keyword):
         """
-        (CONTROL) Removes <keyword> from <team>. (This is for upgrades outside of power.)
+        (CONTROL) Removes <keyword> from this team. (This is for upgrades outside of power.)
         """
-        await perform_async_unsafe(remove_keyword_from_sub, ctx, team, keyword)
+        await perform_async_unsafe(remove_keyword_from_sub, ctx, get_team(ctx.channel), keyword)
 
 class Comms(commands.Cog):
     """
@@ -235,11 +211,11 @@ class Comms(commands.Cog):
     
     @commands.command(name="control_message")
     @commands.has_role(CONTROL_ROLE)
-    async def message_team(self, ctx, team, message):
+    async def message_team(self, ctx, message):
         """
-        (CONTROL) Sends to <team> the message <message>, regardless of distance.
+        (CONTROL) Sends to this team the message <message>, regardless of distance.
         """
-        await perform_async_unsafe(shout_at_team, ctx, team, message)
+        await perform_async_unsafe(shout_at_team, ctx, get_team(ctx.channel), message)
 
 class Inventory(commands.Cog):
     """
@@ -291,35 +267,35 @@ class Inventory(commands.Cog):
 
     @commands.command(name="give")
     @commands.has_role(CONTROL_ROLE)
-    async def give(self, ctx, team, item, quantity : int = 1):
+    async def give(self, ctx, item, quantity : int = 1):
         """
-        (CONTROL) Gives <team> an <item> with optional <quantity>.
+        (CONTROL) Gives this team an <item> with optional <quantity>.
         """
-        await perform_async_unsafe(give_item_to_team, ctx, team, item, quantity)
+        await perform_async_unsafe(give_item_to_team, ctx, get_team(ctx.channel), item, quantity)
 
     @commands.command(name="pay")
     @commands.has_role(CONTROL_ROLE)
-    async def pay(self, ctx, team, amount : int):
+    async def pay(self, ctx, amount : int):
         """
-        (CONTROL) Pay a <team> <amount> money. Shorthand for !give with currency name.
+        (CONTROL) Pays this team <amount> money. Shorthand for !give with currency name.
         """
-        await perform_async_unsafe(give_item_to_team, ctx, team, CURRENCY_NAME, amount)
+        await perform_async_unsafe(give_item_to_team, ctx, get_team(ctx.channel), CURRENCY_NAME, amount)
 
     @commands.command(name="take")
     @commands.has_role(CONTROL_ROLE)
-    async def take(self, ctx, team, item, quantity : int = 1):
+    async def take(self, ctx, item, quantity : int = 1):
         """
-        (CONTROL) Take <quantity> of <item> away from <team>. Do not use this during a trade.
+        (CONTROL) Take <quantity> of <item> away from this team. Do not use this during a trade.
         """
-        await perform_async_unsafe(take_item_from_team, ctx, team, item, quantity)
+        await perform_async_unsafe(take_item_from_team, ctx, get_team(ctx.channel), item, quantity)
 
     @commands.command(name="get_paid")
     @commands.has_role(CONTROL_ROLE)
-    async def get_paid(self, ctx, team, amount : int):
+    async def get_paid(self, ctx, amount : int):
         """
-        (CONTROL) Get paid by <team> <amount> money. Shorthand for !take with currency name. Do not use this during a trade.
+        (CONTROL) Get paid by this team <amount> money. Shorthand for !take with currency name. Do not use this during a trade.
         """
-        await perform_async_unsafe(take_item_from_team, ctx, team, CURRENCY_NAME, amount)
+        await perform_async_unsafe(take_item_from_team, ctx, get_team(ctx.channel), CURRENCY_NAME, amount)
 
 class Engineering(commands.Cog):
     """
@@ -345,11 +321,11 @@ class Engineering(commands.Cog):
 
     @commands.command(name="force_puzzle")
     @commands.has_role(CONTROL_ROLE)
-    async def force_puzzle(self, ctx, team):
+    async def force_puzzle(self, ctx):
         """
-        (CONTROL) Gives team <team> a puzzle, resolving any puzzles they currently have.
+        (CONTROL) Gives this team a puzzle, resolving any puzzles they currently have.
         """
-        await perform_async(give_team_puzzle, ctx, team, "fixing")
+        await perform_async(give_team_puzzle, ctx, get_team(ctx.channel), "fixing")
 
 class Crane(commands.Cog):
     """
@@ -381,7 +357,7 @@ class DangerZone(commands.Cog):
         """
         (CONTROL) Kills the team <team>, removing any trace of their existence bar their channels.
         This deletes their Submarine object, so all game progress is erased.
-        Do NOT use this unless you are absolutely sure.
+        Do NOT use this unless you are absolutely sure. (There's a reason you have to specify the team name, and that's to make it actively harder to call this command.)
         """
         await perform_unsafe(delete_team, ctx, team)
     
