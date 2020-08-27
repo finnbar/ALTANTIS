@@ -29,7 +29,7 @@ class Movement(commands.Cog):
         """
         Sets the direction of your submarine to <direction>.
         """
-        await perform(move, ctx, direction, get_team(ctx.author))
+        await perform(move, ctx, direction, get_team(ctx.channel))
 
     @commands.command(name="force_setdir")
     @commands.has_role(CONTROL_ROLE)
@@ -54,7 +54,7 @@ class Movement(commands.Cog):
         """
         Activates your submarine, allowing it to move and do actions in real-time.
         """
-        await perform_async(set_activation, ctx, get_team(ctx.author), True)
+        await perform_async(set_activation, ctx, get_team(ctx.channel), True)
 
     @commands.command(name="deactivate")
     @commands.has_role(CAPTAIN)
@@ -63,7 +63,7 @@ class Movement(commands.Cog):
         Deactivates your submarine, stopping it from moving and performing actions.
         Needed for docking.
         """
-        await perform_async(set_activation, ctx, get_team(ctx.author), False)
+        await perform_async(set_activation, ctx, get_team(ctx.channel), False)
 
 class Status(commands.Cog):
     """
@@ -75,7 +75,7 @@ class Status(commands.Cog):
         """
         Shows a map of the world, including your submarine!
         """
-        await perform_async(print_map, ctx, get_team(ctx.author))
+        await perform_async(print_map, ctx, get_team(ctx.channel))
 
     @commands.command(name="mapall")
     @commands.has_role(CONTROL_ROLE)
@@ -101,14 +101,14 @@ class Status(commands.Cog):
         """
         Reports the status of the submarine, including power and direction.
         """
-        await perform(get_status, ctx, get_team(ctx.author), main_loop)
+        await perform(get_status, ctx, get_team(ctx.channel), main_loop)
     
     @commands.command(name="scan")
     async def scan(self, ctx):
         """
         Repeats the scan message sent at the start of the current tick.
         """
-        await perform(get_scan, ctx, get_team(ctx.author))
+        await perform(get_scan, ctx, get_team(ctx.channel))
 
 class PowerManagement(commands.Cog):
     """
@@ -122,7 +122,7 @@ class PowerManagement(commands.Cog):
         Fails if this would overload the power.
         NOTE: This is cumulative - it acts based on all previous calls to this (before the game tick).
         """
-        await perform(power_systems, ctx, get_team(ctx.author), list(systems))
+        await perform(power_systems, ctx, get_team(ctx.channel), list(systems))
 
     @commands.command(name="force_power")
     @commands.has_role(CONTROL_ROLE)
@@ -140,7 +140,7 @@ class PowerManagement(commands.Cog):
         Fails if a system would have less than zero power.
         NOTE: This is cumulative - it acts based on all previous calls to this (before the game tick).
         """
-        await perform(unpower_systems, ctx, get_team(ctx.author), list(systems))
+        await perform(unpower_systems, ctx, get_team(ctx.channel), list(systems))
 
     @commands.command(name="force_unpower")
     @commands.has_role(CONTROL_ROLE)
@@ -231,7 +231,7 @@ class Comms(commands.Cog):
         """
         Broadcasts a <message> to all in range. Requires the sub to be activated.
         """
-        await perform_async(broadcast, ctx, get_team(ctx.author), message)
+        await perform_async(broadcast, ctx, get_team(ctx.channel), message)
     
     @commands.command(name="control_message")
     @commands.has_role(CONTROL_ROLE)
@@ -253,7 +253,7 @@ class Inventory(commands.Cog):
         You cannot drop items in ALL CAPS. (These are undroppable due to being
         important or dangerous.)
         """
-        await perform(drop_item, ctx, get_team(ctx.author), item)
+        await perform(drop_item, ctx, get_team(ctx.channel), item)
 
     @commands.command(name="trade")
     @commands.has_role(CAPTAIN)
@@ -262,7 +262,7 @@ class Inventory(commands.Cog):
         Begins a trade with <team>, where you offer item1 quantity1 item2 quantity2 and so on.
         For example: !trade team_name Fish 10 "Gold coin" 3
         """
-        await perform_async(arrange_trade, ctx, get_team(ctx.author), team, list(args))
+        await perform_async(arrange_trade, ctx, get_team(ctx.channel), team, list(args))
 
     @commands.command(name="offer")
     @commands.has_role(CAPTAIN)
@@ -271,7 +271,7 @@ class Inventory(commands.Cog):
         Makes a counteroffer in your current trade, of form item1 quantity1 item2 quantity2...
         For example: !offer Fish 10 "Gold coin" 4
         """
-        await perform_async(make_offer, ctx, get_team(ctx.author), list(args))
+        await perform_async(make_offer, ctx, get_team(ctx.channel), list(args))
 
     @commands.command(name="accept_trade")
     @commands.has_role(CAPTAIN)
@@ -279,7 +279,7 @@ class Inventory(commands.Cog):
         """
         Accepts the current trade. A trade will only complete once both parties have accepted the trade.
         """
-        await perform_async(accept_offer, ctx, get_team(ctx.author))
+        await perform_async(accept_offer, ctx, get_team(ctx.channel))
 
     @commands.command(name="reject_trade")
     @commands.has_role(CAPTAIN)
@@ -287,7 +287,7 @@ class Inventory(commands.Cog):
         """
         Rejects and ends the current trade.
         """
-        await perform_async(reject_offer, ctx, get_team(ctx.author))
+        await perform_async(reject_offer, ctx, get_team(ctx.channel))
 
     @commands.command(name="give")
     @commands.has_role(CONTROL_ROLE)
@@ -333,7 +333,7 @@ class Engineering(commands.Cog):
         already have a puzzle in progress, it will be treated as if you ran out of
         time!
         """
-        await perform_async(give_team_puzzle, ctx, get_team(ctx.author), "repair")
+        await perform_async(give_team_puzzle, ctx, get_team(ctx.channel), "repair")
 
     @commands.command(name="answer")
     @commands.has_role(ENGINEER)
@@ -341,7 +341,7 @@ class Engineering(commands.Cog):
         """
         Lets you answer a set puzzle that hasn't resolved yet.
         """
-        await perform_async(answer_team_puzzle, ctx, get_team(ctx.author), answer)
+        await perform_async(answer_team_puzzle, ctx, get_team(ctx.channel), answer)
 
     @commands.command(name="force_puzzle")
     @commands.has_role(CONTROL_ROLE)
@@ -361,7 +361,7 @@ class Crane(commands.Cog):
         """
         Drops the crane in your current location. Takes two turns to resolve.
         """
-        await perform(drop_crane, ctx, get_team(ctx.author))
+        await perform(drop_crane, ctx, get_team(ctx.channel))
 
 class DangerZone(commands.Cog):
     """
@@ -373,7 +373,7 @@ class DangerZone(commands.Cog):
         """
         Kills your submarine. This isn't a joke. Must be called with your submarine's full name.
         """
-        await perform_async(kill_sub, ctx, get_team(ctx.author), subname)
+        await perform_async(kill_sub, ctx, get_team(ctx.channel), subname)
 
     @commands.command(name="kill_team")
     @commands.has_role(CONTROL_ROLE)
@@ -501,7 +501,7 @@ class Weaponry(commands.Cog):
         """
         Schedules a damaging shot at (<x>, <y>). This uses two weapons charges.
         """
-        await perform(schedule_shot, ctx, x, y, get_team(ctx.author), True)
+        await perform(schedule_shot, ctx, x, y, get_team(ctx.channel), True)
     
     @commands.command(name="shoot_stunning")
     @commands.has_role(SCIENTIST)
@@ -509,17 +509,18 @@ class Weaponry(commands.Cog):
         """
         Schedules a nondamaging shot at (<x>, <y>). This uses two weapons charges.
         """
-        await perform(schedule_shot, ctx, x, y, get_team(ctx.author), False)
+        await perform(schedule_shot, ctx, x, y, get_team(ctx.channel), False)
 
 # HELPER FUNCTIONS
 
-def get_team(author):
+def get_team(channel):
     """
-    Gets the first role that has a submarine associated with it, or None.
+    Gets the name of the category channel of the channel the message was sent in.
     """
-    roles = list(map(lambda x: x.name.lower(), author.roles))
-    for team in get_subs():
-        if team in roles:
+    category_channel = bot.get_channel(channel.category_id)
+    if category_channel:
+        team = category_channel.name.lower()
+        if team in get_subs():
             return team
     return None
 
