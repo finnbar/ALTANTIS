@@ -24,7 +24,7 @@ class Movement(commands.Cog):
     All commands that allow you to move the submarine.
     """
     @commands.command(name="setdir")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def player_move(self, ctx, direction):
         """
         Sets the direction of your submarine to <direction>.
@@ -49,7 +49,7 @@ class Movement(commands.Cog):
         await perform_unsafe(teleport, ctx, team, x, y)
 
     @commands.command(name="activate")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def on(self, ctx):
         """
         Activates your submarine, allowing it to move and do actions in real-time.
@@ -57,7 +57,7 @@ class Movement(commands.Cog):
         await perform_async(set_activation, ctx, get_team(ctx.channel), True)
 
     @commands.command(name="deactivate")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def off(self, ctx):
         """
         Deactivates your submarine, stopping it from moving and performing actions.
@@ -70,7 +70,7 @@ class Status(commands.Cog):
     All commands that get the status of your submarine and its local environment.
     """
     @commands.command(name="map")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def player_map(self, ctx):
         """
         Shows a map of the world, including your submarine!
@@ -115,7 +115,7 @@ class PowerManagement(commands.Cog):
     Commands for powering, unpowering, healing and damaging subsystems.
     """
     @commands.command(name="power")
-    @commands.has_role(ENGINEER)
+    @commands.has_any_role(ENGINEER, CONTROL_ROLE)
     async def power(self, ctx, *systems):
         """
         Gives one power to all of <systems> (any number of systems, can repeat).
@@ -133,7 +133,7 @@ class PowerManagement(commands.Cog):
         await perform_unsafe(power_systems, ctx, team, list(systems))
 
     @commands.command(name="unpower")
-    @commands.has_role(ENGINEER)
+    @commands.has_any_role(ENGINEER, CONTROL_ROLE)
     async def unpower(self, ctx, *systems):
         """
         Removes one power from all of <systems> (any number of systems, can repeat).
@@ -226,7 +226,7 @@ class Comms(commands.Cog):
     Commands for communicating with your fellow subs.
     """
     @commands.command(name="broadcast")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def do_broadcast(self, ctx, message):
         """
         Broadcasts a <message> to all in range. Requires the sub to be activated.
@@ -246,7 +246,7 @@ class Inventory(commands.Cog):
     Commands for trading with subs on the same space as you, and generally interacting with inventories.
     """
     @commands.command(name="drop")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def drop(self, ctx, item):
         """
         Drops the item specified by <item> and optional quantity <quantity>.
@@ -256,7 +256,7 @@ class Inventory(commands.Cog):
         await perform(drop_item, ctx, get_team(ctx.channel), item)
 
     @commands.command(name="trade")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def trade(self, ctx, team, *args):
         """
         Begins a trade with <team>, where you offer item1 quantity1 item2 quantity2 and so on.
@@ -265,7 +265,7 @@ class Inventory(commands.Cog):
         await perform_async(arrange_trade, ctx, get_team(ctx.channel), team, list(args))
 
     @commands.command(name="offer")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def offer(self, ctx, *args):
         """
         Makes a counteroffer in your current trade, of form item1 quantity1 item2 quantity2...
@@ -274,7 +274,7 @@ class Inventory(commands.Cog):
         await perform_async(make_offer, ctx, get_team(ctx.channel), list(args))
 
     @commands.command(name="accept_trade")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def accept_trade(self, ctx):
         """
         Accepts the current trade. A trade will only complete once both parties have accepted the trade.
@@ -282,7 +282,7 @@ class Inventory(commands.Cog):
         await perform_async(accept_offer, ctx, get_team(ctx.channel))
 
     @commands.command(name="reject_trade")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def reject_trade(self, ctx):
         """
         Rejects and ends the current trade.
@@ -326,7 +326,7 @@ class Engineering(commands.Cog):
     Commands for dealing with the engineering issues.
     """
     @commands.command(name="puzzle")
-    @commands.has_role(ENGINEER)
+    @commands.has_any_role(ENGINEER, CONTROL_ROLE)
     async def repair_puzzle(self, ctx):
         """
         Gives you a puzzle, which must be solved before you next move. If you
@@ -336,7 +336,7 @@ class Engineering(commands.Cog):
         await perform_async(give_team_puzzle, ctx, get_team(ctx.channel), "repair")
 
     @commands.command(name="answer")
-    @commands.has_role(ENGINEER)
+    @commands.has_any_role(ENGINEER, CONTROL_ROLE)
     async def answer_puzzle(self, ctx, answer: str):
         """
         Lets you answer a set puzzle that hasn't resolved yet.
@@ -356,7 +356,7 @@ class Crane(commands.Cog):
     Commands for operating the crane.
     """
     @commands.command(name="crane")
-    @commands.has_role(SCIENTIST)
+    @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
     async def crane(self, ctx):
         """
         Drops the crane in your current location. Takes two turns to resolve.
@@ -368,7 +368,7 @@ class DangerZone(commands.Cog):
     DO NOT USE COMMANDS HERE UNLESS YOU ARE ABSOLUTELY CERTAIN.
     """
     @commands.command(name="death")
-    @commands.has_role(CAPTAIN)
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def death(self, ctx, subname):
         """
         Kills your submarine. This isn't a joke. Must be called with your submarine's full name.
@@ -496,7 +496,7 @@ class Weaponry(commands.Cog):
     """
 
     @commands.command(name="shoot_damaging")
-    @commands.has_role(SCIENTIST)
+    @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
     async def damaging(self, ctx, x : int, y : int):
         """
         Schedules a damaging shot at (<x>, <y>). This uses two weapons charges.
@@ -504,7 +504,7 @@ class Weaponry(commands.Cog):
         await perform(schedule_shot, ctx, x, y, get_team(ctx.channel), True)
     
     @commands.command(name="shoot_stunning")
-    @commands.has_role(SCIENTIST)
+    @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
     async def nondamaging(self, ctx, x : int, y : int):
         """
         Schedules a nondamaging shot at (<x>, <y>). This uses two weapons charges.
