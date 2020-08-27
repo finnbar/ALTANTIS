@@ -317,7 +317,7 @@ def draw_map(subs, to_show):
                 npcs_in_square = npc.filtered_npcs(lambda n: n.x == x and n.y == y)
                 if len(npcs_in_square) > 0:
                     tile_char = "N"
-                    tile_name = list_to_and_separated(list(map(lambda n: n.name.title(), npcs_in_square)))
+                    tile_name = list_to_and_separated(list(map(lambda n: n.title(), npcs_in_square)))
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:

@@ -5,6 +5,7 @@ All possible NPC types.
 import npc, world, control
 
 class Squid(npc.NPC):
+    classname = "squid"
     def __init__(self, name, x, y):
         super().__init__(name, x, y)
         self.tick_count = 0
@@ -21,6 +22,7 @@ class Squid(npc.NPC):
             self.tick_count += 1
 
 class NewsBouy(npc.NPC):
+    classname = "bouy"
     def __init__(self, name, x, y):
         super().__init__(name, x, y)
         self.health = 5

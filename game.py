@@ -5,7 +5,7 @@ Runs the game, performing the right actions at fixed time intervals.
 from state import get_subs, get_sub, state_to_dict, state_from_dict
 from world import map_to_dict, map_from_dict
 from utils import OKAY_REACT, FAIL_REACT
-from npc import npc_tick
+from npc import npc_tick, npcs_to_dict, npcs_from_dict
 
 import json
 
@@ -107,34 +107,42 @@ async def perform_timestep(counter):
 
 def save_game():
     """
-    Save the game to map.json and state.json.
+    Save the game to map.json, state.json and npcs.json.
     We save the map and state separately, so they can be loaded separately.
     This must be called at the end of the loop, as to guarantee that we're
     not about to overwrite important data being written during it.
     """
     state_dict = state_to_dict()
     map_dict = map_to_dict()
+    npcs_dict = npcs_to_dict()
     with open("state.json", "w") as state_file:
         state_file.write(json.dumps(state_dict))
     with open("map.json", "w") as map_file:
         map_file.write(json.dumps(map_dict))
+    with open("npcs.json", "w") as npcs_file:
+        npcs_file.write(json.dumps(npcs_dict))
 
 def load_game(which, bot):
     """
-    Loads the state (from state.json), map (from map.json) or both.
+    Loads the state (from state.json), map (from map.json), npcs (from npcs.json) or all.
     Does not check whether the files exist.
     This is destructive, so needs the exact correct argument.
     """
-    if which not in ["both", "map", "state"]:
+    if which not in ["all", "map", "npcs", "state"]:
         return FAIL_REACT
-    if which in ["both", "map"]:
+    if which in ["all", "map"]:
         with open("map.json", "r") as map_file:
             map_string = map_file.read()
             map_json = json.loads(map_string)
             map_from_dict(map_json)
-    if which in ["both", "state"]:
+    if which in ["all", "state"]:
         with open("state.json", "r") as state_file:
             state_string = state_file.read()
             state_json = json.loads(state_string)
             state_from_dict(state_json, bot)
+    if which in ["all", "npcs"]:
+        with open("npcs.json", "r") as npc_file:
+            npc_string = npc_file.read()
+            npc_json = json.loads(npc_string)
+            npcs_from_dict(npc_json)
     return OKAY_REACT

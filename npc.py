@@ -79,7 +79,10 @@ import npc_templates as _npc
 
 # Available NPC types. Note that "NPC" is used liberally here - it can refer to
 # monsters, non-player characters, and structures such as mines.
-npc_types = {"squid": _npc.Squid, "bouy": _npc.NewsBouy}
+npc_classes = [_npc.Squid, _npc.NewsBouy]
+npc_types = {}
+for cl in npc_classes:
+    npc_types[cl.classname] = cl
 
 # All NPCs, listed by name.
 npcs = {}
@@ -119,3 +122,17 @@ def add_npc(npcname, npctype, x, y):
         npcs[npcname] = npc_types[npctype](npcname, x, y)
         return f"Created NPC {npcname.title()} of type {npctype.title()}!"
     return "That NPC type does not exist."
+
+def npcs_to_dict():
+    npcs_dict = {}
+    for npc in npcs:
+        npcs_dict[npc] = npcs[npc].__dict__.copy()
+        npcs_dict[npc]["classname"] = npcs[npc].classname
+    return npcs_dict
+
+def npcs_from_dict(json):
+    for npc_name in json:
+        new_npc = npc_types[json[npc_name]["classname"]]("", 0, 0)
+        del json[npc_name]["classname"]
+        new_npc.__dict__ = json[npc_name]
+        npcs[npc_name] = new_npc
