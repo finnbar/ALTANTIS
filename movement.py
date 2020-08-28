@@ -29,7 +29,7 @@ class MovementControls():
         if self.movement_progress >= threshold:
             self.movement_progress -= threshold
             direction = self.direction # Direction can change as result of movement.
-            message = self.move()
+            message = await self.move()
             move_status = (
                 f"Moved **{self.sub.name.title()}** in direction **{direction.upper()}**!\n"
                 f"**{self.sub.name.title()}** is now at position **{self.get_position()}**."
@@ -66,8 +66,8 @@ class MovementControls():
     def get_position(self):
         return (self.x, self.y)
 
-    def move(self):
-        self.x, self.y, message = move_on_map(self.sub, self.direction, self.x, self.y)
+    async def move(self):
+        self.x, self.y, message = await move_on_map(self.sub, self.direction, self.x, self.y)
         return message
     
     def status(self, loop):

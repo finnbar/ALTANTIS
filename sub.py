@@ -3,7 +3,8 @@ Manages individual submarines, including their subsystems.
 """
 
 from consts import GAME_SPEED
-from utils import Entity, list_to_and_separated, to_titled_list
+from utils import Entity, list_to_and_separated, to_titled_list, create_or_return_role
+from world import get_square
 
 from discord import File as DFile
 from random import choice, random, shuffle
@@ -68,6 +69,49 @@ class Submarine(Entity):
     
     def damage(self, amount):
         self.power.damage(amount)
+    
+    async def docking(self, guild):
+        """
+        Finds all members of this sub (by finding those with the relevant role)
+        and gives them the docked-at-{base_name} role.
+        This is undone when the sub is activated.
+        """
+        def has_subname_role(member):
+            roles = member.roles
+            role_names = map(lambda r: r.name, roles)
+            return self.name in role_names
+
+        (x, y) = self.movement.get_position()
+        square = get_square(x, y)
+        location = square.docked_at()
+        if location:
+            role_name = f"docked-at-{location.lower()}"
+            in_sub = filter(has_subname_role, guild.members)
+            role = await create_or_return_role(guild, role_name)
+            for member in in_sub:
+                await member.add_roles(role)
+            await self.send_to_all(f"Team has left submarine at **{location.title()}**. You will be automatically returned when the submarine is turned back on.")
+            return "Successfully left the submarine."
+        return "Unable to leave the submarine."
+    
+    async def undocking(self, guild):
+        """
+        Finds all members of this sub (by finding those with the relevant role)
+        and then removes any docked-at-{x} role.
+        Call this when a sub is activated.
+        """
+        def has_subname_role(member):
+            roles = member.roles
+            role_names = map(lambda r: r.name, roles)
+            return self.name in role_names
+
+        in_sub = filter(has_subname_role, guild.members)
+        for member in in_sub:
+            roles_to_remove = []
+            for role in member.roles:
+                if str.startswith(role.name, "docked-at-"):
+                    roles_to_remove.append(role)
+            await member.remove_roles(*roles_to_remove)
     
     def to_dict(self):
         """

@@ -117,6 +117,15 @@ def to_pair_list(items):
         pairs.append((items[i], int(items[i+1])))
     return pairs
 
+# Roles helper
+
+async def create_or_return_role(guild, role, **kwargs):
+    all_roles = await guild.fetch_roles()
+    for r in all_roles:
+        if r.name == role:
+            return r
+    return await guild.create_role(name=role, **kwargs)
+
 # Helper class for dealing with NPCs and Submarines together.
 
 class Entity():

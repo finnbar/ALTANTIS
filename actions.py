@@ -2,7 +2,7 @@
 The backend for all Discord actions, which allow players to control their sub.
 """
 
-from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
+from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list, create_or_return_role
 from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
 from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN, CONTROL_ROLE
@@ -17,7 +17,6 @@ def move(direction, subname):
     Records the team's direction.
     We then react to the message accordingly.
     """
-    print("Setting direction of", subname, "to", direction)
     if subname in get_subs():
         # Store the move and return the correct emoji.
         if get_sub(subname).movement.set_direction(direction):
@@ -28,28 +27,34 @@ def teleport(subname, x, y):
     """
     Teleports team to (x,y), checking if the space is in the world.
     """
-    print("Teleporting", subname, "to", (x,y))
     if subname in get_subs():
         sub = get_sub(subname)
         if sub.movement.set_position(x, y):
             return OKAY_REACT
     return FAIL_REACT
 
-async def set_activation(team, value):
+async def set_activation(team, guild, value):
     """
     Sets the submarine's power to `value`.
     """
     sub = get_sub(team)
     if sub:
-        print("Setting power of", team, "to", value)
         if sub.power.activated() == value:
             return Message(f"{team.title()} activation unchanged.")
         sub.power.activate(value)
         if sub.power.activated():
+            await sub.undocking(guild)
             await sub.send_to_all(f"{team.title()} is **ON** and running! Current direction: **{sub.movement.get_direction().upper()}**.")
             return OKAY_REACT
         await sub.send_to_all(f"{team.title()} is **OFF** and halted!")
         return OKAY_REACT
+    return FAIL_REACT
+
+async def exit_submarine(team, guild):
+    sub = get_sub(team)
+    if sub:
+        message = await sub.docking(guild)
+        return Message(message)
     return FAIL_REACT
 
 # STATUS
@@ -196,7 +201,6 @@ async def shout_at_team(team, message):
 async def broadcast(team, message):
     sub = get_sub(team)
     if sub and sub.power.activated():
-        print(f"Going to broadcast {message}!")
         result = await sub.comms.broadcast(message)
         if result:
             return OKAY_REACT
@@ -307,13 +311,6 @@ async def explode_square(x, y, power):
 
 # GAME MANAGEMENT
 
-async def create_or_return_role(guild, role, **kwargs):
-    all_roles = await guild.fetch_roles()
-    for r in all_roles:
-        if r.name == role:
-            return r
-    return await guild.create_role(name=role, **kwargs)
-
 async def make_submarine(guild, name, captain, engineer, scientist, x, y):
     """
     Makes a submarine with the name <name> and members Captain, Engineer and Scientist.
@@ -370,7 +367,6 @@ async def register(category, x, y):
     Requires a category with the required subchannels.
     ONLY RUNNABLE BY CONTROL.
     """
-    print("Registering", category.name.lower())
     if add_team(category.name.lower(), category, x, y):
         sub = get_sub(category.name.lower())
         if sub:

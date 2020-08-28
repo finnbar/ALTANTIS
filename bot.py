@@ -46,7 +46,7 @@ class Movement(commands.Cog):
         """
         Activates your submarine, allowing it to move and do actions in real-time.
         """
-        await perform_async(set_activation, ctx, get_team(ctx.channel), True)
+        await perform_async(set_activation, ctx, get_team(ctx.channel), ctx.guild, True)
 
     @commands.command(name="deactivate")
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
@@ -55,7 +55,15 @@ class Movement(commands.Cog):
         Deactivates your submarine, stopping it from moving and performing actions.
         Needed for docking.
         """
-        await perform_async(set_activation, ctx, get_team(ctx.channel), False)
+        await perform_async(set_activation, ctx, get_team(ctx.channel), ctx.guild, False)
+    
+    @commands.command(name="exit_sub")
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
+    async def leave_sub(self, ctx):
+        """
+        Allows crew to leave a sub. Call only while you are docked.
+        """
+        await perform_async(exit_submarine, ctx, get_team(ctx.channel), ctx.guild)
 
 class Status(commands.Cog):
     """

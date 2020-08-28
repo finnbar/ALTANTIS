@@ -58,14 +58,14 @@ class Cell():
             broadcast.append(f"docking station \"{self.attributes['docking'].title()}\"")
         return list_to_and_separated(broadcast).capitalize()
     
-    def on_entry(self, sub):
+    async def on_entry(self, sub):
         # This is what happens when a sub attempts to enter this space.
         # This includes docking and damage.
         if "docking" in self.attributes:
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
             sub.power.activate(False)
             (x, y) = sub.movement.get_position()
-            return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped."
+            return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped. Please call !exit_sub to leave the submarine and enter the docking station."
         if "obstacle" in self.attributes:
             message = sub.damage(1)
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
@@ -95,6 +95,12 @@ class Cell():
             name = self.attributes["docking"].title()
         if name != "":
             return name
+        return None
+    
+    def docked_at(self):
+        # Returns its name if it's a docking station, else None
+        if "docking" in self.attributes:
+            return self.attributes["docking"].title()
         return None
     
     def difficulty(self):
@@ -287,7 +293,7 @@ def explore_submap(pos, dist, exclusions=[], with_distance=False):
 
     return events
 
-def move_on_map(sub, direction, x, y):
+async def move_on_map(sub, direction, x, y):
     motion = directions[direction]
     new_x = x + motion[0]
     new_y = y + motion[1]
@@ -295,7 +301,7 @@ def move_on_map(sub, direction, x, y):
         # Crashed into the boundaries of the world, whoops.
         sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
         return x, y, f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{sub.movement.direction.upper()}**) and did not move this turn!"
-    message = undersea_map[new_x][new_y].on_entry(sub)
+    message = await undersea_map[new_x][new_y].on_entry(sub)
     if undersea_map[new_x][new_y].is_obstacle():
         return x, y, message
     return new_x, new_y, message
