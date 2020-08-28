@@ -382,6 +382,13 @@ class GameManagement(commands.Cog):
         (CONTROL) Loads either the map, state or both from file. You must specify "map", "state" or "both" as the single argument.
         """
         await perform_unsafe(load_game, ctx, arg, bot)
+    
+    @commands.command(name="make_submarine")
+    async def make_sub(self, ctx, name, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int = 0, y : int = 0):
+        """
+        (CONTROL) Creates channels, roles and a sub for the inputted team.
+        """
+        await perform_async_unsafe(make_submarine, ctx, ctx.guild, name, captain, engineer, scientist, x, y)
 
     @commands.command(name="register")
     @commands.has_role(CONTROL_ROLE)

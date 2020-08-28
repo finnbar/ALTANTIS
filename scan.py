@@ -18,7 +18,6 @@ class ScanSystem():
         Shows information about this sub to others based on the strength of
         scanners. This strength is at least zero (comms power - distance).
         This strength allows for secrecy and limited information.
-        TODO: Make this way more interesting. It's currently just sub name.
         Could add direction of motion, whether it's got cargo etc.
         """
         subname = ""

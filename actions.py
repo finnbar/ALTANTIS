@@ -5,10 +5,10 @@ The backend for all Discord actions, which allow players to control their sub.
 from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list
 from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
-from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN
+from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN, CONTROL_ROLE
 from npc import add_npc
 
-import httpx, json
+import httpx, json, discord
 
 # MOVEMENT
 
@@ -306,6 +306,63 @@ async def explode_square(x, y, power):
     return OKAY_REACT
 
 # GAME MANAGEMENT
+
+async def create_or_return_role(guild, role, **kwargs):
+    all_roles = await guild.fetch_roles()
+    for r in all_roles:
+        if r.name == role:
+            return r
+    return await guild.create_role(name=role, **kwargs)
+
+async def make_submarine(guild, name, captain, engineer, scientist, x, y):
+    """
+    Makes a submarine with the name <name> and members Captain, Engineer and Scientist.
+    Creates a category with <name>, then channels for each player.
+    Then creates the relevant roles (if they don't exist already), and assigns them to players.
+    Finally, we register this team as a submarine.
+    """
+    if get_sub(name):
+        return FAIL_REACT
+
+    category = await guild.create_category_channel(name)
+    # Create roles if needed.
+    captain_role = await create_or_return_role(guild, "captain", mentionable=True)
+    engineer_role = await create_or_return_role(guild, "engineer", mentionable=True)
+    scientist_role = await create_or_return_role(guild, "scientist", mentionable=True)
+    control_role = await create_or_return_role(guild, CONTROL_ROLE, hoist=True, mentionable=True)
+    altantis_role = await create_or_return_role(guild, "ALTANTIS", hoist=True)
+    submarine_role = await create_or_return_role(guild, name, hoist=True)
+    specific_capt = await create_or_return_role(guild, f"captain-{name}")
+    specific_engi = await create_or_return_role(guild, f"engineer-{name}")
+    specific_sci = await create_or_return_role(guild, f"scientist-{name}")
+
+    # Add roles to players.
+    await captain.add_roles(captain_role, submarine_role, specific_capt)
+    await engineer.add_roles(engineer_role, submarine_role, specific_engi)
+    await scientist.add_roles(scientist_role, submarine_role, specific_sci)
+
+    # Add perms to created text channels.
+    def allow_control_and_one(channel):
+        if channel is not None:
+            return {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                channel: discord.PermissionOverwrite(read_messages=True),
+                control_role: discord.PermissionOverwrite(read_messages=True),
+                altantis_role: discord.PermissionOverwrite(read_messages=True)
+            }
+        else:
+            return {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                control_role: discord.PermissionOverwrite(read_messages=True),
+                altantis_role: discord.PermissionOverwrite(read_messages=True)
+            }
+
+    await category.create_text_channel("captain", overwrites=allow_control_and_one(specific_capt))
+    await category.create_text_channel("engineer", overwrites=allow_control_and_one(specific_engi))
+    await category.create_text_channel("scientist", overwrites=allow_control_and_one(specific_sci))
+    await category.create_text_channel("control", overwrites=allow_control_and_one(None))
+    await category.create_voice_channel("submarine", overwrites=allow_control_and_one(submarine_role))
+    return await register(category, x, y)
 
 async def register(category, x, y):
     """
