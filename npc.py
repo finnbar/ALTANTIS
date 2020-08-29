@@ -10,7 +10,7 @@ from utils import Entity
 class NPC(Entity):
     def __init__(self, name, x, y):
         self.health = 1
-        self.treasure = None
+        self.treasure = []
         self.x = x
         self.y = y
         self.name = name
@@ -43,8 +43,8 @@ class NPC(Entity):
         if self.damage_to_apply > 0:
             self.health -= self.damage_to_apply
             if self.health <= 0:
-                if self.treasure:
-                    world.bury_treasure_at(self.treasure, (self.x, self.y))
+                for treasure in self.treasure:
+                    world.bury_treasure_at(treasure, (self.x, self.y))
                 await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage and **died**!")
                 await self.deathrattle()
                 kill_npc(self.name)
@@ -66,8 +66,9 @@ class NPC(Entity):
         return ""
     
     def move(self, dx, dy):
-        self.x += dx
-        self.y += dy
+        if world.in_world(self.x + dx, self.y + dy):
+            self.x += dx
+            self.y += dy
     
     def get_position(self):
         return (self.x, self.y)

@@ -60,7 +60,8 @@ New features:
 - [x] Save NPCs to file!
 - [x] Automatic Discord server set up.
 - [x] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
-- [ ] NPCs can trade. This is implemented by an `!interact` command, which does some command with NPCs.
+- [x] NPCs can trade. This is implemented by an `!interact` command, which does some command with NPCs.
+- [ ] Map generation!
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.

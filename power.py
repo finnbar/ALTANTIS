@@ -137,8 +137,10 @@ class PowerManager():
         Will not change anything if it would mean you go over the power cap.
         If you name a system that doesn't exist, it will not apply the changes.
         """
+        if "shocked" in self.sub.upgrades.keywords:
+            return "Cannot change power while shocked!"
         if len(systems) > self.total_power - self.power_use(self.scheduled_power):
-            return f"You will exceed your power cap with this! Operation cancelled."
+            return "You will exceed your power cap with this! Operation cancelled."
         power_copy = self.scheduled_power.copy()
         for system in systems:
             if system in power_copy:
@@ -158,6 +160,8 @@ class PowerManager():
         Attempts to remove power from all of the named systems in `systems`.
         If you specify a system that doesn't exist, it will fail.
         """
+        if "shocked" in self.sub.upgrades.keywords:
+            return "Cannot change power while shocked!"
         power_copy = self.scheduled_power.copy()
         for system in systems:
             if system in power_copy:
