@@ -395,12 +395,16 @@ class GameManagement(commands.Cog):
     @commands.has_role(CONTROL_ROLE)
     async def save(self, ctx):
         """
-        (CONTROL) Saves the game. Do NOT use this if the main loop is calculating.
-        If you're unsure what that means, do NOT use this command unless asked.
-        This is safest when the main loop is NOT running.
-        (This is because async magic means you might save progress midway through the main loop, which would cause the state to be invalid and all the submarines to be out of sync. I am not exactly sure of the consequences of saving during loop exection, but I am worried enough to put this comment here.)
+        (CONTROL) Saves the game. Please do not do this unless you know what you're doing.
+        The game automatically saves every turn, so that should be enough.
+        However, this is useful if you are about to do something that might break, or if you want to save the starting state of the game without running any turns.
+        I will reemphasise this, however: PLEASE DO NOT USE THIS COMMAND UNLESS YOU KNOW WHAT YOU'RE DOING.
+        It may protect you from running it at the same time as the main loop, but it won't protect you from stupidity.
         """
-        await perform_unsafe(save_game, ctx)
+        if save_game():
+            await OKAY_REACT.do_status(ctx)
+        else:
+            await FAIL_REACT.do_status(ctx)
     
     @commands.command(name="make_submarine")
     async def make_sub(self, ctx, name, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int = 0, y : int = 0):

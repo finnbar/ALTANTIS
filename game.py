@@ -9,11 +9,16 @@ from npc import npc_tick, npcs_to_dict, npcs_from_dict
 
 import json
 
+NO_SAVE = False
+
 async def perform_timestep(counter):
     """
     Does all time-related stuff, including movement, power changes and so on.
     Called at a time interval, when allowed.
     """
+    global NO_SAVE
+    NO_SAVE = True
+
     print(f"Running turn {counter}.")
 
     def is_active_sub(subname):
@@ -103,6 +108,7 @@ async def perform_timestep(counter):
         if messages["scientist"] != "":
             await sub.send_message(f"{message_opening}{messages['scientist'][:-1]}", "scientist")
 
+    NO_SAVE = False
     save_game()
 
 def save_game():
@@ -112,6 +118,9 @@ def save_game():
     This must be called at the end of the loop, as to guarantee that we're
     not about to overwrite important data being written during it.
     """
+    if NO_SAVE:
+        print("SAVE FAILED")
+        return False
     state_dict = state_to_dict()
     map_dict = map_to_dict()
     npcs_dict = npcs_to_dict()
@@ -121,6 +130,7 @@ def save_game():
         map_file.write(json.dumps(map_dict))
     with open("npcs.json", "w") as npcs_file:
         npcs_file.write(json.dumps(npcs_dict))
+    return True
 
 def load_game(which, bot):
     """
