@@ -59,15 +59,14 @@ New features:
 - [x] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
 - [x] Save NPCs to file!
 - [x] Automatic Discord server set up.
-- [ ] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
-- [ ] NPCs can trade.
+- [x] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
+- [ ] NPCs can trade. This is implemented by an `!interact` command, which does some command with NPCs.
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
 - [x] Default to lowercase for all inputs.
 - [x] Emoji map.
-- [ ] !save (determine if this is a safe command to add)
-- [ ] !disable/!enable, which disables commands for teams. (as a control-available safety valve).
+- [x] !save (determine if this is a safe command to add)
 
 Fixes:
 - [x] Trading should cease at movement rather than tick.

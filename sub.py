@@ -90,7 +90,8 @@ class Submarine(Entity):
             role = await create_or_return_role(guild, role_name)
             for member in in_sub:
                 await member.add_roles(role)
-            await self.send_to_all(f"Team has left submarine at **{location.title()}**. You will be automatically returned when the submarine is turned back on.")
+            await self.send_to_all(f"Team has left submarine at **{location.title()}**. Submarine is now off it is wasn't already. You will be automatically returned when the submarine is turned back on.")
+            self.power.activate(False)
             return "Successfully left the submarine."
         return "Unable to leave the submarine."
     

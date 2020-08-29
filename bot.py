@@ -7,7 +7,7 @@ from discord.ext import commands, tasks
 from typing import Optional
 
 from actions import *
-from game import perform_timestep, load_game
+from game import perform_timestep, load_game, save_game
 from utils import OKAY_REACT
 from consts import *
 from control import init_control_notifs, init_news_notifs
@@ -390,6 +390,17 @@ class GameManagement(commands.Cog):
         (CONTROL) Loads either the map, state or both from file. You must specify "map", "state" or "both" as the single argument.
         """
         await perform_unsafe(load_game, ctx, arg, bot)
+    
+    @commands.command(name="save")
+    @commands.has_role(CONTROL_ROLE)
+    async def save(self, ctx):
+        """
+        (CONTROL) Saves the game. Do NOT use this if the main loop is calculating.
+        If you're unsure what that means, do NOT use this command unless asked.
+        This is safest when the main loop is NOT running.
+        (This is because async magic means you might save progress midway through the main loop, which would cause the state to be invalid and all the submarines to be out of sync. I am not exactly sure of the consequences of saving during loop exection, but I am worried enough to put this comment here.)
+        """
+        await perform_unsafe(save_game, ctx)
     
     @commands.command(name="make_submarine")
     async def make_sub(self, ctx, name, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int = 0, y : int = 0):
