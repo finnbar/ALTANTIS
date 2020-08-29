@@ -53,6 +53,9 @@ class Inventory():
         return True
     
     def remove_many(self, items):
+        """
+        NB: This doesn't check properly if the removal is possible, so be careful!
+        """
         for item in items:
             if not self.remove(item, items[item]):
                 return False

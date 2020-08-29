@@ -272,6 +272,14 @@ class Inventory(commands.Cog):
         Rejects and ends the current trade.
         """
         await perform_async(reject_offer, ctx, get_team(ctx.channel))
+    
+    @commands.command(name="interact")
+    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
+    async def interact(self, ctx, arg = None):
+        """
+        Some NPCs will ask you to call this.
+        """
+        await perform_async(sub_interacts, ctx, get_team(ctx.channel), arg)
 
     @commands.command(name="give")
     @commands.has_role(CONTROL_ROLE)

@@ -74,12 +74,15 @@ class NPC(Entity):
     
     def is_weak(self):
         return True
+    
+    async def interact(self, sub):
+        return ""
 
 import npc_templates as _npc
 
 # Available NPC types. Note that "NPC" is used liberally here - it can refer to
 # monsters, non-player characters, and structures such as mines.
-npc_classes = [_npc.Squid, _npc.NewsBouy]
+npc_classes = [_npc.Squid, _npc.NewsBouy, _npc.GoldTrader]
 npc_types = {}
 for cl in npc_classes:
     npc_types[cl.classname] = cl
@@ -107,6 +110,16 @@ def filtered_npcs(pred):
         if pred(npcs[npc]):
             result.append(npc)
     return result
+
+async def interact_in_square(sub, square, arg):
+    in_square = filtered_npcs(lambda npc: (npc.x, npc.y) == square)
+    message = ""
+    for npcname in in_square:
+        npc = get_npc(npcname)
+        npc_message = await npc.interact(sub, arg)
+        if npc_message != "":
+            message += f"Interaction with **{npcname.title()}**: {npc_message}\n"
+    return message
 
 def get_npc(npcname):
     if npcname in npcs:

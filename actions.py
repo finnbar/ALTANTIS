@@ -6,7 +6,7 @@ from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list, create_o
 from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
 from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN, CONTROL_ROLE
-from npc import add_npc
+from npc import add_npc, interact_in_square
 
 import httpx, json, discord
 
@@ -241,6 +241,15 @@ async def reject_offer(team):
     sub = get_sub(team)
     if sub:
         return Message(await sub.inventory.reject_trade())
+    return FAIL_REACT
+
+async def sub_interacts(team, arg):
+    sub = get_sub(team)
+    if sub:
+        message = await interact_in_square(sub, sub.movement.get_position(), arg)
+        if message != "":
+            return Message(message)
+        return Message("Nothing to report.")
     return FAIL_REACT
 
 async def give_item_to_team(team, item, quantity):
