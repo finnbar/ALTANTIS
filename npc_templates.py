@@ -7,8 +7,6 @@ from consts import CURRENCY_NAME, RESOURCES
 
 import random
 
-# TODO: Giant Sea Urchins (spiky, deal damage on entry, slightly stealthy), Angler Fish (standard attacker, very stealthy), Sharks (require motion tracking), Giant Crabs (snip crane cables (adds "snipped" keyword), dealing two damage, drop crab meat), Manta Rays (pretty, do little else)
-
 class Squid(npc.NPC):
     classname = "squid"
     def __init__(self, name, x, y):
@@ -60,6 +58,24 @@ class Octopus(npc.NPC):
         else:
             self.tick_count += 1
 
+class Shark(npc.NPC):
+    classname = "shark"
+    def __init__(self, name, x, y):
+        super().__init__(name, x, y)
+        self.tick_count = 0
+        self.health = 2
+        self.treasure = [random.choice(RESOURCES)]
+    
+    async def attack(self):
+        if self.tick_count >= 2:
+            self.tick_count -= 2
+            self.move_towards_sub(4)
+            for entity in world.all_in_square(self.get_position()):
+                if entity.name != self.name:
+                    await self.do_attack(entity, 1, f"The shark {self.name.title()} snapped you for one damage!")
+        else:
+            self.tick_count += 1
+
 class Whale(npc.NPC):
     classname = "whale"
     def __init__(self, name, x, y):
@@ -78,10 +94,29 @@ class Dolphin(npc.NPC):
     def __init__(self, name, x, y):
         super().__init__(name, x, y)
         self.health = 2
-        self.treasure = "unexploded bomb*"
+        self.treasure = ["unexploded bomb*"]
 
     async def interact(self, *_):
         return "The dolphin made a few happy noises!"
+
+class MantaRay(npc.NPC):
+    classname = "mantaray"
+    def __init__(self, name, x, y):
+        super().__init__(name, x, y)
+        self.health = 2
+        self.treasure = [random.choice(RESOURCES)] * 2
+
+    async def interact(self, *_):
+        return "The manta ray swims happily!"
+    
+    async def deathrattle(self):
+        await super().deathrattle()
+        # Then summon four eel as a "fuck you".
+        locations = [(0,1), (1,0), (-1,0), (0,-1)]
+        locations = list(map(lambda p: (self.x+p[0], self.y+p[1]), locations))
+        rand_id = random.randrange(100000)
+        for location in locations:
+            npc.add_npc(f"Manta Ray Revenge Squad ({location[0]}{location[1]}{rand_id})", "eel", location[0], location[1])
 
 class Eel(npc.NPC):
     classname = "eel"
@@ -103,7 +138,61 @@ class Eel(npc.NPC):
                     entity.upgrades.add_keyword("shocked", 5, 0)
         else:
             self.tick_count += 1
+
+class AnglerFish(npc.NPC):
+    classname = "angler"
+    def __init__(self, name, x, y):
+        super().__init__(name, x, y)
+        self.tick_count = 0
+        self.health = 2
+        self.treasure = [CURRENCY_NAME, random.choice(RESOURCES)]
+        self.stealth = 2
     
+    async def attack(self):
+        if self.tick_count >= 2:
+            self.tick_count -= 2
+            for entity in world.all_in_square(self.get_position()):
+                if entity.name != self.name:
+                    await self.do_attack(entity, 1, f"The angler fish {self.name.title()} jumped out from hiding and did 1 damage!")
+        else:
+            self.tick_count += 1
+
+class Urchin(npc.NPC):
+    classname = "urchin"
+    def __init__(self, name, x, y):
+        super().__init__(name, x, y)
+        self.health = 2
+        self.treasure = [random.choice(RESOURCES)]
+        self.stealth = 1
+        # Which subs were in this square previously.
+        self.visited = []
+    
+    async def attack(self):
+        new_visited = []
+        for entity in world.all_in_square(self.get_position()):
+            if type(entity) is sub.Submarine:
+                new_visited.append(entity.name)
+                if entity.name not in self.visited:
+                    await self.do_attack(entity, 1, f"The urchin {self.name.title()} jumped out from hiding and did 1 damage on your arrival!")
+        self.visited = new_visited
+
+class Crab(npc.NPC):
+    classname = "crab"
+    def __init__(self, name, x, y):
+        super().__init__(name, x, y)
+        self.treasure = ["crab meat"]
+    
+    async def attack(self):
+        for entity in world.all_in_square(self.get_position()):
+            if type(entity) is sub.Submarine:
+                if entity.inventory.crane_down:
+                    # Snip the crane lead and otherwise mess it up.
+                    if await self.do_attack(entity, 2, f"The crab {self.name.title()} snipped at your crane cable and caused a balance issue, dealing two damage!"):
+                        entity.upgrades.add_keyword("snipped")
+                        message = entity.inventory.crane_falters()
+                        if message:
+                            await entity.send_message(message, "captain")
+
 class NewsBouy(npc.NPC):
     classname = "bouy"
     def __init__(self, name, x, y):

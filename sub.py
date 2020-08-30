@@ -70,6 +70,9 @@ class Submarine(Entity):
     def damage(self, amount):
         self.power.damage(amount)
     
+    def get_position(self):
+        return self.movement.get_position()
+    
     async def docking(self, guild):
         """
         Finds all members of this sub (by finding those with the relevant role)

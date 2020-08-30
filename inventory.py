@@ -73,11 +73,13 @@ class Inventory():
     
     def drop_crane(self):
         if self.sub.power.get_power("crane") == 0:
-            return False
+            return "Crane is unpowered!"
+        if "snipped" in self.sub.upgrades.keywords:
+            return "Crane cable was snipped so cannot be lowered!"
         if not self.schedule_crane and not self.crane_down:
             self.schedule_crane = True
-            return True
-        return False
+            return "Crane scheduled to lower!"
+        return "Crane is already in use!"
     
     def send_crane_down(self):
         # The crane goes down!
@@ -97,16 +99,20 @@ class Inventory():
         await notify_control(f"**{self.sub.name.title()}** picked up treasure **{to_titled_list(treasure)}**!")
         return treasure
     
+    def crane_falters(self):
+        # Drop what's currently being held.
+        if self.crane_holds:
+            treasure = self.crane_holds
+            for treas in treasure:
+                bury_treasure_at(treas, self.sub.movement.get_position())
+            self.crane_holds = []
+            self.crane_down = False
+            return f"Dropped {to_titled_list(treasure)} because the crane faltered!"
+        return ""
+
     async def crane_tick(self):
         if self.sub.power.get_power("crane") == 0:
-            # Drop what's currently being held.
-            if self.crane_holds:
-                treasure = self.crane_holds
-                for treas in treasure:
-                    bury_treasure_at(treas, self.sub.movement.get_position())
-                self.crane_holds = []
-                return f"Dropped {to_titled_list(treasure)} because the crane was unpowered..."
-            return ""
+            return self.crane_falters()
         if self.schedule_crane and not self.crane_down:
             self.send_crane_down()
             if not "fastcrane" in self.sub.upgrades.keywords:

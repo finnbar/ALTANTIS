@@ -89,6 +89,9 @@ def determine_direction(pa, pb):
         x_val = "e"
     return y_val + x_val
 
+def go_in_direction(direction):
+    return directions[direction]
+
 # Textual utilities
 
 def list_to_and_separated(items):

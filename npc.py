@@ -3,9 +3,9 @@ Deals with NPCs in general, and how they operate.
 (Individual NPCs will be put elsewhere.)
 """
 
-import world
+import world, sub
 from control import notify_control
-from utils import Entity
+from utils import Entity, diagonal_distance, determine_direction, go_in_direction
 
 class NPC(Entity):
     def __init__(self, name, x, y):
@@ -29,12 +29,14 @@ class NPC(Entity):
         if self.attackable(entity):
             await entity.send_message(message, "scientist")
             entity.damage(amount)
+            return True
+        return False
 
     def attackable(self, entity):
-        if type(entity) == NPC:
-            return not "camo" in entity.keywords
-        else:
+        if type(entity) is sub.Submarine:
             return not "camo" in entity.upgrades.keywords
+        else:
+            return not "camo" in entity.keywords
 
     async def send_message(self, content, _):
         await notify_control(f"Event from {self.name.title()}! {content}")
@@ -70,6 +72,22 @@ class NPC(Entity):
             self.x += dx
             self.y += dy
     
+    def move_towards_sub(self, dist):
+        """
+        Looks for the closest sub in range, and moves towards it.
+        """
+        nearby_entities = world.all_in_submap(self.get_position(), dist)
+        closest = (None, 0)
+        for entity in nearby_entities:
+            if type(entity) is sub.Submarine:
+                this_dist = diagonal_distance(self.get_position(), entity.get_position())
+                if (closest[0] is None) or this_dist < closest[1]:
+                    closest = (entity, this_dist)
+        if closest[0] is not None:
+            direction = determine_direction(self.get_position(), closest[0].get_position())
+            if direction is not None:
+                self.move(*go_in_direction(direction))
+    
     def get_position(self):
         return (self.x, self.y)
     
@@ -83,7 +101,7 @@ import npc_templates as _npc
 
 # Available NPC types. Note that "NPC" is used liberally here - it can refer to
 # monsters, non-player characters, and structures such as mines.
-npc_classes = [_npc.Squid, _npc.NewsBouy, _npc.GoldTrader]
+npc_classes = [_npc.Squid, _npc.BigSquid, _npc.Dolphin, _npc.Eel, _npc.Mine, _npc.StormGenerator, _npc.Whale, _npc.Octopus, _npc.NewsBouy, _npc.GoldTrader, _npc.Urchin, _npc.MantaRay, _npc.AnglerFish, _npc.Shark, _npc.Crab]
 npc_types = {}
 for cl in npc_classes:
     npc_types[cl.classname] = cl

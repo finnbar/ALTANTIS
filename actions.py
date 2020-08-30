@@ -294,8 +294,8 @@ async def answer_team_puzzle(team, answer):
 
 def drop_crane(team):
     sub = get_sub(team)
-    if sub and sub.inventory.drop_crane():
-        return OKAY_REACT
+    if sub:
+        return Message(sub.inventory.drop_crane())
     return FAIL_REACT
 
 # DANGER ZONE
