@@ -8,6 +8,8 @@ import state, npc
 from random import choice
 
 class Cell():
+    # A list of characters able to be used for wall alternate styles (such as in bases)
+    WALL_STYLES = ['']
     def __init__(self):
         # The items this square contains.
         self.treasure = []
@@ -76,7 +78,10 @@ class Cell():
         if "t" in to_show and len(self.treasure) > 0:
             return "T"
         if "w" in to_show and "obstacle" in self.attributes:
-            return "W"
+            if "wallstyle" in self.attributes and self.attributes['wallstyle'] in self.WALL_STYLES:
+                return self.attributes['wallstyle']
+            else:
+                return "W"
         if "d" in to_show and "docking" in self.attributes:
             return "D"
         if "s" in to_show and "storm" in self.attributes:
