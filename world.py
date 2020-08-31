@@ -5,9 +5,12 @@ Deals with the world map, which submarines explore.
 from utils import diagonal_distance, directions, reverse_dir, determine_direction, list_to_and_separated
 import state, npc
 
-from random import choice
+import random
 
 class Cell():
+    # A list of implemented attributes
+    # Other attributes will do nothing, so are prevented from being added
+    ATTRIBUTES = ["deposit", "diverse", "hiddenness", "storm", "calm", "docking", "obstacle", "ruins", "junk"]
     # A list of characters able to be used for wall alternate styles (such as in bases)
     # Currently just b for base.
     WALL_STYLES = ["b"]
@@ -18,7 +21,17 @@ class Cell():
         # throughout the class. A cell with no attributes acts like Empty from
         # the previous version - has no extra difficulty etc.
         self.attributes = {}
-    
+
+    def cell_tick(self):
+        if not ("deposit" in self.attributes or "diverse" in self.attributes):
+            return
+        if "deposit" in self.attributes and random.random() < 0.03:
+            self.treasure.append(random.choice(["tool", "plating"]))
+        if "diverse" in self.attributes and random.random() < 0.03:
+            self.treasure.append("specimen")
+        if "ruins" in self.attributes and random.random() < 0.03:
+            self.treasure.append(random.choice(["tool", "circuitry"]))
+
     def treasure_string(self):
         return list_to_and_separated(list(map(lambda t: t.title(), self.treasure)))
     
@@ -33,7 +46,7 @@ class Cell():
         power = min(power, len(self.treasure))
         treasures = []
         for _ in range(power):
-            treas = choice(self.treasure)
+            treas = random.choice(self.treasure)
             self.treasure.remove(treas)
             treasures.append(treas)
         return treasures
@@ -54,9 +67,17 @@ class Cell():
                 broadcast.append(self.treasure_string())
             else:
                 plural = ""
-                if len(self.treasure) > 1:
+                if len(self.treasure) != 1:
                     plural = "s"
                 broadcast.append(f"{len(self.treasure)} treasure{plural}")
+        if "diverse" in self.attributes:
+            broadcast.append("a diverse ecosystem")
+        if "ruins" in self.attributes:
+            broadcast.append(f"some ruins ({self.attributes['ruins']})")
+        if "junk" in self.attributes:
+            broadcast.append("some submarine debris")
+        if "deposit" in self.attributes:
+            broadcast.append("a mineral deposit")
         if "docking" in self.attributes:
             broadcast.append(f"docking station \"{self.attributes['docking'].title()}\"")
         return list_to_and_separated(broadcast).capitalize()
@@ -78,6 +99,14 @@ class Cell():
     def to_char(self, to_show):
         if "t" in to_show and len(self.treasure) > 0:
             return "T"
+        if "r" in to_show and "ruins" in self.attributes:
+            return "R"
+        if "j" in to_show and "junk" in self.attributes:
+            return "J"
+        if "m" in to_show and "deposit" in self.attributes:
+            return "M"
+        if "e" in to_show and "diverse" in self.attributes:
+            return "D"
         if "w" in to_show and "obstacle" in self.attributes:
             if "wallstyle" in self.attributes and self.attributes['wallstyle'] in self.WALL_STYLES:
                 return self.attributes['wallstyle']
@@ -117,6 +146,8 @@ class Cell():
         return 4
     
     def add_attribute(self, attr, val=""):
+        if attr not in self.ATTRIBUTES:
+            return False
         if attr not in self.attributes:
             self.attributes[attr] = val
             return True
@@ -156,6 +187,11 @@ def pick_up_treasure(pos, power):
     if in_world(x, y):
         return undersea_map[x][y].pick_up(power)
     return []
+
+def map_tick():
+    for x in range(X_LIMIT):
+        for y in range(Y_LIMIT):
+            undersea_map[x][y].cell_tick()
 
 def investigate_square(x, y, loop):
     if in_world(x, y):

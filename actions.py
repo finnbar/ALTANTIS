@@ -64,7 +64,7 @@ async def print_map(team, options=["w", "d", "s"]):
     Prints the map from the perspective of one submarine, or all if team is None.
     """
     subs = []
-    max_options = ["w", "d", "s", "t", "n", "c"]
+    max_options = ["w", "d", "s", "t", "n", "c", "r", "j", "m", "e"]
     if options is True:
         options = max_options
     options = list(filter(lambda v: v in max_options, options))

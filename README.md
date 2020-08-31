@@ -63,10 +63,10 @@ New features:
 - [x] NPCs can trade. This is implemented by an `!interact` command, which does some command with NPCs.
 - [x] Move NPCs to an integer ID system, and allow for deletion by ID. (Thus relaxing the identical name constraint.) Also movement by ID. Just generally getting control of NPCs by ID.
 - [x] Allow control to remove the engineering puzzles part of a submarine (for if someone urgently needs to leave). Can be done as a keyword.
-- [ ] Implement "ticking" - if you take damage, shit might explode.
+- [x] Implement "ticking" - if you take damage, shit might explode.
+- [x] Resource-rich squares that scanners can pick up.
 - [ ] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
 - [ ] Team-specific mechanics.
-- [ ] Resource-rich squares that scanners can pick up.
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.

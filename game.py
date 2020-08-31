@@ -3,7 +3,7 @@ Runs the game, performing the right actions at fixed time intervals.
 """
 
 from state import get_subs, get_sub, state_to_dict, state_from_dict
-from world import map_to_dict, map_from_dict
+from world import map_to_dict, map_from_dict, map_tick
 from utils import OKAY_REACT, FAIL_REACT
 from npc import npc_tick, npcs_to_json, npcs_from_json
 
@@ -52,6 +52,8 @@ async def perform_timestep(counter):
     
     # NPCs
     await npc_tick()
+    # Map
+    map_tick()
 
     # The crane
     for subname in subsubset:
