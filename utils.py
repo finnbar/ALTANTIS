@@ -132,13 +132,8 @@ async def create_or_return_role(guild, role, **kwargs):
 # Helper class for dealing with NPCs and Submarines together.
 
 class Entity():
-    def __init__(self, name, x, y):
-        self.name = name
-        self.x = x
-        self.y = y
-
     def get_position(self):
-        return (self.x, self.y)
+        raise NotImplementedError
 
     def damage(self, amount):
         raise NotImplementedError
@@ -154,3 +149,9 @@ class Entity():
         Whether the submarine is affected by stunning shots.
         """
         return False
+    
+    def name(self):
+        """
+        The primary key.
+        """
+        raise NotImplementedError

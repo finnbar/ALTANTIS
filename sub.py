@@ -28,7 +28,7 @@ class Submarine(Entity):
         from weapons import Weaponry
         from upgrades import Upgrades
 
-        self.name = name
+        self._name = name
         self.channels = channels
         self.power = PowerManager(self)
         self.comms = CommsSystem(self)
@@ -38,10 +38,13 @@ class Submarine(Entity):
         self.inventory = Inventory(self)
         self.weapons = Weaponry(self)
         self.upgrades = Upgrades(self)
+    
+    def name(self):
+        return self._name.title()
 
     def status_message(self, loop):
         message = (
-            f"Status for **{self.name.title()}**\n"
+            f"Status for **{self.name()}**\n"
             f"------------------------------------\n\n"
         )
         
@@ -82,7 +85,7 @@ class Submarine(Entity):
         def has_subname_role(member):
             roles = member.roles
             role_names = map(lambda r: r.name, roles)
-            return self.name in role_names
+            return self._name in role_names
 
         (x, y) = self.movement.get_position()
         square = get_square(x, y)
@@ -107,7 +110,7 @@ class Submarine(Entity):
         def has_subname_role(member):
             roles = member.roles
             role_names = map(lambda r: r.name, roles)
-            return self.name in role_names
+            return self._name in role_names
 
         in_sub = filter(has_subname_role, guild.members)
         for member in in_sub:

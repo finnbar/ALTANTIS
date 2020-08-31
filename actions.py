@@ -2,11 +2,11 @@
 The backend for all Discord actions, which allow players to control their sub.
 """
 
-from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list, create_or_return_role
+from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list, create_or_return_role, list_to_and_separated
 from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
 from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN, CONTROL_ROLE
-from npc import add_npc, interact_in_square
+from npc import add_npc, interact_in_square, kill_npc, get_npc_types
 
 import httpx, json, discord
 
@@ -302,7 +302,7 @@ def drop_crane(team):
 
 async def kill_sub(team, verify):
     sub = get_sub(team)
-    if sub and sub.name == verify:
+    if sub and sub._name == verify:
         sub.damage(sub.power.total_power)
         await sub.send_to_all("Submarine took catastrophic damage and will die on next game loop.")
         return OKAY_REACT
@@ -402,8 +402,19 @@ def remove_attribute_from(x, y, attribute):
         return OKAY_REACT
     return FAIL_REACT
 
-def add_npc_to_map(name, ntype, x, y):
-    return Message(add_npc(name, ntype, x, y))
+# NPCs
+
+def add_npc_to_map(ntype, x, y):
+    return Message(add_npc(ntype, x, y))
+
+def remove_npc_from_map(npcid):
+    if kill_npc(npcid):
+        return OKAY_REACT
+    return FAIL_REACT
+
+def printout_npc_types():
+    types = list_to_and_separated(get_npc_types())
+    return Message(f"Possible NPC types: {types}.")
 
 # WEAPONRY
 

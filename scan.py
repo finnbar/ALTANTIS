@@ -25,7 +25,7 @@ class ScanSystem():
         if "stealthy" in self.sub.upgrades.keywords and strength < min(3, unused_power):
             return ""
         if strength > 0:
-            subname = f" {self.sub.name.title()}"
+            subname = f" {self.sub.name()}"
         else:
             subname = " ???"
         return f"Submarine{subname}"
@@ -40,7 +40,7 @@ class ScanSystem():
             return []
         my_position = self.sub.movement.get_position()
         with_distance = "triangulation" in self.sub.upgrades.keywords
-        events = explore_submap(my_position, scanners_range, [self.sub.name], with_distance)
+        events = explore_submap(my_position, scanners_range, sub_exclusions=[self.sub._name], with_distance=with_distance)
         shuffle(events)
         return events
     

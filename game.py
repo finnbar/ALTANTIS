@@ -5,7 +5,7 @@ Runs the game, performing the right actions at fixed time intervals.
 from state import get_subs, get_sub, state_to_dict, state_from_dict
 from world import map_to_dict, map_from_dict
 from utils import OKAY_REACT, FAIL_REACT
-from npc import npc_tick, npcs_to_dict, npcs_from_dict
+from npc import npc_tick, npcs_to_json, npcs_from_json
 
 import json
 
@@ -123,7 +123,7 @@ def save_game():
         return False
     state_dict = state_to_dict()
     map_dict = map_to_dict()
-    npcs_dict = npcs_to_dict()
+    npcs_dict = npcs_to_json()
     with open("state.json", "w") as state_file:
         state_file.write(json.dumps(state_dict))
     with open("map.json", "w") as map_file:
@@ -154,5 +154,5 @@ def load_game(which, bot):
         with open("npcs.json", "r") as npc_file:
             npc_string = npc_file.read()
             npc_json = json.loads(npc_string)
-            npcs_from_dict(npc_json)
+            npcs_from_json(npc_json)
     return OKAY_REACT

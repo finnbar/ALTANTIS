@@ -81,7 +81,7 @@ class EngineeringPuzzles():
             if condition == "Repair":
                 await self.sub.send_to_all(self.sub.power.heal(1))
             await self.sub.send_message(f"Puzzle answered correctly! **{condition}** sorted!", "engineer")
-            await notify_control(f"**{self.sub.name}** got puzzle **\"{self.current_puzzle[0]}\"** **correct**!")
+            await notify_control(f"**{self.sub.name()}** got puzzle **\"{self.current_puzzle[0]}\"** **correct**!")
         else:
             # Incorrect.
             if answer is None:
@@ -92,7 +92,6 @@ class EngineeringPuzzles():
                 await self.sub.send_message(f"You got the answer wrong! **{condition}** not sorted.", "engineer")
                 self.sub.damage(1)
             self.puzzles.append(self.current_puzzle)
-            await notify_control(f"**{self.sub.name}** got puzzle **\"{self.current_puzzle[0]}\"** **wrong**!")
+            await notify_control(f"**{self.sub.name()}** got puzzle **\"{self.current_puzzle[0]}\"** **wrong**!")
         self.current_puzzle = None
         return True
-    

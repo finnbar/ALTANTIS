@@ -96,7 +96,7 @@ class Inventory():
         for treas in treasure:
             self.add(treas)
         self.crane_holds = None
-        await notify_control(f"**{self.sub.name.title()}** picked up treasure **{to_titled_list(treasure)}**!")
+        await notify_control(f"**{self.sub.name()}** picked up treasure **{to_titled_list(treasure)}**!")
         return treasure
     
     def crane_falters(self):
@@ -118,14 +118,17 @@ class Inventory():
             if not "fastcrane" in self.sub.upgrades.keywords:
                 treasure_count = len(self.crane_holds)
                 plural = ""
-                if treasure_count > 1:
+                if treasure_count != 1:
                     plural = "s"
                 return f"Crane went down and found {treasure_count} treasure chest{plural}! Coming up next turn!"
             treasure = await self.send_crane_up()
             return f"Crane went down and up again, finding {to_titled_list(treasure)}!"
         elif self.crane_down:
             treasure = await self.send_crane_up()
-            return f"Crane came back up with {to_titled_list(treasure)}!"
+            treasure_str = to_titled_list(treasure)
+            if treasure_str == "":
+                treasure_str = "nothing"
+            return f"Crane came back up with {treasure_str}!"
         return ""
 
     def valid_offer(self, items):
@@ -183,13 +186,13 @@ class Inventory():
         self.my_turn = False
         offer_text = self.offer_as_text(offer)
         await partner.inventory.received_trade(self.sub, offer_text)
-        return f"You have offered **{offer_text}** to {partner.name.title()}. Wait for them to respond to the trade, and then you may give a counteroffer with `!offer`, `!accept_trade` if you agree with what they've said, or `!reject_trade` if you don't want to trade anymore. You have until either sub next moves to complete the trade."
+        return f"You have offered **{offer_text}** to {partner.name()}. Wait for them to respond to the trade, and then you may give a counteroffer with `!offer`, `!accept_trade` if you agree with what they've said, or `!reject_trade` if you don't want to trade anymore. You have until either sub next moves to complete the trade."
 
     async def received_trade(self, sub, offer_text):
         self.accepting = False
         self.trading_partner = sub
         self.my_turn = True
-        await self.sub.send_message(f"**{sub.name.title()}** asked for trade! They are offering **{offer_text}**. Respond with `!offer` to present your side of the trade, `!accept_trade` if you want to offer nothing in exchange, or `!reject_trade` if you don't want to trade. You have until either sub next moves to complete the trade.", "captain")
+        await self.sub.send_message(f"**{sub.name()}** asked for trade! They are offering **{offer_text}**. Respond with `!offer` to present your side of the trade, `!accept_trade` if you want to offer nothing in exchange, or `!reject_trade` if you don't want to trade. You have until either sub next moves to complete the trade.", "captain")
     
     async def reject_trade(self):
         """
@@ -198,11 +201,11 @@ class Inventory():
         if not self.trading_partner:
             return None
 
-        partner_name = self.trading_partner.name
+        partner_name = self.trading_partner.name()
         self.trading_partner.inventory.reset_trade_state()
         self.reset_trade_state()
-        await self.trading_partner.send_message(f"Trade with **{self.sub.name.title()}** cancelled due to rejection.", "captain")
-        return f"Trade with **{partner_name.title()}** cancelled due to rejection."
+        await self.trading_partner.send_message(f"Trade with **{self.sub.name()}** cancelled due to rejection.", "captain")
+        return f"Trade with **{partner_name}** cancelled due to rejection."
     
     def reset_trade_state(self):
         self.offer = {}
@@ -219,8 +222,8 @@ class Inventory():
         partner = self.trading_partner
         self.reset_trade_state()
         partner.inventory.reset_trade_state()
-        return {self.sub.name: f"Trade with {partner.name.title()} cancelled due to timeout.",
-                partner.name: f"Trade with {self.sub.name.title()} cancelled due to timeout."}
+        return {self.sub._name: f"Trade with {partner.name()} cancelled due to timeout.",
+                partner._name: f"Trade with {self.sub.name()} cancelled due to timeout."}
     
     async def make_offer(self, items):
         """

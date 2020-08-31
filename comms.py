@@ -47,7 +47,7 @@ class CommsSystem():
         
         my_pos = self.sub.movement.get_position()
         for subname in get_subs():
-            if subname == self.sub.name:
+            if subname == self.sub._name:
                 continue
 
             sub = get_sub(subname)
@@ -55,15 +55,15 @@ class CommsSystem():
             dist = diagonal_distance(my_pos, sub.movement.get_position())
             garbled = self.garble(content, dist)
             if garbled is not None:
-                await sub.send_message(f"**Message received from {self.sub.name.title()}**:\n`{garbled}`\n**END MESSAGE**", "captain")
+                await sub.send_message(f"**Message received from {self.sub.name()}**:\n`{garbled}`\n**END MESSAGE**", "captain")
 
-        for npcname in get_npcs():
-            npc = get_npc(npcname)
+        for npcid in get_npcs():
+            npc = get_npc(npcid)
 
             dist = diagonal_distance(my_pos, npc.get_position())
             garbled = self.garble(content, dist)
             if garbled is not None:
-                await npc.send_message(f"**Message received from {self.sub.name.title()}**:\n`{garbled}`\n**END MESSAGE**", "")
+                await npc.send_message(f"**Message received from {self.sub.name()}**:\n`{garbled}`\n**END MESSAGE**", "")
         self.last_comms = now()
         return True
     

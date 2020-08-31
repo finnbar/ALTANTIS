@@ -31,8 +31,8 @@ class MovementControls():
             direction = self.direction # Direction can change as result of movement.
             message = await self.move()
             move_status = (
-                f"Moved **{self.sub.name.title()}** in direction **{direction.upper()}**!\n"
-                f"**{self.sub.name.title()}** is now at position **{self.get_position()}**."
+                f"Moved **{self.sub.name()}** in direction **{direction.upper()}**!\n"
+                f"**{self.sub.name()}** is now at position **{self.get_position()}**."
             )
 
             # Do all the puzzles stuff.

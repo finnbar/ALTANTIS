@@ -495,14 +495,34 @@ class MapModification(commands.Cog):
         (CONTROL) Remove <attribute> from the square <x> <y>.
         """
         await perform_unsafe(remove_attribute_from, ctx, x, y, attribute)
-    
+
+class NPCs(commands.Cog):
+    """
+    Allows control of NPCs
+    """    
     @commands.command(name="add_npc")
     @commands.has_role(CONTROL_ROLE)
-    async def add_npc(self, ctx, npcname, npctype, x : int, y : int):
+    async def add_npc(self, ctx, npctype, x : int, y : int):
         """
         (CONTROL) Add an NPC <npcname> of <npctype> to the map at (<x>, <y>).
         """
-        await perform_unsafe(add_npc_to_map, ctx, npcname, npctype, x, y)
+        await perform_unsafe(add_npc_to_map, ctx, npctype, x, y)
+    
+    @commands.command(name="remove_npc")
+    @commands.has_role(CONTROL_ROLE)
+    async def remove_npc(self, ctx, npcid : int):
+        """
+        (CONTROL) Remove the NPC with the given id.
+        """
+        await perform_unsafe(remove_npc_from_map, ctx, npcid)
+    
+    @commands.command(name="npc_types")
+    @commands.has_role(CONTROL_ROLE)
+    async def npc_types(self, ctx):
+        """
+        (CONTROL) Prints out all possible NPC types.
+        """
+        await perform_unsafe(printout_npc_types, ctx)
 
 class Weaponry(commands.Cog):
     """
@@ -602,6 +622,7 @@ bot.add_cog(Engineering())
 bot.add_cog(GameManagement())
 bot.add_cog(Inventory())
 bot.add_cog(MapModification())
+bot.add_cog(NPCs())
 bot.add_cog(Movement())
 bot.add_cog(PowerManagement())
 bot.add_cog(Status())

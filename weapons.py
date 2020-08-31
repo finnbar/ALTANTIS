@@ -43,10 +43,10 @@ class Weaponry():
                 hits = self.damaging(x, y)
             else:
                 hits = self.nondamaging(x, y)
-            direct_hits = list_to_and_separated(list(map(lambda entity: entity.name.title(), hits["direct"])))
+            direct_hits = list_to_and_separated(list(map(lambda entity: entity.name(), hits["direct"])))
             if direct_hits == "":
                 direct_hits = "nobody"
-            indirect_hits = list_to_and_separated(list(map(lambda entity: entity.name.title(), hits["indirect"])))
+            indirect_hits = list_to_and_separated(list(map(lambda entity: entity.name(), hits["indirect"])))
             if indirect_hits == "":
                 indirect_hits = "nobody"
             damaging_str = "damaging" if damaging else "non-damaging"
@@ -67,9 +67,6 @@ class Weaponry():
         indirect = []
         direct = []
         for subname in get_subs():
-            if subname == self.sub.name:
-                continue
-
             sub = get_sub(subname)
             pos = sub.movement.get_position()
             distance = diagonal_distance(pos, (x, y))
@@ -78,8 +75,8 @@ class Weaponry():
             elif distance == 1:
                 indirect.append(sub)
         
-        for npcname in get_npcs():
-            npc = get_npc(npcname)
+        for npcid in get_npcs():
+            npc = get_npc(npcid)
             pos = npc.get_position()
             distance = diagonal_distance(pos, (x, y))
             if distance == 0:

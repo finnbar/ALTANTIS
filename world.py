@@ -9,7 +9,8 @@ from random import choice
 
 class Cell():
     # A list of characters able to be used for wall alternate styles (such as in bases)
-    WALL_STYLES = ['']
+    # Currently just b for base.
+    WALL_STYLES = ["b"]
     def __init__(self):
         # The items this square contains.
         self.treasure = []
@@ -178,29 +179,29 @@ def all_in_square(pos):
     npc_objects = list(map(npc.get_npc, npcs_in_square))
     return sub_objects + npc_objects
 
-def all_in_submap(pos, dist, exclusions=[]):
+def all_in_submap(pos, dist, sub_exclusions=[], npc_exclusions=[]):
     """
     Gets all entities some distance from the chosen square.
     Ignores any entities in exclusions.
     """
     subs_in_range = state.filtered_teams(
-        lambda sub: diagonal_distance(sub.movement.get_position(), pos) <= dist and sub.name not in exclusions
+        lambda sub: diagonal_distance(sub.movement.get_position(), pos) <= dist and sub._name not in sub_exclusions
     )
     sub_objects = list(map(state.get_sub, subs_in_range))
     npcs_in_range = npc.filtered_npcs(
-        lambda npc: diagonal_distance(npc.get_position(), pos) <= dist and npc.name not in exclusions
+        lambda npc: diagonal_distance(npc.get_position(), pos) <= dist and npc.id not in npc_exclusions
     )
     npc_objects = list(map(npc.get_npc, npcs_in_range))
     return sub_objects + npc_objects
 
-async def explode(pos, power, exclusions=[]):
+async def explode(pos, power, sub_exclusions=[], npc_exclusions=[]):
     """
     Makes an explosion in pos, dealing power damage to the centre square,
     power-1 to the surrounding ones, power-2 to those that surround and
     so on.
     """
     for subname in state.get_subs():
-        if subname in exclusions:
+        if subname in sub_exclusions:
             continue
 
         sub = state.get_sub(subname)
@@ -212,11 +213,11 @@ async def explode(pos, power, exclusions=[]):
             await sub.send_message(f"Explosion in {pos}!", "captain")
             sub.damage(damage)
     
-    for npcname in npc.get_npcs():
-        if npcname in exclusions:
+    for npcid in npc.get_npcs():
+        if npcid in npc_exclusions:
             continue
         
-        npc_obj = npc.get_npc(npcname)
+        npc_obj = npc.get_npc(npcid)
         npc_pos = npc_obj.get_position()
         npc_dist = diagonal_distance(pos, npc_pos)
         damage = power - npc_dist
@@ -225,7 +226,7 @@ async def explode(pos, power, exclusions=[]):
             await npc_obj.send_message(f"Explosion in {pos}!", "captain")
             npc_obj.damage(damage)
 
-def explore_submap(pos, dist, exclusions=[], with_distance=False):
+def explore_submap(pos, dist, sub_exclusions=[], npc_exclusions=[], with_distance=False):
     """
     Explores the area centered around pos = (cx, cy) spanning distance dist.
     Returns all outward_broadcast events (as a list) formatted for output.
@@ -257,7 +258,7 @@ def explore_submap(pos, dist, exclusions=[], with_distance=False):
 
     # Then, submarines.
     for subname in state.get_subs():
-        if subname in exclusions:
+        if subname in sub_exclusions:
             continue
 
         sub = state.get_sub(subname)
@@ -277,11 +278,11 @@ def explore_submap(pos, dist, exclusions=[], with_distance=False):
         events.append(event)
     
     # Finally, NPCs.
-    for npcname in npc.get_npcs():
-        if npcname in exclusions:
+    for npcid in npc.get_npcs():
+        if npcid in npc_exclusions:
             continue
         
-        npc_obj = npc.get_npc(npcname)
+        npc_obj = npc.get_npc(npcid)
         npc_pos = npc_obj.get_position()
         npc_dist = diagonal_distance(pos, npc_pos)
 
@@ -328,12 +329,12 @@ def draw_map(subs, to_show):
                 npcs_in_square = npc.filtered_npcs(lambda n: n.x == x and n.y == y)
                 if len(npcs_in_square) > 0:
                     tile_char = "N"
-                    tile_name = list_to_and_separated(list(map(lambda n: n.title(), npcs_in_square)))
+                    tile_name = list_to_and_separated(list(map(lambda n: npc.get_npc(n).name(), npcs_in_square)))
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
                     tile_char = str(i)
-                    tile_name = subs[i].name.title()
+                    tile_name = subs[i].name()
             row += tile_char
             if tile_name is not None:
                 map_json.append({"x": x, "y": y, "name": tile_name})

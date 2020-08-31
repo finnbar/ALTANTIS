@@ -203,16 +203,16 @@ class PowerManager():
         damage_message = ""
         for hit in self.scheduled_damage:
             damage_message += self.run_damage(hit)
-            await notify_control(f"**{self.sub.name.title()}** took **{hit} damage**!")
+            await notify_control(f"**{self.sub.name()}** took **{hit} damage**!")
         self.scheduled_damage = []
         if self.total_power <= 0:
             await self.deathrattle()
         return damage_message
     
     async def deathrattle(self):
-        hears_rattle = all_in_submap(self.sub.movement.get_position(), 5, [self.sub.name])
+        hears_rattle = all_in_submap(self.sub.movement.get_position(), 5, sub_exclusions=[self.sub._name])
         for entity in hears_rattle:
-            await entity.send_message(f"SUBMARINE **{self.sub.name.upper()}** ({self.sub.movement.x}, {self.sub.movement.y}) HAS DIED", "captain")
+            await entity.send_message(f"SUBMARINE **{self.sub.name().upper()}** ({self.sub.movement.x}, {self.sub.movement.y}) HAS DIED", "captain")
 
     def heal(self, amount):
         self.total_power = min(self.total_power + amount, self.total_power_max)

@@ -8,12 +8,13 @@ from control import notify_control
 from utils import Entity, diagonal_distance, determine_direction, go_in_direction
 
 class NPC(Entity):
-    def __init__(self, name, x, y):
+    classname = ""
+    def __init__(self, id, x, y):
         self.health = 1
         self.treasure = []
         self.x = x
         self.y = y
-        self.name = name
+        self.id = id
         self.stealth = 0
         self.damage_to_apply = 0
         self.keywords = []
@@ -37,9 +38,15 @@ class NPC(Entity):
             return not "camo" in entity.upgrades.keywords
         else:
             return not "camo" in entity.keywords
+    
+    def name(self):
+        return f"{self.classname.title()} (#{self.id})"
+    
+    def full_name(self):
+        return f"{self.classname.title()} (#{self.id} at {self.x}, {self.y})"
 
     async def send_message(self, content, _):
-        await notify_control(f"Event from {self.name.title()}! {content}")
+        await notify_control(f"Event from {self.name()}! {content}")
 
     async def damage_tick(self):
         if self.damage_to_apply > 0:
@@ -47,24 +54,24 @@ class NPC(Entity):
             if self.health <= 0:
                 for treasure in self.treasure:
                     world.bury_treasure_at(treasure, (self.x, self.y))
-                await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage and **died**!")
+                await notify_control(f"**{self.full_name()}** took a total of {self.damage_to_apply} damage and **died**!")
                 await self.deathrattle()
-                kill_npc(self.name)
+                kill_npc(self.id)
             else:
-                await notify_control(f"**{self.name.title()}** took a total of {self.damage_to_apply} damage!")
+                await notify_control(f"**{self.full_name()}** took a total of {self.damage_to_apply} damage!")
             self.damage_to_apply = 0
 
     async def deathrattle(self):
-        hears_rattle = world.all_in_submap(self.get_position(), 5, [self.name])
+        hears_rattle = world.all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
         for entity in hears_rattle:
-            await entity.send_message(f"ENTITY **{self.name.upper()}** ({self.x}, {self.y}) HAS DIED", "captain")
+            await entity.send_message(f"ENTITY **{self.name().upper()}** HAS DIED", "captain")
 
     def damage(self, amount):
         self.damage_to_apply += amount
     
     def outward_broadcast(self, strength):
         if strength >= self.stealth:
-            return self.name.title()
+            return self.name()
         return ""
     
     def move(self, dx, dy):
@@ -106,65 +113,71 @@ npc_types = {}
 for cl in npc_classes:
     npc_types[cl.classname] = cl
 
-# All NPCs, listed by name.
-npcs = {}
+# All NPCs, listed by ID.
+npcs = []
+
+def get_npc_types():
+    return npc_types.keys()
 
 def get_npcs():
-    return npcs.keys()
+    return range(len(npcs))
 
-def kill_npc(name):
-    if name in npcs:
-        del npcs[name]
+def kill_npc(id):
+    if id in range(len(npcs)):
+        del npcs[id]
+        return True
+    return False
 
 async def npc_tick():
     for npc in npcs:
-        await npcs[npc].on_tick()
+        await npc.on_tick()
 
 def filtered_npcs(pred):
     """
     Gets all names of npcs that satisfy some predicate.
     """
     result = []
-    for npc in npcs:
-        if pred(npcs[npc]):
-            result.append(npc)
+    for index in range(len(npcs)):
+        if pred(npcs[index]):
+            result.append(index)
     return result
 
 async def interact_in_square(sub, square, arg):
     in_square = filtered_npcs(lambda npc: (npc.x, npc.y) == square)
     message = ""
-    for npcname in in_square:
-        npc = get_npc(npcname)
+    for npcid in in_square:
+        npc = get_npc(npcid)
         npc_message = await npc.interact(sub, arg)
         if npc_message != "":
-            message += f"Interaction with **{npcname.title()}**: {npc_message}\n"
+            message += f"Interaction with **{npcid.title()}**: {npc_message}\n"
     return message
 
-def get_npc(npcname):
-    if npcname in npcs:
-        return npcs[npcname]
+def get_npc(npcid):
+    if npcid in get_npcs():
+        return npcs[npcid]
     return None
 
-def add_npc(npcname, npctype, x, y):
+def add_npc(npctype, x, y):
     if not world.in_world(x, y):
         return "Cannot place an NPC outside of the map."
-    if npcname in npcs:
-        return "An NPC with than name already exists."
     if npctype in npc_types:
-        npcs[npcname] = npc_types[npctype](npcname, x, y)
-        return f"Created NPC {npcname.title()} of type {npctype.title()}!"
+        id = len(npcs)
+        npcs.append(npc_types[npctype](id, x, y))
+        return f"Created NPC #{id} of type {npctype.title()}!"
     return "That NPC type does not exist."
 
-def npcs_to_dict():
-    npcs_dict = {}
+def npcs_to_json():
+    npcs_list = []
     for npc in npcs:
-        npcs_dict[npc] = npcs[npc].__dict__.copy()
-        npcs_dict[npc]["classname"] = npcs[npc].classname
-    return npcs_dict
+        npcs_list.append(npc.__dict__.copy())
+        npcs_list[-1]["classname"] = npc.classname
+    return npcs_list
 
-def npcs_from_dict(json):
-    for npc_name in json:
-        new_npc = npc_types[json[npc_name]["classname"]]("", 0, 0)
-        del json[npc_name]["classname"]
-        new_npc.__dict__ = json[npc_name]
-        npcs[npc_name] = new_npc
+def npcs_from_json(json):
+    global npcs
+    npcs = []
+    for npc in json:
+        new_npc = npc_types[npc["classname"]](0, 0, 0)
+        del npc["classname"]
+        new_npc.__dict__ = npc
+        npcs.append(new_npc)
