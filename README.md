@@ -62,7 +62,7 @@ New features:
 - [x] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
 - [x] NPCs can trade. This is implemented by an `!interact` command, which does some command with NPCs.
 - [x] Move NPCs to an integer ID system, and allow for deletion by ID. (Thus relaxing the identical name constraint.) Also movement by ID. Just generally getting control of NPCs by ID.
-- [ ] Allow control to remove the engineering puzzles part of a submarine (for if someone urgently needs to leave). Can be done as a keyword.
+- [x] Allow control to remove the engineering puzzles part of a submarine (for if someone urgently needs to leave). Can be done as a keyword.
 - [ ] Implement "ticking" - if you take damage, shit might explode.
 - [ ] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
 - [ ] Team-specific mechanics.

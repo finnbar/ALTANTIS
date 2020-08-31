@@ -42,10 +42,11 @@ class EngineeringPuzzles():
         # Puzzles resolve once you've moved:
         await self.resolve_puzzle(None)
         # We also need to set wear and tear puzzles if need be.
-        self.wear_and_tear -= 1
-        if self.wear_and_tear <= 0:
-            await self.send_puzzle("wear and tear")
-            self.wear_and_tear = choice([4,5,6])
+        if not "wearfree" in self.sub.upgrades.keywords:
+            self.wear_and_tear -= 1
+            if self.wear_and_tear <= 0:
+                await self.send_puzzle("wear and tear")
+                self.wear_and_tear = choice([4,5,6])
     
     async def send_puzzle(self, reason):
         """
