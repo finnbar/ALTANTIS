@@ -2,10 +2,11 @@
 Allows submarines to manage their power usage.
 """
 
-from random import choice
 from control import notify_control
 from consts import TICK, CROSS, PLUS
 from world import all_in_submap
+
+import random
 
 class PowerManager():
     def __init__(self, sub):
@@ -190,7 +191,7 @@ class PowerManager():
         else:
             # Pick a system at random to lose power.
             available_systems = filter(lambda system: self.power[system] > 0, self.power)
-            system = choice(list(available_systems))
+            system = random.choice(list(available_systems))
             self.unpower_systems([system])
         # Else continue taking damage.
         message = self.run_damage(amount - 1)
@@ -204,6 +205,11 @@ class PowerManager():
         for hit in self.scheduled_damage:
             damage_message += self.run_damage(hit)
             await notify_control(f"**{self.sub.name()}** took **{hit} damage**!")
+            if "ticking" in self.sub.upgrades.keywords and 0.65 < random.random():
+                # The volatile thing explodes!!
+                damage_message += self.run_damage(2)
+                self.sub.upgrades.remove_keyword("ticking")
+                await notify_control(f"**{self.sub.name()}'s** ticking exploded for two damage!")
         self.scheduled_damage = []
         if self.total_power <= 0:
             await self.deathrattle()

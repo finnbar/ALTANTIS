@@ -116,6 +116,10 @@ class MantaRay(npc.NPC):
         super().__init__(id, x, y)
         self.health = 2
         self.treasure = [random.choice(RESOURCES)] * 2
+    
+    def name(self):
+        # Override to add a space
+        return f"Manta Ray (#{self.id})"
 
     async def interact(self, *_):
         return "The manta ray swims happily!"
