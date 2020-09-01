@@ -2,10 +2,12 @@
 Deals with the world map, which submarines explore.
 """
 
-from utils import diagonal_distance, directions, reverse_dir, determine_direction, list_to_and_separated
+from utils import diagonal_distance, directions, reverse_dir, determine_direction, list_to_and_separated, Entity
 import state, npc
+import sub as _sub
 
 import random
+from typing import List, Optional, Tuple, Any, Dict
 
 class Cell():
     # A list of implemented attributes
@@ -32,17 +34,17 @@ class Cell():
         if "ruins" in self.attributes and random.random() < 0.03:
             self.treasure.append(random.choice(["tool", "circuitry"]))
 
-    def treasure_string(self):
+    def treasure_string(self) -> str:
         return list_to_and_separated(list(map(lambda t: t.title(), self.treasure)))
     
-    def square_status(self):
+    def square_status(self) -> str:
         return f"This square has treasures {self.treasure_string()} and attributes {self.attributes}."
     
-    def is_obstacle(self):
+    def is_obstacle(self) -> bool:
         # obstacle: this cell cannot be entered.
         return "obstacle" in self.attributes
     
-    def pick_up(self, power):
+    def pick_up(self, power : int) -> List[str]:
         power = min(power, len(self.treasure))
         treasures = []
         for _ in range(power):
@@ -51,11 +53,11 @@ class Cell():
             treasures.append(treas)
         return treasures
     
-    def bury_treasure(self, treasure):
+    def bury_treasure(self, treasure : str) -> bool:
         self.treasure.append(treasure)
         return True
     
-    def outward_broadcast(self, strength):
+    def outward_broadcast(self, strength : int) -> str:
         # This is what the sub sees when scanning this cell.
         if "hiddenness" in self.attributes and self.attributes["hiddenness"] > strength:
             return ""
@@ -82,7 +84,7 @@ class Cell():
             broadcast.append(f"docking station \"{self.attributes['docking'].title()}\"")
         return list_to_and_separated(broadcast).capitalize()
     
-    async def on_entry(self, sub):
+    async def on_entry(self, sub : _sub.Submarine) -> str:
         # This is what happens when a sub attempts to enter this space.
         # This includes docking and damage.
         if "docking" in self.attributes:
@@ -96,7 +98,7 @@ class Cell():
             return f"The submarine hit a wall and took one damage!\n{message}"
         return ""
 
-    def to_char(self, to_show):
+    def to_char(self, to_show : List[str]) -> str:
         if "t" in to_show and len(self.treasure) > 0:
             return "T"
         if "r" in to_show and "ruins" in self.attributes:
@@ -120,7 +122,7 @@ class Cell():
             return "C"
         return "."
     
-    def map_name(self, to_show):
+    def map_name(self, to_show : List[str]) -> Optional[str]:
         # For Thomas' map drawing code.
         # Gives names to squares that make sense.
         name = ""
@@ -132,20 +134,20 @@ class Cell():
             return name
         return None
     
-    def docked_at(self):
+    def docked_at(self) -> Optional[str]:
         # Returns its name if it's a docking station, else None
         if "docking" in self.attributes:
             return self.attributes["docking"].title()
         return None
     
-    def difficulty(self):
+    def difficulty(self) -> int:
         if "storm" in self.attributes:
             return 8
         elif "calm" in self.attributes:
             return 2
         return 4
     
-    def add_attribute(self, attr, val=""):
+    def add_attribute(self, attr : str, val="") -> bool:
         if attr not in self.ATTRIBUTES:
             return False
         if attr not in self.attributes:
@@ -153,7 +155,7 @@ class Cell():
             return True
         return False
     
-    def remove_attribute(self, attr):
+    def remove_attribute(self, attr : str) -> bool:
         if attr in self.attributes:
             del self.attributes[attr]
             return True
@@ -165,24 +167,24 @@ Y_LIMIT = 40
 
 undersea_map = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
 
-def in_world(x, y):
+def in_world(x : int, y : int) -> bool:
     return 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT
 
-def possible_directions():
+def possible_directions() -> str:
     return directions.keys()
 
-def get_square(x, y):
+def get_square(x : int, y : int) -> Optional[Cell]:
     if in_world(x, y):
         return undersea_map[x][y]
     return None
 
-def bury_treasure_at(name, pos):
+def bury_treasure_at(name : str, pos : Tuple[int, int]) -> bool:
     (x, y) = pos
     if in_world(x, y):
         return undersea_map[x][y].bury_treasure(name)
     return False
 
-def pick_up_treasure(pos, power):
+def pick_up_treasure(pos : Tuple[int, int], power : int) -> List[str]:
     (x, y) = pos
     if in_world(x, y):
         return undersea_map[x][y].pick_up(power)
@@ -193,7 +195,7 @@ def map_tick():
         for y in range(Y_LIMIT):
             undersea_map[x][y].cell_tick()
 
-def investigate_square(x, y, loop):
+def investigate_square(x : int, y : int, loop) -> Optional[str]:
     if in_world(x, y):
         report = f"Report for square **({x}, {y})**\n"
         report += get_square(x, y).square_status() + "\n\n"
@@ -203,8 +205,9 @@ def investigate_square(x, y, loop):
             sub = state.get_sub(subname)
             report += sub.status_message(loop) + "\n\n"
         return report
+    return None
 
-def all_in_square(pos):
+def all_in_square(pos : Tuple[int, int]) -> List[Entity]:
     """
     Gets all entities (subs and NPCs) in the chosen square.
     """
@@ -215,7 +218,7 @@ def all_in_square(pos):
     npc_objects = list(map(npc.get_npc, npcs_in_square))
     return sub_objects + npc_objects
 
-def all_in_submap(pos, dist, sub_exclusions=[], npc_exclusions=[]):
+def all_in_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[_sub.Submarine] = [], npc_exclusions : List[npc.NPC] = []) -> List[Entity]:
     """
     Gets all entities some distance from the chosen square.
     Ignores any entities in exclusions.
@@ -230,7 +233,7 @@ def all_in_submap(pos, dist, sub_exclusions=[], npc_exclusions=[]):
     npc_objects = list(map(npc.get_npc, npcs_in_range))
     return sub_objects + npc_objects
 
-async def explode(pos, power, sub_exclusions=[], npc_exclusions=[]):
+async def explode(pos : Tuple[int, int], power : int, sub_exclusions : List[_sub.Submarine] = [], npc_exclusions : List[npc.NPC] = []):
     """
     Makes an explosion in pos, dealing power damage to the centre square,
     power-1 to the surrounding ones, power-2 to those that surround and
@@ -262,7 +265,7 @@ async def explode(pos, power, sub_exclusions=[], npc_exclusions=[]):
             await npc_obj.send_message(f"Explosion in {pos}!", "captain")
             npc_obj.damage(damage)
 
-def explore_submap(pos, dist, sub_exclusions=[], npc_exclusions=[], with_distance=False):
+def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[str] = [], npc_exclusions : List[int] = [], with_distance : bool = False) -> [str]:
     """
     Explores the area centered around pos = (cx, cy) spanning distance dist.
     Returns all outward_broadcast events (as a list) formatted for output.
@@ -335,7 +338,7 @@ def explore_submap(pos, dist, sub_exclusions=[], npc_exclusions=[], with_distanc
 
     return events
 
-async def move_on_map(sub, direction, x, y):
+async def move_on_map(sub : _sub.Submarine, direction : str, x : int, y : int) -> Tuple[int, int, str]:
     motion = directions[direction]
     new_x = x + motion[0]
     new_y = y + motion[1]
@@ -348,7 +351,7 @@ async def move_on_map(sub, direction, x, y):
         return x, y, message
     return new_x, new_y, message
 
-def draw_map(subs, to_show):
+def draw_map(subs : List[_sub.Submarine], to_show : List[str]) -> Tuple[str, List[Dict[str, Any]]]:
     """
     Draws an ASCII version of the map.
     Also returns a JSON of additional information.
@@ -377,7 +380,7 @@ def draw_map(subs, to_show):
         map_string += row + "\n"
     return map_string, map_json
 
-def map_to_dict():
+def map_to_dict() -> Dict[str, Any]:
     """
     Converts our map to dict form. Since each of our map entries can be
     trivially converted into dicts, we just convert them individually.
@@ -389,7 +392,7 @@ def map_to_dict():
             undersea_map_dicts[i][j] = undersea_map[i][j].__dict__
     return {"map": undersea_map_dicts, "x_limit": X_LIMIT, "y_limit": Y_LIMIT}
 
-def map_from_dict(dictionary):
+def map_from_dict(dictionary : Dict[str, Any]):
     """
     Takes a triple generated by map_to_dict and overwrites our map with it.
     """

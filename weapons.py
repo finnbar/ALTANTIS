@@ -4,21 +4,22 @@ Allows subs to charge and fire (stunning) weapons.
 
 from state import get_subs, get_sub
 from npc import get_npcs, get_npc
-from utils import diagonal_distance, list_to_and_separated
+from utils import diagonal_distance, list_to_and_separated, Entity
 from world import in_world
+import sub
 
 import math
 from random import shuffle
+from typing import Tuple, Dict, List
 
 class Weaponry():
-    def __init__(self, sub):
+    def __init__(self, sub : sub.Submarine):
         self.sub = sub
         self.weapons_charge = 1
         self.range = 4
-        # A list of shots of (damaging, x, y).
-        self.planned_shots = []
+        self.planned_shots : Tuple[bool, int, int] = []
     
-    def prepare_shot(self, damaging, x, y):
+    def prepare_shot(self, damaging : bool, x : int, y : int) -> str:
         if not in_world(x, y):
             return "Coordinate outside of world."
         if diagonal_distance(self.sub.movement.get_position(), (x,y)) > self.range:
@@ -33,7 +34,7 @@ class Weaponry():
             return f"Non-damaging shot fired at ({x}, {y})!"
         return "Not enough charge to use that."
     
-    def weaponry_tick(self):
+    def weaponry_tick(self) -> str:
         # Do the hits for the current turn:
         results = ""
         for shot in self.planned_shots:
@@ -62,7 +63,7 @@ class Weaponry():
             return f"{results}Recharged weapons up to {self.weapons_charge} charge!"
         return results
     
-    def hits(self, x, y):
+    def hits(self, x : int, y : int) -> Dict[str, List[Entity]]:
         # Returns a list of indirect and direct hits.
         indirect = []
         direct = []
@@ -88,7 +89,7 @@ class Weaponry():
         shuffle(direct)
         return {"indirect": indirect, "direct": direct}
     
-    def nondamaging(self, x, y):
+    def nondamaging(self, x : int, y : int) -> Dict[str, List[Entity]]:
         results = self.hits(x, y)
         for target in results["direct"]:
             if target.is_weak():
@@ -98,7 +99,7 @@ class Weaponry():
                 target.damage(1)
         return results
 
-    def damaging(self, x, y):
+    def damaging(self, x : int, y : int) -> Dict[str, List[Entity]]:
         results = self.hits(x, y)
         for target in results["indirect"]:
             target.damage(2)
@@ -106,7 +107,7 @@ class Weaponry():
             target.damage(1)
         return results
     
-    def status(self):
+    def status(self) -> str:
         weapons_power = self.sub.power.get_power("weapons")
         if weapons_power == 0:
             return ""

@@ -5,6 +5,7 @@ Allows submarines to communicate with one another.
 from utils import diagonal_distance
 from state import get_subs, get_sub
 from npc import get_npcs, get_npc
+import sub
 
 from random import random
 from time import time as now
@@ -13,12 +14,12 @@ GARBLE = 10
 COMMS_COOLDOWN = 30
 
 class CommsSystem():
-    def __init__(self, sub):
-        self.sub = sub
+    def __init__(self, sub : sub.Submarine):
+        self.sub : sub.Submarine = sub
         # last_comms is the time when the Comms were last used.
-        self.last_comms = 0
+        self.last_comms : float = 0
     
-    def garble(self, content, distance):
+    def garble(self, content : str, distance : int):
         """
         We define the message error as the proportion of incorrect characters
         in a message. This error increases with distance between two subs.
@@ -41,7 +42,7 @@ class CommsSystem():
                 new_content[i] = "_"
         return "".join(new_content)
 
-    async def broadcast(self, content):
+    async def broadcast(self, content : str):
         if self.last_comms + COMMS_COOLDOWN > now():
             return False
         

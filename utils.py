@@ -5,6 +5,8 @@ Also utility functions for distances and directions.
 
 from consts import TICK, CROSS
 
+from typing import Optional, Tuple, List, Any
+
 # Messaging utilities
 
 class Status():
@@ -40,7 +42,7 @@ reverse_dir = {"n": "s", "ne": "sw", "e": "w", "se": "nw", "s": "n",
 
 import math
 
-def diagonal_distance(pa, pb):
+def diagonal_distance(pa : int, pb : int) -> int:
     """
     Gets manhattan distance with diagonals between points pa and pb.
     I don't know what this is called, but the fastest route is to take the
@@ -53,7 +55,7 @@ def diagonal_distance(pa, pb):
     dist = min(xdist, ydist) + abs(xdist - ydist)
     return dist
 
-def determine_direction(pa, pb):
+def determine_direction(pa : int, pb : int) -> Optional[str]:
     """
     Determines which compass direction coord pb is from pa.
     This would normally be easy, but guess which idiot made everything work in
@@ -89,12 +91,12 @@ def determine_direction(pa, pb):
         x_val = "e"
     return y_val + x_val
 
-def go_in_direction(direction):
+def go_in_direction(direction : str) -> Tuple[int, int]:
     return directions[direction]
 
 # Textual utilities
 
-def list_to_and_separated(items):
+def list_to_and_separated(items : List[Any]) -> str:
     if len(items) == 0:
         return ""
     if len(items) == 1:
@@ -109,10 +111,10 @@ def list_to_and_separated(items):
     result[-2] = " and "
     return "".join(result)
 
-def to_titled_list(items):
+def to_titled_list(items : List[str]) -> str:
     return list_to_and_separated(list(map(lambda x: x.title(), items)))
 
-def to_pair_list(items):
+def to_pair_list(items : List[Any]) -> List[Tuple[Any, Any]]:
     pairs = []
     if len(items) % 2 == 1:
         raise ValueError("Input list is badly formatted.")
@@ -122,7 +124,9 @@ def to_pair_list(items):
 
 # Roles helper
 
-async def create_or_return_role(guild, role, **kwargs):
+import discord
+
+async def create_or_return_role(guild : discord.Guild, role : str, **kwargs) -> discord.Role:
     all_roles = await guild.fetch_roles()
     for r in all_roles:
         if r.name == role:
@@ -132,7 +136,7 @@ async def create_or_return_role(guild, role, **kwargs):
 # Helper class for dealing with NPCs and Submarines together.
 
 class Entity():
-    def get_position(self):
+    def get_position(self) -> Tuple[int, int]:
         raise NotImplementedError
 
     def damage(self, amount):
@@ -141,16 +145,16 @@ class Entity():
     async def send_message(self, content, channel):
         raise NotImplementedError
 
-    def outward_broadcast(self, strength):
+    def outward_broadcast(self, strength) -> str:
         return ""
 
-    def is_weak(self):
+    def is_weak(self) -> bool:
         """
         Whether the submarine is affected by stunning shots.
         """
         return False
-    
-    def name(self):
+
+    def name(self) -> str:
         """
         The primary key.
         """

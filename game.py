@@ -8,10 +8,11 @@ from utils import OKAY_REACT, FAIL_REACT
 from npc import npc_tick, npcs_to_json, npcs_from_json
 
 import json
+from typing import List, Dict
 
 NO_SAVE = False
 
-async def perform_timestep(counter):
+async def perform_timestep(counter : int):
     """
     Does all time-related stuff, including movement, power changes and so on.
     Called at a time interval, when allowed.
@@ -29,9 +30,9 @@ async def perform_timestep(counter):
     # Get all active subs. (Can you tell I'm a functional programmer?)
     # Note: we still collect all messages for all subs, as there are some
     # messages that inactive subs should receive.
-    subsubset = list(filter(is_active_sub, get_subs()))
-    submessages = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_subs()}
-    message_opening = f"---------**TURN {counter}**----------\n"
+    subsubset : List[str] = list(filter(is_active_sub, get_subs()))
+    submessages : Dict[str, Dict[str, str]] = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_subs()}
+    message_opening : str = f"---------**TURN {counter}**----------\n"
 
     # Power management
     for subname in subsubset:
@@ -134,7 +135,7 @@ def save_game():
         npcs_file.write(json.dumps(npcs_dict))
     return True
 
-def load_game(which, bot):
+def load_game(which : str, bot):
     """
     Loads the state (from state.json), map (from map.json), npcs (from npcs.json) or all.
     Does not check whether the files exist.

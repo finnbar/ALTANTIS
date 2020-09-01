@@ -4,11 +4,13 @@ Allows the sub to move.
 
 from world import move_on_map, possible_directions, get_square, in_world
 from consts import GAME_SPEED, direction_emoji, TICK, CROSS
+import sub
 
 import math, datetime
+from typing import Tuple
 
 class MovementControls():
-    def __init__(self, sub, x, y):
+    def __init__(self, sub : sub.Submarine, x : int, y : int):
         self.sub = sub
         self.direction = "n"
         self.x = x
@@ -47,30 +49,30 @@ class MovementControls():
             return move_status, trade_messages
         return None, {}
     
-    def set_direction(self, direction):
+    def set_direction(self, direction : str) -> bool:
         if direction in possible_directions():
             self.direction = direction
             return True
         return False
 
-    def get_direction(self):
+    def get_direction(self) -> str:
         return self.direction
 
-    def set_position(self, x, y):
+    def set_position(self, x : int, y : int) -> bool:
         if in_world(x, y):
             self.x = x
             self.y = y
             return True
         return False
 
-    def get_position(self):
+    def get_position(self) -> Tuple[int, int]:
         return (self.x, self.y)
 
-    async def move(self):
+    async def move(self) -> str:
         self.x, self.y, message = await move_on_map(self.sub, self.direction, self.x, self.y)
         return message
     
-    def status(self, loop):
+    def status(self, loop) -> str:
         message = ""
         power_system = self.sub.power
 

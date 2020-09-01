@@ -2,17 +2,18 @@
 The backend for all Discord actions, which allow players to control their sub.
 """
 
-from utils import React, Message, OKAY_REACT, FAIL_REACT, to_pair_list, create_or_return_role, list_to_and_separated
+from utils import Status, React, Message, OKAY_REACT, FAIL_REACT, to_pair_list, create_or_return_role, list_to_and_separated
 from state import get_subs, get_sub, add_team, remove_team
 from world import draw_map, bury_treasure_at, get_square, investigate_square, explode
 from consts import direction_emoji, MAP_DOMAIN, MAP_TOKEN, CONTROL_ROLE
 from npc import add_npc, interact_in_square, kill_npc, get_npc_types
 
 import httpx, json, discord
+from typing import List, Optional
 
 # MOVEMENT
 
-def move(direction, subname):
+def move(direction : str, subname : str) -> Status:
     """
     Records the team's direction.
     We then react to the message accordingly.
@@ -23,7 +24,7 @@ def move(direction, subname):
             return React(direction_emoji[direction])
     return FAIL_REACT
 
-def teleport(subname, x, y):
+def teleport(subname : str, x : int, y : int) -> Status:
     """
     Teleports team to (x,y), checking if the space is in the world.
     """
@@ -33,7 +34,7 @@ def teleport(subname, x, y):
             return OKAY_REACT
     return FAIL_REACT
 
-async def set_activation(team, guild, value):
+async def set_activation(team : str, guild : discord.Guild, value : bool) -> Status:
     """
     Sets the submarine's power to `value`.
     """
@@ -50,7 +51,7 @@ async def set_activation(team, guild, value):
         return OKAY_REACT
     return FAIL_REACT
 
-async def exit_submarine(team, guild):
+async def exit_submarine(team : str, guild : discord.Guild) -> Status:
     sub = get_sub(team)
     if sub:
         message = await sub.docking(guild)
@@ -59,7 +60,7 @@ async def exit_submarine(team, guild):
 
 # STATUS
 
-async def print_map(team, options=["w", "d", "s"]):
+async def print_map(team : str, options : List[str] = ["w", "d", "s"]) -> Status:
     """
     Prints the map from the perspective of one submarine, or all if team is None.
     """
@@ -85,17 +86,17 @@ async def print_map(team, options=["w", "d", "s"]):
             return Message(f"The map is visible here: {final_url}")
     return FAIL_REACT
 
-def zoom_in(x, y, loop):
+def zoom_in(x : int, y : int, loop) -> Status:
     return Message(investigate_square(x, y, loop))
 
-def get_status(team, loop):
+def get_status(team : str, loop) -> Status:
     sub = get_sub(team)
     if sub:
         status_message = sub.status_message(loop)
         return Message(status_message)
     return FAIL_REACT
 
-def get_scan(team):
+def get_scan(team : str) -> Status:
     sub = get_sub(team)
     if sub:
         return Message(sub.scan.previous_scan())
@@ -103,7 +104,7 @@ def get_scan(team):
 
 # POWER
 
-def power_systems(team, systems):
+def power_systems(team : str, systems : List[str]) -> Status:
     """
     Powers `systems` of the submarine `team` if able.
     """
@@ -113,7 +114,7 @@ def power_systems(team, systems):
         return Message(result)
     return FAIL_REACT
 
-def unpower_systems(team, systems):
+def unpower_systems(team : str, systems : List[str]) -> Status:
     """
     Unpowers `systems` of the submarine `team` if able.
     """
@@ -123,7 +124,7 @@ def unpower_systems(team, systems):
         return Message(result)
     return FAIL_REACT
 
-async def deal_damage(team, amount, reason):
+async def deal_damage(team : str, amount : int, reason : str) -> Status:
     sub = get_sub(team)
     if sub:
         sub.damage(amount)
@@ -131,7 +132,7 @@ async def deal_damage(team, amount, reason):
         return OKAY_REACT
     return FAIL_REACT
 
-async def heal_up(team, amount, reason):
+async def heal_up(team : str, amount : int, reason : str) -> Status:
     sub = get_sub(team)
     if sub:
         sub.power.heal(amount)
@@ -141,7 +142,7 @@ async def heal_up(team, amount, reason):
 
 # UPGRADING
 
-async def upgrade_sub(team, amount):
+async def upgrade_sub(team : str, amount : int) -> Status:
     sub = get_sub(team)
     if sub:
         sub.power.modify_reactor(amount)
@@ -149,7 +150,7 @@ async def upgrade_sub(team, amount):
         return OKAY_REACT
     return FAIL_REACT
 
-async def upgrade_sub_system(team, system, amount):
+async def upgrade_sub_system(team : str, system : str, amount : int) -> Status:
     sub = get_sub(team)
     if sub:
         if sub.power.modify_system(system, amount):
@@ -157,7 +158,7 @@ async def upgrade_sub_system(team, system, amount):
             return OKAY_REACT
     return FAIL_REACT
 
-async def upgrade_sub_innate(team, system, amount):
+async def upgrade_sub_innate(team : str, system : str, amount : int) -> Status:
     sub = get_sub(team)
     if sub:
         if sub.power.modify_innate(system, amount):
@@ -165,7 +166,7 @@ async def upgrade_sub_innate(team, system, amount):
             return OKAY_REACT
     return FAIL_REACT
 
-async def add_system(team, system):
+async def add_system(team : str, system : str) -> Status:
     sub = get_sub(team)
     if sub:
         if sub.power.add_system(system):
@@ -173,7 +174,7 @@ async def add_system(team, system):
             return OKAY_REACT
     return FAIL_REACT
 
-async def add_keyword_to_sub(team, keyword, turn_limit, damage):
+async def add_keyword_to_sub(team : str, keyword : str, turn_limit : Optional[int], damage : int) -> Status:
     sub = get_sub(team)
     if sub:
         if sub.upgrades.add_keyword(keyword, turn_limit, damage):
@@ -181,7 +182,7 @@ async def add_keyword_to_sub(team, keyword, turn_limit, damage):
             return OKAY_REACT
     return FAIL_REACT
 
-async def remove_keyword_from_sub(team, keyword):
+async def remove_keyword_from_sub(team : str, keyword : str) -> Status:
     sub = get_sub(team)
     if sub:
         if sub.upgrades.remove_keyword(keyword):
@@ -191,14 +192,14 @@ async def remove_keyword_from_sub(team, keyword):
 
 # COMMS
 
-async def shout_at_team(team, message):
+async def shout_at_team(team : str, message : str) -> Status:
     sub = get_sub(team)
     if sub:
         await sub.send_to_all(message)
         return OKAY_REACT
     return FAIL_REACT
 
-async def broadcast(team, message):
+async def broadcast(team : str, message : str) -> Status:
     sub = get_sub(team)
     if sub and sub.power.activated():
         result = await sub.comms.broadcast(message)
@@ -210,7 +211,7 @@ async def broadcast(team, message):
 
 # INVENTORY
 
-async def arrange_trade(team, partner, items):
+async def arrange_trade(team : str, partner : str, items) -> Status:
     pair_list = []
     try:
         pair_list = to_pair_list(items)
@@ -222,7 +223,7 @@ async def arrange_trade(team, partner, items):
         return Message(await sub.inventory.begin_trade(partner_sub, pair_list))
     return Message("Didn't recognise the submarine asked for.")
 
-async def make_offer(team, items):
+async def make_offer(team : str, items) -> Status:
     pair_list = to_pair_list(items)
     if pair_list is None:
         return Message("Input list is badly formatted.")
@@ -231,19 +232,19 @@ async def make_offer(team, items):
         return Message(await sub.inventory.make_offer(pair_list))
     return FAIL_REACT
 
-async def accept_offer(team):
+async def accept_offer(team : str) -> Status:
     sub = get_sub(team)
     if sub:
         return Message(await sub.inventory.accept_trade())
     return FAIL_REACT
 
-async def reject_offer(team):
+async def reject_offer(team : str) -> Status:
     sub = get_sub(team)
     if sub:
         return Message(await sub.inventory.reject_trade())
     return FAIL_REACT
 
-async def sub_interacts(team, arg):
+async def sub_interacts(team : str, arg) -> Status:
     sub = get_sub(team)
     if sub:
         message = await interact_in_square(sub, sub.movement.get_position(), arg)
@@ -252,7 +253,7 @@ async def sub_interacts(team, arg):
         return Message("Nothing to report.")
     return FAIL_REACT
 
-async def give_item_to_team(team, item, quantity):
+async def give_item_to_team(team : str, item : str, quantity : int) -> Status:
     sub = get_sub(team)
     if sub:
         if sub.inventory.add(item, quantity):
@@ -260,7 +261,7 @@ async def give_item_to_team(team, item, quantity):
             return OKAY_REACT
     return FAIL_REACT
 
-async def take_item_from_team(team, item, quantity):
+async def take_item_from_team(team : str, item : str, quantity : int) -> Status:
     sub = get_sub(team)
     if sub:
         if sub.inventory.remove(item, quantity):
@@ -268,7 +269,7 @@ async def take_item_from_team(team, item, quantity):
             return OKAY_REACT
     return FAIL_REACT
 
-def drop_item(team, item):
+def drop_item(team : str, item : str) -> Status:
     sub = get_sub(team)
     if sub:
         return Message(sub.inventory.drop(item))
@@ -276,14 +277,14 @@ def drop_item(team, item):
 
 # ENGINEERING
 
-async def give_team_puzzle(team, reason):
+async def give_team_puzzle(team : str, reason : str) -> Status:
     sub = get_sub(team)
     if sub:
         await sub.puzzles.send_puzzle(reason)
         return OKAY_REACT
     return FAIL_REACT
 
-async def answer_team_puzzle(team, answer):
+async def answer_team_puzzle(team : str, answer : str) -> Status:
     sub = get_sub(team)
     if sub:
         await sub.puzzles.resolve_puzzle(answer)
@@ -292,7 +293,7 @@ async def answer_team_puzzle(team, answer):
 
 # CRANE
 
-def drop_crane(team):
+def drop_crane(team : str) -> Status:
     sub = get_sub(team)
     if sub:
         return Message(sub.inventory.drop_crane())
@@ -300,7 +301,7 @@ def drop_crane(team):
 
 # DANGER ZONE
 
-async def kill_sub(team, verify):
+async def kill_sub(team : str, verify : str) -> Status:
     sub = get_sub(team)
     if sub and sub._name == verify:
         sub.damage(sub.power.total_power)
@@ -308,19 +309,19 @@ async def kill_sub(team, verify):
         return OKAY_REACT
     return FAIL_REACT
 
-def delete_team(team):
+def delete_team(team : str) -> Status:
     # DELETES THE TEAM IN QUESTION. DO NOT DO THIS UNLESS YOU ARE ABSOLUTELY CERTAIN.
     if remove_team(team):
         return OKAY_REACT
     return FAIL_REACT
 
-async def explode_square(x, y, power):
+async def explode_square(x : int, y : int, power : int) -> Status:
     await explode((x, y), power)
     return OKAY_REACT
 
 # GAME MANAGEMENT
 
-async def make_submarine(guild, name, captain, engineer, scientist, x, y):
+async def make_submarine(guild : discord.Guild, name : str, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int, y : int) -> Status:
     """
     Makes a submarine with the name <name> and members Captain, Engineer and Scientist.
     Creates a category with <name>, then channels for each player.
@@ -370,7 +371,7 @@ async def make_submarine(guild, name, captain, engineer, scientist, x, y):
     await category.create_voice_channel("submarine", overwrites=allow_control_and_one(submarine_role))
     return await register(category, x, y)
 
-async def register(category, x, y):
+async def register(category : discord.CategoryChannel, x : int, y : int) -> Status:
     """
     Registers a team, setting them up with everything they could need.
     Requires a category with the required subchannels.
@@ -385,18 +386,18 @@ async def register(category, x, y):
 
 # MAP MODIFICATION
 
-def bury_treasure(name, x, y):
+def bury_treasure(name : str, x : int, y : int) -> Status:
     if bury_treasure_at(name, (x, y)):
         return OKAY_REACT
     return FAIL_REACT
 
-def add_attribute_to(x, y, attribute, value):
+def add_attribute_to(x : int, y : int, attribute : str, value) -> Status:
     square = get_square(x, y)
     if square and square.add_attribute(attribute, value):
         return OKAY_REACT
     return FAIL_REACT
 
-def remove_attribute_from(x, y, attribute):
+def remove_attribute_from(x : int, y : int, attribute : str) -> Status:
     square = get_square(x, y)
     if square and square.remove_attribute(attribute):
         return OKAY_REACT
@@ -404,21 +405,21 @@ def remove_attribute_from(x, y, attribute):
 
 # NPCs
 
-def add_npc_to_map(ntype, x, y):
+def add_npc_to_map(ntype : str, x : int, y : int) -> Status:
     return Message(add_npc(ntype, x, y))
 
-def remove_npc_from_map(npcid):
+def remove_npc_from_map(npcid : int) -> Status:
     if kill_npc(npcid):
         return OKAY_REACT
     return FAIL_REACT
 
-def printout_npc_types():
+def printout_npc_types() -> Status:
     types = list_to_and_separated(get_npc_types())
     return Message(f"Possible NPC types: {types}.")
 
 # WEAPONRY
 
-def schedule_shot(x, y, team, damaging):
+def schedule_shot(x : int, y : int, team : str, damaging : bool):
     sub = get_sub(team)
     if sub:
         return Message(sub.weapons.prepare_shot(damaging, x, y))

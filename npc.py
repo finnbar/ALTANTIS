@@ -7,9 +7,11 @@ import world, sub
 from control import notify_control
 from utils import Entity, diagonal_distance, determine_direction, go_in_direction
 
+from typing import Tuple, List, Callable, Dict, Any
+
 class NPC(Entity):
     classname = ""
-    def __init__(self, id, x, y):
+    def __init__(self, id : int, x : int, y : int):
         self.health = 1
         self.treasure = []
         self.x = x
@@ -26,23 +28,23 @@ class NPC(Entity):
     async def attack(self):
         pass
 
-    async def do_attack(self, entity, amount, message):
+    async def do_attack(self, entity, amount, message) -> bool:
         if self.attackable(entity):
             await entity.send_message(message, "scientist")
             entity.damage(amount)
             return True
         return False
 
-    def attackable(self, entity):
+    def attackable(self, entity) -> bool:
         if type(entity) is sub.Submarine:
             return not "camo" in entity.upgrades.keywords
         else:
             return not "camo" in entity.keywords
     
-    def name(self):
+    def name(self) -> str:
         return f"{self.classname.title()} (#{self.id})"
     
-    def full_name(self):
+    def full_name(self) -> str:
         return f"{self.classname.title()} (#{self.id} at {self.x}, {self.y})"
 
     async def send_message(self, content, _):
@@ -66,20 +68,20 @@ class NPC(Entity):
         for entity in hears_rattle:
             await entity.send_message(f"ENTITY **{self.name().upper()}** HAS DIED", "captain")
 
-    def damage(self, amount):
+    def damage(self, amount : int):
         self.damage_to_apply += amount
     
-    def outward_broadcast(self, strength):
+    def outward_broadcast(self, strength : int) -> str:
         if strength >= self.stealth:
             return self.name()
         return ""
     
-    def move(self, dx, dy):
+    def move(self, dx : int, dy : int):
         if world.in_world(self.x + dx, self.y + dy):
             self.x += dx
             self.y += dy
     
-    def move_towards_sub(self, dist):
+    def move_towards_sub(self, dist : str):
         """
         Looks for the closest sub in range, and moves towards it.
         """
@@ -95,13 +97,13 @@ class NPC(Entity):
             if direction is not None:
                 self.move(*go_in_direction(direction))
     
-    def get_position(self):
+    def get_position(self) -> Tuple[int, int]:
         return (self.x, self.y)
     
-    def is_weak(self):
+    def is_weak(self) -> bool:
         return True
     
-    async def interact(self, sub):
+    async def interact(self, sub) -> str:
         return ""
 
 import npc_templates as _npc
@@ -116,13 +118,13 @@ for cl in npc_classes:
 # All NPCs, listed by ID.
 npcs = []
 
-def get_npc_types():
+def get_npc_types() -> List[str]:
     return npc_types.keys()
 
-def get_npcs():
+def get_npcs() -> List[int]:
     return range(len(npcs))
 
-def kill_npc(id):
+def kill_npc(id : int) -> bool:
     if id in range(len(npcs)):
         del npcs[id]
         return True
@@ -132,7 +134,7 @@ async def npc_tick():
     for npc in npcs:
         await npc.on_tick()
 
-def filtered_npcs(pred):
+def filtered_npcs(pred : Callable[[NPC], bool]) -> List[int]:
     """
     Gets all names of npcs that satisfy some predicate.
     """
@@ -142,7 +144,7 @@ def filtered_npcs(pred):
             result.append(index)
     return result
 
-async def interact_in_square(sub, square, arg):
+async def interact_in_square(sub : sub.Submarine, square : Tuple[int, int], arg) -> str:
     in_square = filtered_npcs(lambda npc: (npc.x, npc.y) == square)
     message = ""
     for npcid in in_square:
@@ -152,12 +154,12 @@ async def interact_in_square(sub, square, arg):
             message += f"Interaction with **{npcid.title()}**: {npc_message}\n"
     return message
 
-def get_npc(npcid):
+def get_npc(npcid : int) -> NPC:
     if npcid in get_npcs():
         return npcs[npcid]
     return None
 
-def add_npc(npctype, x, y):
+def add_npc(npctype : str, x : int, y : int):
     if not world.in_world(x, y):
         return "Cannot place an NPC outside of the map."
     if npctype in npc_types:
@@ -166,14 +168,14 @@ def add_npc(npctype, x, y):
         return f"Created NPC #{id} of type {npctype.title()}!"
     return "That NPC type does not exist."
 
-def npcs_to_json():
+def npcs_to_json() -> List[Dict[str, Any]]:
     npcs_list = []
     for npc in npcs:
         npcs_list.append(npc.__dict__.copy())
         npcs_list[-1]["classname"] = npc.classname
     return npcs_list
 
-def npcs_from_json(json):
+def npcs_from_json(json : List[Dict[str, Any]]):
     global npcs
     npcs = []
     for npc in json:

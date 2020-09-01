@@ -65,7 +65,7 @@ class Movement(commands.Cog):
         """
         await perform_async(exit_submarine, ctx, get_team(ctx.channel), ctx.guild)
 
-class Status(commands.Cog):
+class SubStatus(commands.Cog):
     """
     All commands that get the status of your submarine and its local environment.
     """
@@ -191,7 +191,7 @@ class UpgradeManagement(commands.Cog):
     
     @commands.command(name="install_keyword")
     @commands.has_role(CONTROL_ROLE)
-    async def install_keyword(self, ctx, keyword, turn_limit : Optional[int] = None, damage : Optional[int] = 1):
+    async def install_keyword(self, ctx, keyword, turn_limit : Optional[int] = None, damage : int = 1):
         """
         (CONTROL) Gives this team a brand new <keyword>! (This is for upgrades outside of power.)
         """
@@ -625,7 +625,7 @@ bot.add_cog(MapModification())
 bot.add_cog(NPCs())
 bot.add_cog(Movement())
 bot.add_cog(PowerManagement())
-bot.add_cog(Status())
+bot.add_cog(SubStatus())
 bot.add_cog(UpgradeManagement())
 bot.add_cog(Weaponry())
 

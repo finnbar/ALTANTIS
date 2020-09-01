@@ -3,17 +3,20 @@ A subsystem for upgrades, handed to subs via keywords from control.
 """
 
 from utils import to_titled_list, list_to_and_separated
+import sub
+
+from typing import Tuple, Any, Optional
 
 class Upgrades():
-    def __init__(self, sub):
+    def __init__(self, sub : sub.Submarine):
         self.sub = sub
         # Used for special abilities gifted by control.
         self.keywords = []
         # Used for events that should happen on a given turn.
         # Consists of (int, string, (fn name, argument)) triples.
-        self.postponed_events = []
+        self.postponed_events : Tuple[int, str, Tuple[str, Any]] = []
     
-    def upgrade_status(self):
+    def upgrade_status(self) -> str:
         status = ""
         if len(self.keywords) > 0:
             status += f"You have active upgrades: {to_titled_list(self.keywords)}.\n"
@@ -38,7 +41,7 @@ class Upgrades():
                 unresolved.append((count-1, desc, fn))
         self.postponed_events = unresolved
 
-    def add_keyword(self, keyword, turn_limit=None, damage=1):
+    def add_keyword(self, keyword : str, turn_limit : Optional[int] = None, damage : int = 1) -> bool:
         if keyword not in self.keywords:
             self.keywords.append(keyword)
             if turn_limit is not None:
@@ -47,13 +50,13 @@ class Upgrades():
             return True
         return False
 
-    def remove_keyword(self, keyword):
+    def remove_keyword(self, keyword : str) -> bool:
         if keyword in self.keywords:
             self.keywords.remove(keyword)
             return True
         return False
     
-    async def remove_equip(self, keyword, damage=1):
+    async def remove_equip(self, keyword : str, damage : int = 1):
         if self.remove_keyword(keyword):
             self.sub.damage(damage)
             result = "fizzled out"

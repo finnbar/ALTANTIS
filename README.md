@@ -65,6 +65,9 @@ New features:
 - [x] Allow control to remove the engineering puzzles part of a submarine (for if someone urgently needs to leave). Can be done as a keyword.
 - [x] Implement "ticking" - if you take damage, shit might explode.
 - [x] Resource-rich squares that scanners can pick up.
+- [ ] Biocamoflage - make Sea Urchins and (coughthulu cough) ignore it.
+- [ ] Animal photos
+- [ ] Ruins slow subs down
 - [ ] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
 - [ ] Team-specific mechanics.
 

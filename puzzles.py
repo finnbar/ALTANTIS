@@ -2,9 +2,12 @@
 Deals with the engineering puzzles, which need to be imported, served and marked.
 """
 
+from control import notify_control
+import sub
+
 import json, glob
 from random import choice
-from control import notify_control
+from typing import Tuple, List
 
 answers = {}
 with open("puzzles/answers.json", "r") as ans_file:
@@ -13,7 +16,7 @@ with open("puzzles/answers.json", "r") as ans_file:
 questions = glob.glob("puzzles/*")
 questions.remove("puzzles/answers.json")
 
-def attach_answer(question):
+def attach_answer(question : str) -> Tuple[str, List[str]]:
     answer = []
     if question in answers:
         answer = answers[question]
@@ -25,11 +28,11 @@ def attach_answer(question):
 
 puzzles = list(map(attach_answer, questions))
 
-def load_all_puzzles():
+def load_all_puzzles() -> List[Tuple[str, List[str]]]:
     return puzzles.copy()
 
 class EngineeringPuzzles():
-    def __init__(self, sub):
+    def __init__(self, sub : sub.Submarine):
         self.sub = sub
         self.puzzles = load_all_puzzles()
         self.current_puzzle = None
@@ -48,7 +51,7 @@ class EngineeringPuzzles():
                 await self.send_puzzle("wear and tear")
                 self.wear_and_tear = choice([4,5,6])
     
-    async def send_puzzle(self, reason):
+    async def send_puzzle(self, reason : str) -> bool:
         """
         Send the next puzzle, tagging it with a reason.
         Valid reasons are:
@@ -69,7 +72,7 @@ class EngineeringPuzzles():
         await self.sub.send_message(f"Puzzle for **{reason}** received! You have until your submarine next moves to solve it!", "engineer", self.current_puzzle[0])
         return True
     
-    async def resolve_puzzle(self, answer):
+    async def resolve_puzzle(self, answer : str) -> bool:
         """
         Resolve the current puzzle, if able. Called with answer=None if time ran out.
         """
