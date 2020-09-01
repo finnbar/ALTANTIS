@@ -1,9 +1,8 @@
 from discord.ext import commands
-from typing import Optional
 
 from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
-from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT, to_react
+from ALTANTIS.utils.bot import perform_async, perform_unsafe, perform_async_unsafe, get_team
+from ALTANTIS.utils.actions import DiscordAction, OKAY_REACT, FAIL_REACT, to_react
 from ALTANTIS.world.extras import explode
 from ALTANTIS.subs.state import with_sub_async, remove_team
 
@@ -45,6 +44,7 @@ async def kill_sub(team : str, verify : str) -> DiscordAction:
             sub.damage(sub.power.total_power)
             await sub.send_to_all("Submarine took catastrophic damage and will die on next game loop.")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_kill, FAIL_REACT)
 
 def delete_team(team : str) -> DiscordAction:

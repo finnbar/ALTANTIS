@@ -1,10 +1,9 @@
 import discord
 from discord.ext import commands
-from typing import Optional
 
-from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team, bot, main_loop
-from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
+from ALTANTIS.utils.consts import CONTROL_ROLE
+from ALTANTIS.utils.bot import perform_unsafe, perform_async_unsafe, bot, main_loop
+from ALTANTIS.utils.actions import DiscordAction, OKAY_REACT, FAIL_REACT
 from ALTANTIS.utils.roles import create_or_return_role
 from ALTANTIS.utils.control import init_control_notifs, init_news_notifs
 from ALTANTIS.subs.state import add_team, get_sub

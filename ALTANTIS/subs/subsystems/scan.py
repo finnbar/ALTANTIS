@@ -60,7 +60,7 @@ class ScanSystem():
     def previous_scan(self) -> str:
         return self.prev_scan
     
-def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[str] = [], npc_exclusions : List[int] = [], with_distance : bool = False) -> [str]:
+def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[str] = [], npc_exclusions : List[int] = [], with_distance : bool = False) -> List[str]:
     """
     Explores the area centered around pos = (cx, cy) spanning distance dist.
     Returns all outward_broadcast events (as a list) formatted for output.

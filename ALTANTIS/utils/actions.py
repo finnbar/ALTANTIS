@@ -24,5 +24,5 @@ class Message(DiscordAction):
 OKAY_REACT = React(TICK)
 FAIL_REACT = React(CROSS)
 
-def to_react(status : bool):
+def to_react(status : bool) -> React:
     return OKAY_REACT if status else FAIL_REACT

@@ -1,8 +1,7 @@
 from discord.ext import commands
-from typing import Optional
 
 from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, CURRENCY_NAME
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
+from ALTANTIS.utils.bot import perform, perform_async, perform_async_unsafe, get_team
 from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
 from ALTANTIS.utils.text import to_pair_list
 from ALTANTIS.subs.state import with_sub, with_sub_async, get_sub
@@ -139,6 +138,7 @@ async def give_item_to_team(team : str, item : str, quantity : int) -> DiscordAc
         if sub.inventory.add(item, quantity):
             await sub.send_message(f"Obtained {quantity}x {item.title()}!", "captain")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_give, FAIL_REACT)
 
 async def take_item_from_team(team : str, item : str, quantity : int) -> DiscordAction:
@@ -146,6 +146,7 @@ async def take_item_from_team(team : str, item : str, quantity : int) -> Discord
         if sub.inventory.remove(item, quantity):
             await sub.send_message(f"Lost {quantity}x {item.title()}!", "captain")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_take, FAIL_REACT)
 
 def drop_item(team : str, item : str) -> DiscordAction:

@@ -1,9 +1,8 @@
 from discord.ext import commands
-from typing import Optional
 
 from ALTANTIS.utils.consts import CONTROL_ROLE, ENGINEER
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
-from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
+from ALTANTIS.utils.bot import perform_async, get_team
+from ALTANTIS.utils.actions import DiscordAction, OKAY_REACT, FAIL_REACT
 from ALTANTIS.subs.state import with_sub_async
 
 class Engineering(commands.Cog):

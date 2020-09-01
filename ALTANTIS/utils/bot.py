@@ -1,5 +1,6 @@
 from discord.ext import commands, tasks
-from typing import Optional, Tuple, List, Any
+from typing import Optional, List
+import discord
 
 from ALTANTIS.utils.consts import GAME_SPEED
 from ALTANTIS.utils.actions import FAIL_REACT
@@ -8,7 +9,7 @@ from ALTANTIS.subs.state import get_subs
 
 bot = commands.Bot(command_prefix="!")
 
-def get_team(channel):
+def get_team(channel : discord.TextChannel) -> Optional[str]:
     """
     Gets the name of the category channel of the channel the message was sent in.
     """
@@ -19,7 +20,7 @@ def get_team(channel):
             return team
     return None
 
-def to_lowercase_list(args):
+def to_lowercase_list(args) -> List[str]:
     alist = list(args)
     for i in range(len(alist)):
         if type(alist[i]) == str:

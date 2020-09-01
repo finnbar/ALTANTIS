@@ -1,8 +1,8 @@
 from discord.ext import commands
 from typing import Optional
 
-from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
+from ALTANTIS.utils.consts import CONTROL_ROLE
+from ALTANTIS.utils.bot import perform_unsafe
 from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.npcs.npc import add_npc, kill_npc, get_npc_types

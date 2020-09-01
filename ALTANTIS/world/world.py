@@ -167,8 +167,8 @@ undersea_map = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
 def in_world(x : int, y : int) -> bool:
     return 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT
 
-def possible_directions() -> str:
-    return directions.keys()
+def possible_directions() -> List[str]:
+    return list(directions.keys())
 
 def get_square(x : int, y : int) -> Optional[Cell]:
     if in_world(x, y):

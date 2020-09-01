@@ -2,19 +2,17 @@
 Manages individual submarines, including their subsystems.
 """
 
-from random import choice, random, shuffle
-from typing import List, Tuple, Dict, Any
-import math, datetime, discord
+from typing import Tuple, Dict, Any
+import discord
 
 from ALTANTIS.utils.entity import Entity
-from ALTANTIS.utils.text import list_to_and_separated, to_titled_list
 from ALTANTIS.utils.roles import create_or_return_role
 from ALTANTIS.world.world import get_square
 
 subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory", "weapons", "upgrades"]
 
 class Submarine(Entity):
-    def __init__(self, name : str, channels : List[discord.TextChannel], x : int, y : int):
+    def __init__(self, name : str, channels : Dict[str, discord.TextChannel], x : int, y : int):
         # To avoid circular dependencies.
         # The one dependency is that Scan and Comms need the list of available
         # subs, but that needs this class, which needs Scan and Comms.

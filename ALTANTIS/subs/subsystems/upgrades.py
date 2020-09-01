@@ -2,7 +2,7 @@
 A subsystem for upgrades, handed to subs via keywords from control.
 """
 
-from typing import Tuple, Any, Optional
+from typing import Tuple, Any, Optional, List
 
 from ALTANTIS.utils.text import to_titled_list, list_to_and_separated
 from ..sub import Submarine
@@ -14,7 +14,7 @@ class Upgrades():
         self.keywords = []
         # Used for events that should happen on a given turn.
         # Consists of (int, string, (fn name, argument)) triples.
-        self.postponed_events : Tuple[int, str, Tuple[str, Any]] = []
+        self.postponed_events : List[Tuple[int, str, Tuple[str, Any, Any]]] = []
     
     def upgrade_status(self) -> str:
         status = ""
@@ -28,7 +28,7 @@ class Upgrades():
         return status
     
     async def postponed_tick(self):
-        unresolved = []
+        unresolved : List[Tuple[int, str, Tuple[str, Any, Any]]] = []
         for event in self.postponed_events:
             (count, desc, fn) = event
             if count <= 1:

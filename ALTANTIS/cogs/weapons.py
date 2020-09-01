@@ -1,8 +1,7 @@
 from discord.ext import commands
-from typing import Optional
 
 from ALTANTIS.utils.consts import CONTROL_ROLE, SCIENTIST
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
+from ALTANTIS.utils.bot import perform, get_team
 from ALTANTIS.utils.actions import Message, FAIL_REACT
 from ALTANTIS.subs.state import with_sub
 
