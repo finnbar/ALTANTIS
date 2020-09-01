@@ -2,14 +2,17 @@
 All possible NPC types.
 """
 
-import npc, world, control, sub
-from consts import CURRENCY_NAME, RESOURCES
-
 import random
+
+from ALTANTIS.utils.consts import CURRENCY_NAME, RESOURCES
+from ALTANTIS.utils.control import notify_news
+from ALTANTIS.world.world import get_square
+from ALTANTIS.world.extras import all_in_submap, explode
+from ALTANTIS.npcs.npc import NPC, add_npc
 
 # TODO: DeepOne NPC, Large Storm Generator
 
-class Squid(npc.NPC):
+class Squid(NPC):
     classname = "squid"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -20,13 +23,12 @@ class Squid(npc.NPC):
     async def attack(self):
         if self.tick_count >= 3:
             self.tick_count -= 3
-            for entity in world.all_in_square(self.get_position()):
-                if type(entity) is sub.Submarine:
-                    await self.do_attack(entity, 1, f"{self.name()} blooped you for one damage!")
+            for sub in self.all_subs_in_square():
+                await self.do_attack(sub, 1, f"{self.name()} blooped you for one damage!")
         else:
             self.tick_count += 1
 
-class BigSquid(npc.NPC):
+class BigSquid(NPC):
     classname = "giant_squid"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -41,13 +43,12 @@ class BigSquid(npc.NPC):
     async def attack(self):
         if self.tick_count >= 2:
             self.tick_count -= 2
-            for entity in world.all_in_square(self.get_position()):
-                if type(entity) is sub.Submarine:
-                    await self.do_attack(entity, 1, f"{self.name()} blooped you for one damage!")
+            for sub in self.all_subs_in_square():
+                await self.do_attack(sub, 1, f"{self.name()} blooped you for one damage!")
         else:
             self.tick_count += 1
 
-class Octopus(npc.NPC):
+class Octopus(NPC):
     classname = "octopus"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -62,13 +63,12 @@ class Octopus(npc.NPC):
     async def attack(self):
         if self.tick_count >= 2:
             self.tick_count -= 2
-            for entity in world.all_in_square(self.get_position()):
-                if type(entity) is sub.Submarine:
-                    await self.do_attack(entity, 2, f"{self.name()} constricted you for one damage!")
+            for sub in self.all_subs_in_square():
+                await self.do_attack(sub, 2, f"{self.name()} constricted you for one damage!")
         else:
             self.tick_count += 1
 
-class Shark(npc.NPC):
+class Shark(NPC):
     classname = "shark"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -81,13 +81,12 @@ class Shark(npc.NPC):
         if self.tick_count >= 3:
             self.tick_count -= 3
             self.move_towards_sub(4)
-            for entity in world.all_in_square(self.get_position()):
-                if type(entity) is sub.Submarine:
-                    await self.do_attack(entity, 1, f"{self.name()} snapped you for one damage!")
+            for sub in self.all_subs_in_square():
+                await self.do_attack(sub, 1, f"{self.name()} snapped you for one damage!")
         else:
             self.tick_count += 1
 
-class Whale(npc.NPC):
+class Whale(NPC):
     classname = "whale"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -96,11 +95,10 @@ class Whale(npc.NPC):
 
     async def on_tick(self):
         await super().on_tick()
-        for entity in world.all_in_square(self.get_position()):
-            if type(entity) is sub.Submarine:
-                await entity.send_message(f"{self.name()} is having a _whale_ of a time.", "captain")
+        for sub in self.all_subs_in_square():
+            await sub.send_message(f"{self.name()} is having a _whale_ of a time.", "captain")
 
-class Dolphin(npc.NPC):
+class Dolphin(NPC):
     classname = "dolphin"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -110,7 +108,7 @@ class Dolphin(npc.NPC):
     async def interact(self, *_):
         return "The dolphin made a few happy noises!"
 
-class MantaRay(npc.NPC):
+class MantaRay(NPC):
     classname = "mantaray"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -125,16 +123,16 @@ class MantaRay(npc.NPC):
         return "The manta ray swims happily!"
     
     async def deathrattle(self):
-        hears_rattle = world.all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
+        hears_rattle = all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
         for entity in hears_rattle:
             await entity.send_message(f"Manta Ray at ({self.x}, {self.y}) was killed. The Manta Rayvenge Squad hears its cry!", "captain")
         # Then summon four eel as a "fuck you".
         locations = [(0,1), (1,0), (-1,0), (0,-1)]
         locations = list(map(lambda p: (self.x+p[0], self.y+p[1]), locations))
         for location in locations:
-            npc.add_npc("eel", location[0], location[1])
+            add_npc("eel", location[0], location[1])
 
-class Eel(npc.NPC):
+class Eel(NPC):
     classname = "eel"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -152,14 +150,13 @@ class Eel(npc.NPC):
             # First, move randomly:
             self.move(random.choice([-1,0,1]), random.choice([-1,0,1]))
             # Then attack:
-            for entity in world.all_in_square(self.get_position()):
-                if type(entity) is sub.Submarine:
-                    await self.do_attack(entity, 1, f"{self.name()} zapped you for one damage and (temporarily) shocked your submarine!")
-                    entity.upgrades.add_keyword("shocked", 5, 0)
+            for sub in self.all_subs_in_square():
+                await self.do_attack(sub, 1, f"{self.name()} zapped you for one damage and (temporarily) shocked your submarine!")
+                sub.upgrades.add_keyword("shocked", 5, 0)
         else:
             self.tick_count += 1
 
-class AnglerFish(npc.NPC):
+class AnglerFish(NPC):
     classname = "angler"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -175,13 +172,12 @@ class AnglerFish(npc.NPC):
     async def attack(self):
         if self.tick_count >= 2:
             self.tick_count -= 2
-            for entity in world.all_in_square(self.get_position()):
-                if type(entity) is sub.Submarine:
-                    await self.do_attack(entity, 1, f"{self.name()} jumped out from hiding and did 1 damage!")
+            for sub in self.all_subs_in_square():
+                await self.do_attack(sub, 1, f"{self.name()} jumped out from hiding and did 1 damage!")
         else:
             self.tick_count += 1
 
-class Urchin(npc.NPC):
+class Urchin(NPC):
     classname = "urchin"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -193,14 +189,13 @@ class Urchin(npc.NPC):
     
     async def attack(self):
         new_visited = []
-        for entity in world.all_in_square(self.get_position()):
-            if type(entity) is sub.Submarine:
-                new_visited.append(entity.name)
-                if entity.name not in self.visited:
-                    await self.do_attack(entity, 1, f"{self.name()} jumped out from hiding and did 1 damage on your arrival!")
+        for sub in self.all_subs_in_square():
+            new_visited.append(sub.name)
+            if sub.name not in self.visited:
+                await self.do_attack(sub, 1, f"{self.name()} jumped out from hiding and did 1 damage on your arrival!")
         self.visited = new_visited
 
-class Crab(npc.NPC):
+class Crab(NPC):
     classname = "crab"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -211,59 +206,57 @@ class Crab(npc.NPC):
         return f"Giant Crab (#{self.id})"
 
     async def attack(self):
-        for entity in world.all_in_square(self.get_position()):
-            if type(entity) is sub.Submarine:
-                if entity.inventory.crane_down:
-                    # Snip the crane lead and otherwise mess it up.
-                    if await self.do_attack(entity, 2, f"{self.name()} snipped at your crane cable and caused a balance issue, dealing two damage!"):
-                        entity.upgrades.add_keyword("snipped")
-                        message = entity.inventory.crane_falters()
-                        if message:
-                            await entity.send_message(message, "captain")
+        for sub in self.all_subs_in_square():
+            if sub.inventory.crane_down:
+                # Snip the crane lead and otherwise mess it up.
+                if await self.do_attack(sub, 2, f"{self.name()} snipped at your crane cable and caused a balance issue, dealing two damage!"):
+                    sub.upgrades.add_keyword("snipped")
+                    message = sub.inventory.crane_falters()
+                    if message:
+                        await sub.send_message(message, "captain")
 
-class NewsBouy(npc.NPC):
+class NewsBouy(NPC):
     classname = "bouy"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.health = 5
 
     async def send_message(self, content, _):
-        await control.notify_news(content)
+        await notify_news(content)
 
-class Mine(npc.NPC):
+class Mine(NPC):
     classname = "mine"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.countdown = 10
 
     async def on_tick(self):
-        for entity in world.all_in_square(self.get_position()):
-            if type(entity) is sub.Submarine:
-                if self.countdown <= 0:
-                    self.damage(1)
-                else:
-                    self.countdown -= 1
-                    for entity in world.all_in_square(self.get_position()):
-                        await entity.send_message(str(self.countdown), "captain")
+        for sub in self.all_subs_in_square():
+            if self.countdown <= 0:
+                self.damage(1)
+            else:
+                self.countdown -= 1
+                for sub in self.all_subs_in_square():
+                    await sub.send_message(str(self.countdown), "captain")
     
     async def deathrattle(self):
-        await world.explode(self.get_position(), 2)
+        await explode(self.get_position(), 2)
 
-class StormGenerator(npc.NPC):
+class StormGenerator(NPC):
     classname = "stormer"
     async def on_tick(self):
         for dx in range(-2,3):
             for dy in range(-2,3):
-                sq = world.get_square(self.x + dx, self.y + dy)
+                sq = get_square(self.x + dx, self.y + dy)
                 if sq: sq.add_attribute("stormy")
 
     async def deathrattle(self):
         for dx in range(-2,3):
             for dy in range(-2,3):
-                sq = world.get_square(self.x + dx, self.y + dy)
+                sq = get_square(self.x + dx, self.y + dy)
                 if sq: sq.remove_attribute("stormy")
 
-class GoldTrader(npc.NPC):
+class GoldTrader(NPC):
     classname = "gold_trader"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -274,9 +267,8 @@ class GoldTrader(npc.NPC):
     
     async def on_tick(self):
         await super().on_tick()
-        for entity in world.all_in_square(self.get_position()):
-            if type(entity) is sub.Submarine:
-                await entity.send_message(f"{self.name()} here! Use `!interact 1` to pay 2 Gold for one {self.resource.title()}, or `!interact 2` to pay one {self.resource.title()} for 2 Gold.", "captain")
+        for sub in self.all_subs_in_square():
+            await sub.send_message(f"{self.name()} here! Use `!interact 1` to pay 2 Gold for one {self.resource.title()}, or `!interact 2` to pay one {self.resource.title()} for 2 Gold.", "captain")
 
     async def interact(self, sub, option):
         if option == "1":

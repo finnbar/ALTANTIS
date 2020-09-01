@@ -2,10 +2,10 @@
 Runs the game, performing the right actions at fixed time intervals.
 """
 
-from state import get_subs, get_sub, state_to_dict, state_from_dict
-from world import map_to_dict, map_from_dict, map_tick
-from utils import OKAY_REACT, FAIL_REACT
-from npc import npc_tick, npcs_to_json, npcs_from_json
+from ALTANTIS.subs.state import get_subs, get_sub, state_to_dict, state_from_dict
+from ALTANTIS.npcs.npc import npc_tick, npcs_to_json, npcs_from_json
+from ALTANTIS.world.world import map_tick, map_to_dict, map_from_dict
+from ALTANTIS.utils.actions import FAIL_REACT, OKAY_REACT
 
 import json
 from typing import List, Dict

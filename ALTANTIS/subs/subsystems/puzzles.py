@@ -1,13 +1,12 @@
 """
 Deals with the engineering puzzles, which need to be imported, served and marked.
 """
-
-from control import notify_control
-import sub
-
 import json, glob
 from random import choice
 from typing import Tuple, List
+
+from ALTANTIS.utils.control import notify_control
+from ..sub import Submarine
 
 answers = {}
 with open("puzzles/answers.json", "r") as ans_file:
@@ -32,7 +31,7 @@ def load_all_puzzles() -> List[Tuple[str, List[str]]]:
     return puzzles.copy()
 
 class EngineeringPuzzles():
-    def __init__(self, sub : sub.Submarine):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         self.puzzles = load_all_puzzles()
         self.current_puzzle = None

@@ -2,13 +2,13 @@
 A subsystem for upgrades, handed to subs via keywords from control.
 """
 
-from utils import to_titled_list, list_to_and_separated
-import sub
-
 from typing import Tuple, Any, Optional
 
+from ALTANTIS.utils.text import to_titled_list, list_to_and_separated
+from ..sub import Submarine
+
 class Upgrades():
-    def __init__(self, sub : sub.Submarine):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         # Used for special abilities gifted by control.
         self.keywords = []

@@ -2,18 +2,20 @@
 Allows subs to charge and fire (stunning) weapons.
 """
 
-from state import get_subs, get_sub
-from npc import get_npcs, get_npc
-from utils import diagonal_distance, list_to_and_separated, Entity
-from world import in_world
-import sub
+from ALTANTIS.subs.state import get_subs, get_sub
+from ALTANTIS.npcs.npc import get_npcs, get_npc
+from ALTANTIS.utils.direction import diagonal_distance
+from ALTANTIS.utils.text import list_to_and_separated
+from ALTANTIS.utils.entity import Entity
+from ALTANTIS.world.world import in_world
+from ..sub import Submarine
 
 import math
 from random import shuffle
 from typing import Tuple, Dict, List
 
 class Weaponry():
-    def __init__(self, sub : sub.Submarine):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         self.weapons_charge = 1
         self.range = 4

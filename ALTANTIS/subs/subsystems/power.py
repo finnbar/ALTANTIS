@@ -2,16 +2,16 @@
 Allows submarines to manage their power usage.
 """
 
-from control import notify_control
-from consts import TICK, CROSS, PLUS
-from world import all_in_submap
-import sub
+from ALTANTIS.utils.control import notify_control
+from ALTANTIS.utils.consts import TICK, CROSS, PLUS
+from ALTANTIS.world.extras import all_in_submap
+from ..sub import Submarine
 
 import random
 from typing import Dict, List
 
 class PowerManager():
-    def __init__(self, sub : sub.Submarine):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         self.active = False
         # power is a dictionary mapping systems to their current power.

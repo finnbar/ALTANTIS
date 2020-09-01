@@ -1,11 +1,16 @@
+from __future__ import annotations
 """
 Deals with NPCs in general, and how they operate.
 (Individual NPCs will be put elsewhere.)
 """
 
-import world, sub
-from control import notify_control
-from utils import Entity, diagonal_distance, determine_direction, go_in_direction
+from ALTANTIS.subs.state import filtered_teams, get_sub
+from ALTANTIS.subs.sub import Submarine
+from ALTANTIS.world.world import bury_treasure_at, in_world
+from ALTANTIS.world.extras import all_in_submap
+from ALTANTIS.utils.control import notify_control
+from ALTANTIS.utils.entity import Entity
+from ALTANTIS.utils.direction import diagonal_distance, determine_direction, go_in_direction
 
 from typing import Tuple, List, Callable, Dict, Any
 
@@ -36,7 +41,7 @@ class NPC(Entity):
         return False
 
     def attackable(self, entity) -> bool:
-        if type(entity) is sub.Submarine:
+        if type(entity) is Submarine:
             return not "camo" in entity.upgrades.keywords
         else:
             return not "camo" in entity.keywords
@@ -55,7 +60,7 @@ class NPC(Entity):
             self.health -= self.damage_to_apply
             if self.health <= 0:
                 for treasure in self.treasure:
-                    world.bury_treasure_at(treasure, (self.x, self.y))
+                    bury_treasure_at(treasure, (self.x, self.y))
                 await notify_control(f"**{self.full_name()}** took a total of {self.damage_to_apply} damage and **died**!")
                 await self.deathrattle()
                 kill_npc(self.id)
@@ -64,7 +69,7 @@ class NPC(Entity):
             self.damage_to_apply = 0
 
     async def deathrattle(self):
-        hears_rattle = world.all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
+        hears_rattle = all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
         for entity in hears_rattle:
             await entity.send_message(f"ENTITY **{self.name().upper()}** HAS DIED", "captain")
 
@@ -77,7 +82,7 @@ class NPC(Entity):
         return ""
     
     def move(self, dx : int, dy : int):
-        if world.in_world(self.x + dx, self.y + dy):
+        if in_world(self.x + dx, self.y + dy):
             self.x += dx
             self.y += dy
     
@@ -85,10 +90,10 @@ class NPC(Entity):
         """
         Looks for the closest sub in range, and moves towards it.
         """
-        nearby_entities = world.all_in_submap(self.get_position(), dist)
+        nearby_entities = all_in_submap(self.get_position(), dist)
         closest = (None, 0)
         for entity in nearby_entities:
-            if type(entity) is sub.Submarine:
+            if type(entity) is Submarine:
                 this_dist = diagonal_distance(self.get_position(), entity.get_position())
                 if (closest[0] is None) or this_dist < closest[1]:
                     closest = (entity, this_dist)
@@ -105,15 +110,32 @@ class NPC(Entity):
     
     async def interact(self, sub) -> str:
         return ""
+    
+    def all_subs_in_square(self) -> List[Submarine]:
+        subs_in_square = filtered_teams(lambda sub: sub.movement.x == self.x and sub.movement.y == self.y)
+        return list(map(get_sub, subs_in_square))
+    
+    def all_npcs_in_square(self) -> List[NPC]:
+        npcs_in_square = filtered_npcs(lambda npc: npc.x == self.x and npc.y == self.y and npc != self)
+        return list(map(get_npc, npcs_in_square))
 
-import npc_templates as _npc
+    def all_in_square(self) -> List[Entity]:
+        """
+        Gets all entities (subs and NPCs) in your square except yourself.
+        """
+        return self.all_subs_in_square() + self.all_npcs_in_square()
 
-# Available NPC types. Note that "NPC" is used liberally here - it can refer to
-# monsters, non-player characters, and structures such as mines.
-npc_classes = [_npc.Squid, _npc.BigSquid, _npc.Dolphin, _npc.Eel, _npc.Mine, _npc.StormGenerator, _npc.Whale, _npc.Octopus, _npc.NewsBouy, _npc.GoldTrader, _npc.Urchin, _npc.MantaRay, _npc.AnglerFish, _npc.Shark, _npc.Crab]
 npc_types = {}
-for cl in npc_classes:
-    npc_types[cl.classname] = cl
+
+def load_npc_types():
+    # Woo let's continue to avoid circular imports!
+    import ALTANTIS.npcs.templates as _npc
+
+    # Available NPC types. Note that "NPC" is used liberally here - it can refer to
+    # monsters, non-player characters, and structures such as mines.
+    npc_classes = [_npc.Squid, _npc.BigSquid, _npc.Dolphin, _npc.Eel, _npc.Mine, _npc.StormGenerator, _npc.Whale, _npc.Octopus, _npc.NewsBouy, _npc.GoldTrader, _npc.Urchin, _npc.MantaRay, _npc.AnglerFish, _npc.Shark, _npc.Crab]
+    for cl in npc_classes:
+        npc_types[cl.classname] = cl
 
 # All NPCs, listed by ID.
 npcs = []
@@ -144,7 +166,7 @@ def filtered_npcs(pred : Callable[[NPC], bool]) -> List[int]:
             result.append(index)
     return result
 
-async def interact_in_square(sub : sub.Submarine, square : Tuple[int, int], arg) -> str:
+async def interact_in_square(sub : Submarine, square : Tuple[int, int], arg) -> str:
     in_square = filtered_npcs(lambda npc: (npc.x, npc.y) == square)
     message = ""
     for npcid in in_square:
@@ -160,7 +182,7 @@ def get_npc(npcid : int) -> NPC:
     return None
 
 def add_npc(npctype : str, x : int, y : int):
-    if not world.in_world(x, y):
+    if not in_world(x, y):
         return "Cannot place an NPC outside of the map."
     if npctype in npc_types:
         id = len(npcs)

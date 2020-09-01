@@ -2,15 +2,14 @@
 Manages individual submarines, including their subsystems.
 """
 
-from consts import GAME_SPEED
-from utils import Entity, list_to_and_separated, to_titled_list, create_or_return_role
-from world import get_square
-
 from random import choice, random, shuffle
 from typing import List, Tuple, Dict, Any
 import math, datetime, discord
 
-MAX_SPEED = 4
+from ALTANTIS.utils.entity import Entity
+from ALTANTIS.utils.text import list_to_and_separated, to_titled_list
+from ALTANTIS.utils.roles import create_or_return_role
+from ALTANTIS.world.world import get_square
 
 subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory", "weapons", "upgrades"]
 
@@ -19,14 +18,14 @@ class Submarine(Entity):
         # To avoid circular dependencies.
         # The one dependency is that Scan and Comms need the list of available
         # subs, but that needs this class, which needs Scan and Comms.
-        from power import PowerManager
-        from scan import ScanSystem
-        from comms import CommsSystem
-        from puzzles import EngineeringPuzzles
-        from movement import MovementControls
-        from inventory import Inventory
-        from weapons import Weaponry
-        from upgrades import Upgrades
+        from .subsystems.power import PowerManager
+        from .subsystems.scan import ScanSystem
+        from .subsystems.comms import CommsSystem
+        from .subsystems.puzzles import EngineeringPuzzles
+        from .subsystems.movement import MovementControls
+        from .subsystems.inventory import Inventory
+        from .subsystems.weapons import Weaponry
+        from .subsystems.upgrades import Upgrades
 
         self._name = name
         self.channels = channels

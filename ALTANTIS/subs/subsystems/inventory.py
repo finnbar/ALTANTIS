@@ -3,16 +3,16 @@ Inventory system for holding items, trading items and losing items.
 Also features The Crane.
 """
 
-from consts import CURRENCY_NAME
-from world import pick_up_treasure, bury_treasure_at
-from utils import list_to_and_separated, to_titled_list
-from control import notify_control
-import sub
+from ALTANTIS.utils.consts import CURRENCY_NAME
+from ALTANTIS.utils.text import list_to_and_separated, to_titled_list
+from ALTANTIS.world.world import pick_up_treasure, bury_treasure_at
+from ALTANTIS.utils.control import notify_control
+from ..sub import Submarine
 
 from typing import List, Dict, Tuple, Optional
 
 class Inventory():
-    def __init__(self, sub : sub.Submarine):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         self.inventory = {CURRENCY_NAME: 1}
 
@@ -162,7 +162,7 @@ class Inventory():
             offer_list.append(f"{offer[item]}x {item.title()}")
         return list_to_and_separated(offer_list)
     
-    async def begin_trade(self, partner : sub.Submarine, items : List[Tuple[str, int]]) -> str:
+    async def begin_trade(self, partner : Submarine, items : List[Tuple[str, int]]) -> str:
         """
         Begin a trade with <partner> and the opening offer <items>.
         partner is a sub object, items is [(item, quantity), ...]
@@ -191,7 +191,7 @@ class Inventory():
         await partner.inventory.received_trade(self.sub, offer_text)
         return f"You have offered **{offer_text}** to {partner.name()}. Wait for them to respond to the trade, and then you may give a counteroffer with `!offer`, `!accept_trade` if you agree with what they've said, or `!reject_trade` if you don't want to trade anymore. You have until either sub next moves to complete the trade."
 
-    async def received_trade(self, sub : sub.Submarine, offer_text : str):
+    async def received_trade(self, sub : Submarine, offer_text : str):
         self.accepting = False
         self.trading_partner = sub
         self.my_turn = True

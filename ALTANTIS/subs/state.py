@@ -2,9 +2,10 @@
 Manages the state dictionary, which keeps track of all submarines.
 """
 
-from sub import sub_from_dict, Submarine
+from ALTANTIS.subs.sub import sub_from_dict, Submarine
+from ALTANTIS.utils.actions import DiscordAction
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Callable, Awaitable
 import discord
 
 state : Dict[str, Submarine] = {}
@@ -31,6 +32,19 @@ def get_sub(name : str) -> Submarine:
     """
     if name in state:
         return state[name]
+    return None
+
+def with_sub(name : str, function : Callable[[Submarine], DiscordAction], fail : DiscordAction) -> DiscordAction:
+    sub = get_sub(name)
+    if sub:
+        return function(sub)
+    return fail
+
+async def with_sub_async(name : str, function : Callable[[Submarine], Awaitable[DiscordAction]], fail : DiscordAction) -> DiscordAction:
+    sub = get_sub(name)
+    if sub:
+        return await function(sub)
+    return fail
 
 def add_team(name : str, category : discord.CategoryChannel, x : int, y : int) -> bool:
     """

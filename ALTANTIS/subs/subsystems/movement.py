@@ -1,16 +1,16 @@
 """
 Allows the sub to move.
 """
-
-from world import move_on_map, possible_directions, get_square, in_world
-from consts import GAME_SPEED, direction_emoji, TICK, CROSS
-import sub
-
 import math, datetime
 from typing import Tuple
 
+from ALTANTIS.world.world import possible_directions, get_square, in_world
+from ALTANTIS.utils.consts import GAME_SPEED, direction_emoji, TICK, CROSS
+from ALTANTIS.utils.direction import directions, reverse_dir
+from ..sub import Submarine
+
 class MovementControls():
-    def __init__(self, sub : sub.Submarine, x : int, y : int):
+    def __init__(self, sub : Submarine, x : int, y : int):
         self.sub = sub
         self.direction = "n"
         self.x = x
@@ -69,7 +69,18 @@ class MovementControls():
         return (self.x, self.y)
 
     async def move(self) -> str:
-        self.x, self.y, message = await move_on_map(self.sub, self.direction, self.x, self.y)
+        motion = directions[self.direction]
+        new_x = self.x + motion[0]
+        new_y = self.y + motion[1]
+        if not in_world(new_x, new_y):
+            # Crashed into the boundaries of the world, whoops.
+            self.set_direction(reverse_dir[self.get_direction()])
+            return f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{self.direction.upper()}**) and did not move this turn!"
+        message = get_square(new_x, new_y).on_entry(self.sub)
+        if get_square(new_x, new_y).is_obstacle():
+            return message
+        self.x = new_x
+        self.y = new_y
         return message
     
     def status(self, loop) -> str:

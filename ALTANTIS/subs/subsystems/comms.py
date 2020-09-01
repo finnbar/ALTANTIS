@@ -1,21 +1,18 @@
 """
 Allows submarines to communicate with one another.
 """
-
-from utils import diagonal_distance
-from state import get_subs, get_sub
-from npc import get_npcs, get_npc
-import sub
-
 from random import random
 from time import time as now
 
-GARBLE = 10
-COMMS_COOLDOWN = 30
+from ALTANTIS.subs.state import get_subs, get_sub
+from ALTANTIS.npcs.npc import get_npcs, get_npc
+from ALTANTIS.utils.direction import diagonal_distance
+from ALTANTIS.utils.consts import GARBLE, COMMS_COOLDOWN
+from ..sub import Submarine
 
 class CommsSystem():
-    def __init__(self, sub : sub.Submarine):
-        self.sub : sub.Submarine = sub
+    def __init__(self, sub : Submarine):
+        self.sub = sub
         # last_comms is the time when the Comms were last used.
         self.last_comms : float = 0
     

@@ -44,7 +44,7 @@ Important non-gameplay features:
 - [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
 - [x] Sort commands by functionality.
 - [ ] Complete README.
-- [ ] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
+- [x] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
 
 New features:
 - [x] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
@@ -65,6 +65,7 @@ New features:
 - [x] Allow control to remove the engineering puzzles part of a submarine (for if someone urgently needs to leave). Can be done as a keyword.
 - [x] Implement "ticking" - if you take damage, shit might explode.
 - [x] Resource-rich squares that scanners can pick up.
+- [ ] Varied shark NPCs (see pin in #spoilers)
 - [ ] Biocamoflage - make Sea Urchins and (coughthulu cough) ignore it.
 - [ ] Animal photos
 - [ ] Ruins slow subs down
