@@ -44,7 +44,7 @@ Important non-gameplay features:
 - [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
 - [x] Sort commands by functionality.
 - [ ] Complete README.
-- [ ] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
+- [x] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
 
 New features:
 - [x] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
@@ -61,7 +61,16 @@ New features:
 - [x] Automatic Discord server set up.
 - [x] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
 - [x] NPCs can trade. This is implemented by an `!interact` command, which does some command with NPCs.
-- [ ] Move NPCs to an integer ID system, and allow for deletion by ID. (Thus relaxing the identical name constraint.)
+- [x] Move NPCs to an integer ID system, and allow for deletion by ID. (Thus relaxing the identical name constraint.) Also movement by ID. Just generally getting control of NPCs by ID.
+- [x] Allow control to remove the engineering puzzles part of a submarine (for if someone urgently needs to leave). Can be done as a keyword.
+- [x] Implement "ticking" - if you take damage, shit might explode.
+- [x] Resource-rich squares that scanners can pick up.
+- [ ] Varied shark NPCs (see pin in #spoilers)
+- [ ] Biocamoflage - make Sea Urchins and (coughthulu cough) ignore it.
+- [ ] Animal photos
+- [ ] Ruins slow subs down
+- [ ] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
+- [ ] Team-specific mechanics.
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.

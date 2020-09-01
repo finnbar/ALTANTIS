@@ -10,6 +10,14 @@ RESOURCES = ["circuitry", "specimen", "plating", "tool"]
 # moving every four "turns", so really you should think about 4*GAME_SPEED.
 GAME_SPEED = 5
 
+# Comms system.
+GARBLE = 10
+COMMS_COOLDOWN = 30
+
+# Map size.
+X_LIMIT = 40
+Y_LIMIT = 40
+
 direction_emoji = {"n": "⬆", "e": "➡", "s": "⬇",
                    "w": "⬅", "ne": "↗",
                    "nw": "↖", "se": "↘",

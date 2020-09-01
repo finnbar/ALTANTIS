@@ -2,23 +2,26 @@
 Allows subs to charge and fire (stunning) weapons.
 """
 
-from state import get_subs, get_sub
-from npc import get_npcs, get_npc
-from utils import diagonal_distance, list_to_and_separated
-from world import in_world
+from ALTANTIS.subs.state import get_subs, get_sub
+from ALTANTIS.npcs.npc import get_npcs, get_npc
+from ALTANTIS.utils.direction import diagonal_distance
+from ALTANTIS.utils.text import list_to_and_separated
+from ALTANTIS.utils.entity import Entity
+from ALTANTIS.world.world import in_world
+from ..sub import Submarine
 
 import math
 from random import shuffle
+from typing import Tuple, Dict, List
 
 class Weaponry():
-    def __init__(self, sub):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         self.weapons_charge = 1
         self.range = 4
-        # A list of shots of (damaging, x, y).
-        self.planned_shots = []
+        self.planned_shots : Tuple[bool, int, int] = []
     
-    def prepare_shot(self, damaging, x, y):
+    def prepare_shot(self, damaging : bool, x : int, y : int) -> str:
         if not in_world(x, y):
             return "Coordinate outside of world."
         if diagonal_distance(self.sub.movement.get_position(), (x,y)) > self.range:
@@ -33,7 +36,7 @@ class Weaponry():
             return f"Non-damaging shot fired at ({x}, {y})!"
         return "Not enough charge to use that."
     
-    def weaponry_tick(self):
+    def weaponry_tick(self) -> str:
         # Do the hits for the current turn:
         results = ""
         for shot in self.planned_shots:
@@ -43,10 +46,10 @@ class Weaponry():
                 hits = self.damaging(x, y)
             else:
                 hits = self.nondamaging(x, y)
-            direct_hits = list_to_and_separated(list(map(lambda entity: entity.name.title(), hits["direct"])))
+            direct_hits = list_to_and_separated(list(map(lambda entity: entity.name(), hits["direct"])))
             if direct_hits == "":
                 direct_hits = "nobody"
-            indirect_hits = list_to_and_separated(list(map(lambda entity: entity.name.title(), hits["indirect"])))
+            indirect_hits = list_to_and_separated(list(map(lambda entity: entity.name(), hits["indirect"])))
             if indirect_hits == "":
                 indirect_hits = "nobody"
             damaging_str = "damaging" if damaging else "non-damaging"
@@ -62,14 +65,11 @@ class Weaponry():
             return f"{results}Recharged weapons up to {self.weapons_charge} charge!"
         return results
     
-    def hits(self, x, y):
+    def hits(self, x : int, y : int) -> Dict[str, List[Entity]]:
         # Returns a list of indirect and direct hits.
         indirect = []
         direct = []
         for subname in get_subs():
-            if subname == self.sub.name:
-                continue
-
             sub = get_sub(subname)
             pos = sub.movement.get_position()
             distance = diagonal_distance(pos, (x, y))
@@ -78,8 +78,8 @@ class Weaponry():
             elif distance == 1:
                 indirect.append(sub)
         
-        for npcname in get_npcs():
-            npc = get_npc(npcname)
+        for npcid in get_npcs():
+            npc = get_npc(npcid)
             pos = npc.get_position()
             distance = diagonal_distance(pos, (x, y))
             if distance == 0:
@@ -91,7 +91,7 @@ class Weaponry():
         shuffle(direct)
         return {"indirect": indirect, "direct": direct}
     
-    def nondamaging(self, x, y):
+    def nondamaging(self, x : int, y : int) -> Dict[str, List[Entity]]:
         results = self.hits(x, y)
         for target in results["direct"]:
             if target.is_weak():
@@ -101,7 +101,7 @@ class Weaponry():
                 target.damage(1)
         return results
 
-    def damaging(self, x, y):
+    def damaging(self, x : int, y : int) -> Dict[str, List[Entity]]:
         results = self.hits(x, y)
         for target in results["indirect"]:
             target.damage(2)
@@ -109,7 +109,7 @@ class Weaponry():
             target.damage(1)
         return results
     
-    def status(self):
+    def status(self) -> str:
         weapons_power = self.sub.power.get_power("weapons")
         if weapons_power == 0:
             return ""

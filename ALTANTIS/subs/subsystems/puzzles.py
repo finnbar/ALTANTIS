@@ -1,10 +1,12 @@
 """
 Deals with the engineering puzzles, which need to be imported, served and marked.
 """
-
 import json, glob
 from random import choice
-from control import notify_control
+from typing import Tuple, List
+
+from ALTANTIS.utils.control import notify_control
+from ..sub import Submarine
 
 answers = {}
 with open("puzzles/answers.json", "r") as ans_file:
@@ -13,7 +15,7 @@ with open("puzzles/answers.json", "r") as ans_file:
 questions = glob.glob("puzzles/*")
 questions.remove("puzzles/answers.json")
 
-def attach_answer(question):
+def attach_answer(question : str) -> Tuple[str, List[str]]:
     answer = []
     if question in answers:
         answer = answers[question]
@@ -25,11 +27,11 @@ def attach_answer(question):
 
 puzzles = list(map(attach_answer, questions))
 
-def load_all_puzzles():
+def load_all_puzzles() -> List[Tuple[str, List[str]]]:
     return puzzles.copy()
 
 class EngineeringPuzzles():
-    def __init__(self, sub):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         self.puzzles = load_all_puzzles()
         self.current_puzzle = None
@@ -42,12 +44,13 @@ class EngineeringPuzzles():
         # Puzzles resolve once you've moved:
         await self.resolve_puzzle(None)
         # We also need to set wear and tear puzzles if need be.
-        self.wear_and_tear -= 1
-        if self.wear_and_tear <= 0:
-            await self.send_puzzle("wear and tear")
-            self.wear_and_tear = choice([4,5,6])
+        if not "wearfree" in self.sub.upgrades.keywords:
+            self.wear_and_tear -= 1
+            if self.wear_and_tear <= 0:
+                await self.send_puzzle("wear and tear")
+                self.wear_and_tear = choice([4,5,6])
     
-    async def send_puzzle(self, reason):
+    async def send_puzzle(self, reason : str) -> bool:
         """
         Send the next puzzle, tagging it with a reason.
         Valid reasons are:
@@ -68,7 +71,7 @@ class EngineeringPuzzles():
         await self.sub.send_message(f"Puzzle for **{reason}** received! You have until your submarine next moves to solve it!", "engineer", self.current_puzzle[0])
         return True
     
-    async def resolve_puzzle(self, answer):
+    async def resolve_puzzle(self, answer : str) -> bool:
         """
         Resolve the current puzzle, if able. Called with answer=None if time ran out.
         """
@@ -81,7 +84,7 @@ class EngineeringPuzzles():
             if condition == "Repair":
                 await self.sub.send_to_all(self.sub.power.heal(1))
             await self.sub.send_message(f"Puzzle answered correctly! **{condition}** sorted!", "engineer")
-            await notify_control(f"**{self.sub.name}** got puzzle **\"{self.current_puzzle[0]}\"** **correct**!")
+            await notify_control(f"**{self.sub.name()}** got puzzle **\"{self.current_puzzle[0]}\"** **correct**!")
         else:
             # Incorrect.
             if answer is None:
@@ -92,7 +95,6 @@ class EngineeringPuzzles():
                 await self.sub.send_message(f"You got the answer wrong! **{condition}** not sorted.", "engineer")
                 self.sub.damage(1)
             self.puzzles.append(self.current_puzzle)
-            await notify_control(f"**{self.sub.name}** got puzzle **\"{self.current_puzzle[0]}\"** **wrong**!")
+            await notify_control(f"**{self.sub.name()}** got puzzle **\"{self.current_puzzle[0]}\"** **wrong**!")
         self.current_puzzle = None
         return True
-    

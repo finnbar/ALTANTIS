@@ -1,24 +1,22 @@
 """
 Allows submarines to communicate with one another.
 """
-
-from utils import diagonal_distance
-from state import get_subs, get_sub
-from npc import get_npcs, get_npc
-
 from random import random
 from time import time as now
 
-GARBLE = 10
-COMMS_COOLDOWN = 30
+from ALTANTIS.subs.state import get_subs, get_sub
+from ALTANTIS.npcs.npc import get_npcs, get_npc
+from ALTANTIS.utils.direction import diagonal_distance
+from ALTANTIS.utils.consts import GARBLE, COMMS_COOLDOWN
+from ..sub import Submarine
 
 class CommsSystem():
-    def __init__(self, sub):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         # last_comms is the time when the Comms were last used.
-        self.last_comms = 0
+        self.last_comms : float = 0
     
-    def garble(self, content, distance):
+    def garble(self, content : str, distance : int):
         """
         We define the message error as the proportion of incorrect characters
         in a message. This error increases with distance between two subs.
@@ -41,13 +39,13 @@ class CommsSystem():
                 new_content[i] = "_"
         return "".join(new_content)
 
-    async def broadcast(self, content):
+    async def broadcast(self, content : str):
         if self.last_comms + COMMS_COOLDOWN > now():
             return False
         
         my_pos = self.sub.movement.get_position()
         for subname in get_subs():
-            if subname == self.sub.name:
+            if subname == self.sub._name:
                 continue
 
             sub = get_sub(subname)
@@ -55,15 +53,15 @@ class CommsSystem():
             dist = diagonal_distance(my_pos, sub.movement.get_position())
             garbled = self.garble(content, dist)
             if garbled is not None:
-                await sub.send_message(f"**Message received from {self.sub.name.title()}**:\n`{garbled}`\n**END MESSAGE**", "captain")
+                await sub.send_message(f"**Message received from {self.sub.name()}**:\n`{garbled}`\n**END MESSAGE**", "captain")
 
-        for npcname in get_npcs():
-            npc = get_npc(npcname)
+        for npcid in get_npcs():
+            npc = get_npc(npcid)
 
             dist = diagonal_distance(my_pos, npc.get_position())
             garbled = self.garble(content, dist)
             if garbled is not None:
-                await npc.send_message(f"**Message received from {self.sub.name.title()}**:\n`{garbled}`\n**END MESSAGE**", "")
+                await npc.send_message(f"**Message received from {self.sub.name()}**:\n`{garbled}`\n**END MESSAGE**", "")
         self.last_comms = now()
         return True
     

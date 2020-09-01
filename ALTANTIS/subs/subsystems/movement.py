@@ -1,14 +1,16 @@
 """
 Allows the sub to move.
 """
-
-from world import move_on_map, possible_directions, get_square, in_world
-from consts import GAME_SPEED, direction_emoji, TICK, CROSS
-
 import math, datetime
+from typing import Tuple
+
+from ALTANTIS.world.world import possible_directions, get_square, in_world
+from ALTANTIS.utils.consts import GAME_SPEED, direction_emoji, TICK, CROSS
+from ALTANTIS.utils.direction import directions, reverse_dir
+from ..sub import Submarine
 
 class MovementControls():
-    def __init__(self, sub, x, y):
+    def __init__(self, sub : Submarine, x : int, y : int):
         self.sub = sub
         self.direction = "n"
         self.x = x
@@ -31,8 +33,8 @@ class MovementControls():
             direction = self.direction # Direction can change as result of movement.
             message = await self.move()
             move_status = (
-                f"Moved **{self.sub.name.title()}** in direction **{direction.upper()}**!\n"
-                f"**{self.sub.name.title()}** is now at position **{self.get_position()}**."
+                f"Moved **{self.sub.name()}** in direction **{direction.upper()}**!\n"
+                f"**{self.sub.name()}** is now at position **{self.get_position()}**."
             )
 
             # Do all the puzzles stuff.
@@ -47,30 +49,41 @@ class MovementControls():
             return move_status, trade_messages
         return None, {}
     
-    def set_direction(self, direction):
+    def set_direction(self, direction : str) -> bool:
         if direction in possible_directions():
             self.direction = direction
             return True
         return False
 
-    def get_direction(self):
+    def get_direction(self) -> str:
         return self.direction
 
-    def set_position(self, x, y):
+    def set_position(self, x : int, y : int) -> bool:
         if in_world(x, y):
             self.x = x
             self.y = y
             return True
         return False
 
-    def get_position(self):
+    def get_position(self) -> Tuple[int, int]:
         return (self.x, self.y)
 
-    async def move(self):
-        self.x, self.y, message = await move_on_map(self.sub, self.direction, self.x, self.y)
+    async def move(self) -> str:
+        motion = directions[self.direction]
+        new_x = self.x + motion[0]
+        new_y = self.y + motion[1]
+        if not in_world(new_x, new_y):
+            # Crashed into the boundaries of the world, whoops.
+            self.set_direction(reverse_dir[self.get_direction()])
+            return f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{self.direction.upper()}**) and did not move this turn!"
+        message = get_square(new_x, new_y).on_entry(self.sub)
+        if get_square(new_x, new_y).is_obstacle():
+            return message
+        self.x = new_x
+        self.y = new_y
         return message
     
-    def status(self, loop):
+    def status(self, loop) -> str:
         message = ""
         power_system = self.sub.power
 

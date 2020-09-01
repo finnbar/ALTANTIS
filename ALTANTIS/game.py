@@ -2,16 +2,17 @@
 Runs the game, performing the right actions at fixed time intervals.
 """
 
-from state import get_subs, get_sub, state_to_dict, state_from_dict
-from world import map_to_dict, map_from_dict
-from utils import OKAY_REACT, FAIL_REACT
-from npc import npc_tick, npcs_to_dict, npcs_from_dict
+from ALTANTIS.subs.state import get_subs, get_sub, state_to_dict, state_from_dict
+from ALTANTIS.npcs.npc import npc_tick, npcs_to_json, npcs_from_json
+from ALTANTIS.world.world import map_tick, map_to_dict, map_from_dict
+from ALTANTIS.utils.actions import FAIL_REACT, OKAY_REACT
 
 import json
+from typing import List, Dict
 
 NO_SAVE = False
 
-async def perform_timestep(counter):
+async def perform_timestep(counter : int):
     """
     Does all time-related stuff, including movement, power changes and so on.
     Called at a time interval, when allowed.
@@ -29,9 +30,9 @@ async def perform_timestep(counter):
     # Get all active subs. (Can you tell I'm a functional programmer?)
     # Note: we still collect all messages for all subs, as there are some
     # messages that inactive subs should receive.
-    subsubset = list(filter(is_active_sub, get_subs()))
-    submessages = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_subs()}
-    message_opening = f"---------**TURN {counter}**----------\n"
+    subsubset : List[str] = list(filter(is_active_sub, get_subs()))
+    submessages : Dict[str, Dict[str, str]] = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_subs()}
+    message_opening : str = f"---------**TURN {counter}**----------\n"
 
     # Power management
     for subname in subsubset:
@@ -52,6 +53,8 @@ async def perform_timestep(counter):
     
     # NPCs
     await npc_tick()
+    # Map
+    map_tick()
 
     # The crane
     for subname in subsubset:
@@ -123,7 +126,7 @@ def save_game():
         return False
     state_dict = state_to_dict()
     map_dict = map_to_dict()
-    npcs_dict = npcs_to_dict()
+    npcs_dict = npcs_to_json()
     with open("state.json", "w") as state_file:
         state_file.write(json.dumps(state_dict))
     with open("map.json", "w") as map_file:
@@ -132,7 +135,7 @@ def save_game():
         npcs_file.write(json.dumps(npcs_dict))
     return True
 
-def load_game(which, bot):
+def load_game(which : str, bot):
     """
     Loads the state (from state.json), map (from map.json), npcs (from npcs.json) or all.
     Does not check whether the files exist.
@@ -154,5 +157,5 @@ def load_game(which, bot):
         with open("npcs.json", "r") as npc_file:
             npc_string = npc_file.read()
             npc_json = json.loads(npc_string)
-            npcs_from_dict(npc_json)
+            npcs_from_json(npc_json)
     return OKAY_REACT

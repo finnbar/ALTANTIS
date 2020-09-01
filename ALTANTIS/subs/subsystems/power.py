@@ -2,13 +2,16 @@
 Allows submarines to manage their power usage.
 """
 
-from random import choice
-from control import notify_control
-from consts import TICK, CROSS, PLUS
-from world import all_in_submap
+from ALTANTIS.utils.control import notify_control
+from ALTANTIS.utils.consts import TICK, CROSS, PLUS
+from ALTANTIS.world.extras import all_in_submap
+from ..sub import Submarine
+
+import random
+from typing import Dict, List
 
 class PowerManager():
-    def __init__(self, sub):
+    def __init__(self, sub : Submarine):
         self.sub = sub
         self.active = False
         # power is a dictionary mapping systems to their current power.
@@ -27,16 +30,16 @@ class PowerManager():
         # Damage only happens at game tick, so we need to keep track of any taken.
         self.scheduled_damage = []
 
-    def activate(self, value):
+    def activate(self, value : bool) -> bool:
         if self.total_power > 0 or not value:
             self.active = value
             return True
         return False
 
-    def activated(self):
+    def activated(self) -> bool:
         return self.active
     
-    def get_innate_power(self, system):
+    def get_innate_power(self, system : str) -> int:
         """
         Returns the innate power of a system.
         """
@@ -47,7 +50,7 @@ class PowerManager():
             power += 1
         return power
 
-    def get_power(self, system):
+    def get_power(self, system : str) -> int:
         """
         Returns the power given to a system, both innately and otherwise.
         """
@@ -57,7 +60,7 @@ class PowerManager():
         power += self.get_innate_power(system)
         return power
     
-    def add_system(self, systemname):
+    def add_system(self, systemname : str) -> bool:
         """
         Adds a new system with max power 1.
         """
@@ -67,16 +70,16 @@ class PowerManager():
         self.power_max[systemname] = 1
         return True
 
-    def power_use(self, power):
+    def power_use(self, power : Dict[str, int]) -> int:
         use = 0
         for system in power:
             use += power[system]
         return use
     
-    def unused_power(self):
+    def unused_power(self) -> int:
         return self.total_power - self.power_use(self.power)
     
-    def apply_power_schedule(self):
+    def apply_power_schedule(self) -> str:
         # Check for changes and add these to the string.
         message = ""
         for system in self.power:
@@ -91,7 +94,7 @@ class PowerManager():
             return None
         return message
     
-    def modify_system(self, systemname, amount):
+    def modify_system(self, systemname : str, amount : int) -> bool:
         """
         Upgrades or downgrades a system systemname by amount.
         Specify a negative amount to downgrade.
@@ -104,7 +107,7 @@ class PowerManager():
         self.power[systemname] = min(self.power[systemname], self.power_max[systemname])
         return True
     
-    def modify_innate_system(self, systemname, amount):
+    def modify_innate_system(self, systemname : str, amount : int) -> bool:
         """
         Upgrades or downgrades an innate system systemname by amount.
         """
@@ -118,7 +121,7 @@ class PowerManager():
         self.innate_power[systemname] = current_innate + amount
         return True
     
-    def modify_reactor(self, amount):
+    def modify_reactor(self, amount : int) -> bool:
         """
         Upgrades or downgrades reactor by amount.
         """
@@ -131,7 +134,7 @@ class PowerManager():
             self.damage(-amount)
         return True
     
-    def power_systems(self, systems):
+    def power_systems(self, systems : List[str]) -> str:
         """
         Attempts to give power to the list of things to power `systems`.
         Will not change anything if it would mean you go over the power cap.
@@ -155,7 +158,7 @@ class PowerManager():
         self.scheduled_power = power_copy
         return f"Systems {systems} will be powered next tick."
     
-    def unpower_systems(self, systems):
+    def unpower_systems(self, systems : List[str]) -> str:
         """
         Attempts to remove power from all of the named systems in `systems`.
         If you specify a system that doesn't exist, it will fail.
@@ -175,7 +178,7 @@ class PowerManager():
         self.scheduled_power = power_copy
         return f"Systems {systems} will be unpowered next tick."
 
-    def run_damage(self, amount):
+    def run_damage(self, amount : int) -> str:
         if amount <= 0:
             return ""
         self.total_power -= 1
@@ -190,35 +193,40 @@ class PowerManager():
         else:
             # Pick a system at random to lose power.
             available_systems = filter(lambda system: self.power[system] > 0, self.power)
-            system = choice(list(available_systems))
+            system = random.choice(list(available_systems))
             self.unpower_systems([system])
         # Else continue taking damage.
         message = self.run_damage(amount - 1)
         return f"Damage taken to {system}!\n" + message
     
-    def damage(self, amount):
+    def damage(self, amount : int):
         self.scheduled_damage.append(amount)
     
-    async def damage_tick(self):
+    async def damage_tick(self) -> str:
         damage_message = ""
         for hit in self.scheduled_damage:
             damage_message += self.run_damage(hit)
-            await notify_control(f"**{self.sub.name.title()}** took **{hit} damage**!")
+            await notify_control(f"**{self.sub.name()}** took **{hit} damage**!")
+            if "ticking" in self.sub.upgrades.keywords and 0.65 < random.random():
+                # The volatile thing explodes!!
+                damage_message += self.run_damage(2)
+                self.sub.upgrades.remove_keyword("ticking")
+                await notify_control(f"**{self.sub.name()}'s** ticking exploded for two damage!")
         self.scheduled_damage = []
         if self.total_power <= 0:
             await self.deathrattle()
         return damage_message
     
     async def deathrattle(self):
-        hears_rattle = all_in_submap(self.sub.movement.get_position(), 5, [self.sub.name])
+        hears_rattle = all_in_submap(self.sub.movement.get_position(), 5, sub_exclusions=[self.sub._name])
         for entity in hears_rattle:
-            await entity.send_message(f"SUBMARINE **{self.sub.name.upper()}** ({self.sub.movement.x}, {self.sub.movement.y}) HAS DIED", "captain")
+            await entity.send_message(f"SUBMARINE **{self.sub.name().upper()}** ({self.sub.movement.x}, {self.sub.movement.y}) HAS DIED", "captain")
 
-    def heal(self, amount):
+    def heal(self, amount : int) -> str:
         self.total_power = min(self.total_power + amount, self.total_power_max)
         return f"Healed back up to {self.total_power} power!"
     
-    def emoji_power_status(self, innate, use, maxi):
+    def emoji_power_status(self, innate : int, use : int, maxi : int) -> str:
         system_list = [CROSS] * maxi
         for i in range(use):
             system_list[i] = TICK
@@ -227,7 +235,7 @@ class PowerManager():
             system_status = (PLUS * innate) + system_status
         return system_status
     
-    def status(self):
+    def status(self) -> str:
         message = f"**Power status** (Reactor working at {self.total_power}/{self.total_power_max} capacity).\n"
         message += f"{self.total_power - self.power_use(self.scheduled_power)} power available to schedule.\n"
 

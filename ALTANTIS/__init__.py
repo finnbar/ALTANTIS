@@ -1,0 +1,1 @@
+from ALTANTIS.bot import run_bot

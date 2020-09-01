@@ -2,17 +2,21 @@
 Manages the state dictionary, which keeps track of all submarines.
 """
 
-from sub import sub_from_dict, Submarine
+from ALTANTIS.subs.sub import sub_from_dict, Submarine
+from ALTANTIS.utils.actions import DiscordAction
 
-state = {}
+from typing import Dict, List, Any, Callable, Awaitable
+import discord
 
-def get_subs():
+state : Dict[str, Submarine] = {}
+
+def get_subs() -> List[str]:
     """
     Gets all possible teams.
     """
     return list(state.keys())
 
-def filtered_teams(pred):
+def filtered_teams(pred) -> List[str]:
     """
     Gets all names of subs that satisfy some predicate.
     """
@@ -22,14 +26,27 @@ def filtered_teams(pred):
             subs.append(sub)
     return subs
 
-def get_sub(name):
+def get_sub(name : str) -> Submarine:
     """
     Gets the Submarine object associated with `name`.
     """
     if name in state:
         return state[name]
+    return None
 
-def add_team(name, category, x, y):
+def with_sub(name : str, function : Callable[[Submarine], DiscordAction], fail : DiscordAction) -> DiscordAction:
+    sub = get_sub(name)
+    if sub:
+        return function(sub)
+    return fail
+
+async def with_sub_async(name : str, function : Callable[[Submarine], Awaitable[DiscordAction]], fail : DiscordAction) -> DiscordAction:
+    sub = get_sub(name)
+    if sub:
+        return await function(sub)
+    return fail
+
+def add_team(name : str, category : discord.CategoryChannel, x : int, y : int) -> bool:
     """
     Adds a team with the name, if able.
     """
@@ -42,7 +59,7 @@ def add_team(name, category, x, y):
         return True
     return False
 
-def remove_team(name):
+def remove_team(name : str) -> bool:
     """
     Removes the team with that name, if able.
     """
@@ -51,7 +68,7 @@ def remove_team(name):
         return True
     return False
 
-def state_to_dict():
+def state_to_dict() -> Dict[str, Dict[str, Any]]:
     """
     Convert our state to a dictionary. This just runs to_dict on each member of
     the state.
@@ -61,7 +78,7 @@ def state_to_dict():
         state_dict[subname] = state[subname].to_dict()
     return state_dict
 
-def state_from_dict(dictionary, client):
+def state_from_dict(dictionary : Dict[str, Dict[str, Any]], client : discord.Client):
     """
     Overwrites state with the state made by state_to_dict.
     """
