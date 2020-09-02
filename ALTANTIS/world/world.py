@@ -5,6 +5,7 @@ Deals with the world map, which submarines explore.
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.utils.direction import reverse_dir, directions
 from ALTANTIS.utils.consts import X_LIMIT, Y_LIMIT
+from ALTANTIS.world.validators import InValidator, NopValidator, TypeValidator, BothValidator, LenValidator, RangeValidator
 
 import random
 from typing import List, Optional, Tuple, Any, Dict
@@ -13,11 +14,19 @@ from typing import List, Optional, Tuple, Any, Dict
 class Cell():
     # A list of implemented attributes
     # Other attributes will do nothing, so are prevented from being added
-    ATTRIBUTES = ["deposit", "diverse", "hiddenness", "weather", "docking", "obstacle", "ruins", "junk"]
+    ATTRIBUTES = ["deposit", "diverse", "hiddenness", "weather", "docking", "obstacle", "ruins", "junk", "wallstyle"]
+    # A mapping of the permissible weather states and their map characters.
     WEATHER = {"calm": "C", "normal": ".", "rough": "R", "stormy": "S"}
     # A list of characters able to be used for wall alternate styles (such as in bases)
     # Currently just b for base.
     WALL_STYLES = ["b"]
+    # A dictionary of validators to apply to the attributes
+    VALIDATORS = {
+        "weather": InValidator(WEATHER.keys()),
+        "docking": BothValidator(LenValidator(0, 255), TypeValidator(str)),
+        "wallstyle": InValidator(WALL_STYLES),
+        "hiddenness": BothValidator(TypeValidator(int), RangeValidator(0,10))
+    }
 
     def __init__(self):
         # The items this square contains.
@@ -152,8 +161,12 @@ class Cell():
         if attr not in self.ATTRIBUTES:
             return False
         if attr not in self.attributes or self.attributes[attr] != val:
-            self.attributes[attr] = val
-            return True
+            validator = self.VALIDATORS.get(attr, NopValidator())
+            if not validator(val):
+                return False
+            else:
+                self.attributes[attr] = val
+                return True
         return False
 
     def remove_attribute(self, attr: str) -> bool:
