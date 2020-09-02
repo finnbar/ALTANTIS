@@ -25,7 +25,7 @@ class Cell():
         "weather": InValidator(WEATHER.keys()),
         "docking": BothValidator(LenValidator(0, 255), TypeValidator(str)),
         "wallstyle": InValidator(WALL_STYLES),
-        "hiddenness": BothValidator(TypeValidator(int), RangeValidator(0,10))
+        "hiddenness": BothValidator(TypeValidator(int), RangeValidator(0, 10))
     }
 
     def __init__(self):
@@ -160,13 +160,15 @@ class Cell():
     def add_attribute(self, attr: str, val="") -> bool:
         if attr not in self.ATTRIBUTES:
             return False
-        if attr not in self.attributes or self.attributes[attr] != val:
-            validator = self.VALIDATORS.get(attr, NopValidator())
-            if not validator(val):
-                return False
-            else:
-                self.attributes[attr] = val
-                return True
+
+        validator = self.VALIDATORS.get(attr, NopValidator())
+        clean = validator(val)
+        if clean is None:
+            return False
+
+        if attr not in self.attributes or self.attributes[attr] != clean:
+            self.attributes[attr] = clean
+            return True
         return False
 
     def remove_attribute(self, attr: str) -> bool:
