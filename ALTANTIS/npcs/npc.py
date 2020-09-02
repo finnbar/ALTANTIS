@@ -93,7 +93,7 @@ class NPC(Entity):
         nearby_entities : List[Entity] = all_in_submap(self.get_position(), dist)
         closest : Tuple[Optional[Submarine], int] = (None, 0)
         for entity in nearby_entities:
-            if type(entity) is Submarine:
+            if isinstance(entity, Submarine):
                 sub : Submarine = entity
                 this_dist = diagonal_distance(self.get_position(), sub.get_position())
                 if (closest[0] is None) or this_dist < closest[1]:
