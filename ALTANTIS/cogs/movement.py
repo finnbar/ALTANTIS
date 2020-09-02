@@ -61,6 +61,7 @@ def move(direction : str, subname : str) -> DiscordAction:
         # Store the move and return the correct emoji.
         if sub.movement.set_direction(direction):
             return React(direction_emoji[direction])
+        return FAIL_REACT
     return with_sub(subname, do_move, FAIL_REACT)
 
 def teleport(subname : str, x : int, y : int) -> DiscordAction:
@@ -70,6 +71,7 @@ def teleport(subname : str, x : int, y : int) -> DiscordAction:
     def do_teleport(sub):
         if sub.movement.set_position(x, y):
             return OKAY_REACT
+        return FAIL_REACT
     return with_sub(subname, do_teleport, FAIL_REACT)
 
 async def set_activation(team : str, guild : discord.Guild, value : bool) -> DiscordAction:

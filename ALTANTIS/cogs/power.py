@@ -1,8 +1,8 @@
 from discord.ext import commands
 from typing import List
 
-from ALTANTIS.utils.consts import CONTROL_ROLE, ENGINEER, MAP_DOMAIN, MAP_TOKEN
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
+from ALTANTIS.utils.consts import CONTROL_ROLE, ENGINEER
+from ALTANTIS.utils.bot import perform, perform_async, get_team
 from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
 from ALTANTIS.subs.state import with_sub, with_sub_async
 

@@ -10,15 +10,18 @@ def all_in_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[str] 
     Gets all entities some distance from the chosen square.
     Ignores any entities in exclusions.
     """
+    result : List[Entity] = []
     subs_in_range = filtered_teams(
         lambda sub: diagonal_distance(sub.movement.get_position(), pos) <= dist and sub._name not in sub_exclusions
     )
-    sub_objects = list(map(get_sub, subs_in_range))
+    for sub in map(get_sub, subs_in_range):
+        if sub: result.append(sub)
     npcs_in_range = filtered_npcs(
         lambda npc: diagonal_distance(npc.get_position(), pos) <= dist and npc.id not in npc_exclusions
     )
-    npc_objects = list(map(get_npc, npcs_in_range))
-    return sub_objects + npc_objects
+    for npc in map(get_npc, npcs_in_range):
+        if npc: result.append(npc)
+    return result
 
 async def explode(pos : Tuple[int, int], power : int, sub_exclusions : List[str] = [], npc_exclusions : List[int] = []):
     """

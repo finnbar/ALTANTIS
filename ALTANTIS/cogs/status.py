@@ -1,14 +1,14 @@
-import discord, json, httpx
+import json, httpx
 from discord.ext import commands
 from typing import List, Tuple, Dict, Any
 
 from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, MAP_DOMAIN, MAP_TOKEN, X_LIMIT, Y_LIMIT
 from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team, main_loop
-from ALTANTIS.utils.actions import React, DiscordAction, Message, OKAY_REACT, FAIL_REACT
+from ALTANTIS.utils.actions import DiscordAction, Message, FAIL_REACT
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.world.world import in_world, get_square
 from ALTANTIS.npcs.npc import filtered_npcs, get_npc
-from ALTANTIS.subs.state import get_sub, get_subs, filtered_teams, with_sub
+from ALTANTIS.subs.state import get_sub, get_sub_objects, filtered_teams, with_sub
 from ALTANTIS.subs.sub import Submarine
 
 class Status(commands.Cog):
@@ -66,12 +66,13 @@ async def print_map(team : str, options : List[str] = ["w", "d", "s"]) -> Discor
         options = max_options
     options = list(filter(lambda v: v in max_options, options))
     if team is None:
-        subs = [get_sub(sub) for sub in get_subs()]
+        subs = get_sub_objects()
     else:
         sub = get_sub(team)
         if sub is None:
             return FAIL_REACT
-        subs = [sub]
+        else:
+            subs = [sub]
     map_string, map_arr = draw_map(subs, options)
     map_json = json.dumps(map_arr)
     async with httpx.AsyncClient() as client:

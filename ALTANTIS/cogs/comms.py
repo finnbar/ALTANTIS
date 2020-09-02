@@ -1,5 +1,4 @@
 from discord.ext import commands
-from typing import Optional
 
 from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN
 from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
@@ -38,6 +37,6 @@ async def broadcast(team : str, message : str) -> DiscordAction:
             result = await sub.comms.broadcast(message)
             if result:
                 return OKAY_REACT
-            else:
-                return Message("The radio is still in use! (It has a thirty second cooldown.)")
+            return Message("The radio is still in use! (It has a thirty second cooldown.)")
+        return FAIL_REACT
     return await with_sub_async(team, do_broadcast, FAIL_REACT)

@@ -3,7 +3,7 @@ The main entry point for our bot, which tells Discord what commands the bot can
 perform and how to do so.
 """
 
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 from ALTANTIS.utils.bot import bot
 from ALTANTIS.utils.consts import TOKEN

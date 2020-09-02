@@ -19,7 +19,7 @@ class Weaponry():
         self.sub = sub
         self.weapons_charge = 1
         self.range = 4
-        self.planned_shots : Tuple[bool, int, int] = []
+        self.planned_shots : List[Tuple[bool, int, int]] = []
     
     def prepare_shot(self, damaging : bool, x : int, y : int) -> str:
         if not in_world(x, y):

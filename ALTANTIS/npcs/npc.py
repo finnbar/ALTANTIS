@@ -12,7 +12,7 @@ from ALTANTIS.utils.control import notify_control
 from ALTANTIS.utils.entity import Entity
 from ALTANTIS.utils.direction import diagonal_distance, determine_direction, go_in_direction
 
-from typing import Tuple, List, Callable, Dict, Any
+from typing import Tuple, List, Callable, Dict, Any, Optional
 
 class NPC(Entity):
     classname = ""
@@ -86,15 +86,16 @@ class NPC(Entity):
             self.x += dx
             self.y += dy
     
-    def move_towards_sub(self, dist : str):
+    def move_towards_sub(self, dist : int):
         """
         Looks for the closest sub in range, and moves towards it.
         """
-        nearby_entities = all_in_submap(self.get_position(), dist)
-        closest = (None, 0)
+        nearby_entities : List[Entity] = all_in_submap(self.get_position(), dist)
+        closest : Tuple[Optional[Submarine], int] = (None, 0)
         for entity in nearby_entities:
             if type(entity) is Submarine:
-                this_dist = diagonal_distance(self.get_position(), entity.get_position())
+                sub : Submarine = entity
+                this_dist = diagonal_distance(self.get_position(), sub.get_position())
                 if (closest[0] is None) or this_dist < closest[1]:
                     closest = (entity, this_dist)
         if closest[0] is not None:
@@ -108,14 +109,14 @@ class NPC(Entity):
     def is_weak(self) -> bool:
         return True
     
-    async def interact(self, sub) -> str:
+    async def interact(self, sub, arg) -> str:
         return ""
     
-    def all_subs_in_square(self) -> List[Submarine]:
+    def all_subs_in_square(self) -> List[Optional[Submarine]]:
         subs_in_square = filtered_teams(lambda sub: sub.movement.x == self.x and sub.movement.y == self.y)
         return list(map(get_sub, subs_in_square))
     
-    def all_npcs_in_square(self) -> List[NPC]:
+    def all_npcs_in_square(self) -> List[Optional[NPC]]:
         npcs_in_square = filtered_npcs(lambda npc: npc.x == self.x and npc.y == self.y and npc != self)
         return list(map(get_npc, npcs_in_square))
 
@@ -123,7 +124,12 @@ class NPC(Entity):
         """
         Gets all entities (subs and NPCs) in your square except yourself.
         """
-        return self.all_subs_in_square() + self.all_npcs_in_square()
+        result = []
+        for sub in self.all_subs_in_square():
+            result.append(sub)
+        for npc in self.all_npcs_in_square():
+            result.append(npc)
+        return result
 
 npc_types = {}
 
@@ -141,10 +147,10 @@ def load_npc_types():
 npcs = []
 
 def get_npc_types() -> List[str]:
-    return npc_types.keys()
+    return list(npc_types.keys())
 
 def get_npcs() -> List[int]:
-    return range(len(npcs))
+    return list(range(len(npcs)))
 
 def kill_npc(id : int) -> bool:
     if id in range(len(npcs)):
@@ -173,10 +179,10 @@ async def interact_in_square(sub : Submarine, square : Tuple[int, int], arg) -> 
         npc = get_npc(npcid)
         npc_message = await npc.interact(sub, arg)
         if npc_message != "":
-            message += f"Interaction with **{npcid.title()}**: {npc_message}\n"
+            message += f"Interaction with **{npc.name()}**: {npc_message}\n"
     return message
 
-def get_npc(npcid : int) -> NPC:
+def get_npc(npcid : int) -> Optional[NPC]:
     if npcid in get_npcs():
         return npcs[npcid]
     return None

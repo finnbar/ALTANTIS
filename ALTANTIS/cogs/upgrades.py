@@ -1,9 +1,9 @@
 from discord.ext import commands
 from typing import Optional
 
-from ALTANTIS.utils.consts import CONTROL_ROLE, ENGINEER
-from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team
-from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
+from ALTANTIS.utils.consts import CONTROL_ROLE
+from ALTANTIS.utils.bot import perform_async_unsafe, get_team
+from ALTANTIS.utils.actions import DiscordAction, OKAY_REACT, FAIL_REACT
 from ALTANTIS.subs.state import with_sub_async
 
 class UpgradeManagement(commands.Cog):
@@ -73,6 +73,7 @@ async def upgrade_sub_system(team : str, system : str, amount : int) -> DiscordA
         if sub.power.modify_system(system, amount):
             await sub.send_message(f"Submarine **{team.title()}** was upgraded! **{system.title()}** max power increased by {amount}.", "engineer")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_upgrade, FAIL_REACT)
 
 async def upgrade_sub_innate(team : str, system : str, amount : int) -> DiscordAction:
@@ -80,6 +81,7 @@ async def upgrade_sub_innate(team : str, system : str, amount : int) -> DiscordA
         if sub.power.modify_innate(system, amount):
             await sub.send_message(f"Submarine **{team.title()}** was upgraded! **{system.title()}** innate power increased by {amount}.", "engineer")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_upgrade, FAIL_REACT)
 
 async def add_system(team : str, system : str) -> DiscordAction:
@@ -87,6 +89,7 @@ async def add_system(team : str, system : str) -> DiscordAction:
         if sub.power.add_system(system):
             await sub.send_message(f"Submarine **{team.title()}** was upgraded! New system **{system}** was installed.", "engineer")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_add, FAIL_REACT)
 
 async def add_keyword_to_sub(team : str, keyword : str, turn_limit : Optional[int], damage : int) -> DiscordAction:
@@ -94,6 +97,7 @@ async def add_keyword_to_sub(team : str, keyword : str, turn_limit : Optional[in
         if sub.upgrades.add_keyword(keyword, turn_limit, damage):
             await sub.send_message(f"Submarine **{team.title()}** was upgraded with the keyword **{keyword}**!", "engineer")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_add, FAIL_REACT)
 
 async def remove_keyword_from_sub(team : str, keyword : str) -> DiscordAction:
@@ -101,4 +105,5 @@ async def remove_keyword_from_sub(team : str, keyword : str) -> DiscordAction:
         if sub.upgrades.remove_keyword(keyword):
             await sub.send_message(f"Submarine **{team.title()}** was downgraded, as keyword **{keyword}** was removed.", "engineer")
             return OKAY_REACT
+        return FAIL_REACT
     return await with_sub_async(team, do_remove, FAIL_REACT)

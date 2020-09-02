@@ -22,7 +22,7 @@ class Inventory():
         # crane_down is the state of the crane.
         self.crane_down = False
         # crane_holds is what the crane contains.
-        self.crane_holds = []
+        self.crane_holds : List[str] = []
         # schedule_crane is whether the crane command has been called.
         self.schedule_crane = False
 
@@ -98,7 +98,7 @@ class Inventory():
         treasure = self.crane_holds
         for treas in treasure:
             self.add(treas)
-        self.crane_holds = None
+        self.crane_holds = []
         await notify_control(f"**{self.sub.name()}** picked up treasure **{to_titled_list(treasure)}**!")
         return treasure
     
@@ -197,7 +197,7 @@ class Inventory():
         self.my_turn = True
         await self.sub.send_message(f"**{sub.name()}** asked for trade! They are offering **{offer_text}**. Respond with `!offer` to present your side of the trade, `!accept_trade` if you want to offer nothing in exchange, or `!reject_trade` if you don't want to trade. You have until either sub next moves to complete the trade.", "captain")
     
-    async def reject_trade(self) -> str:
+    async def reject_trade(self) -> Optional[str]:
         """
         End a currently running trade.
         """

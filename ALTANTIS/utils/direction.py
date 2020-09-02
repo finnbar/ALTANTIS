@@ -6,7 +6,7 @@ directions = {"n": (0, -1), "ne": (1, -1), "e": (1, 0), "se": (1, 1),
 reverse_dir = {"n": "s", "ne": "sw", "e": "w", "se": "nw", "s": "n",
                "sw": "ne", "w": "e", "nw": "se"}
 
-def diagonal_distance(pa : int, pb : int) -> int:
+def diagonal_distance(pa : Tuple[int, int], pb : Tuple[int, int]) -> int:
     """
     Gets manhattan distance with diagonals between points pa and pb.
     I don't know what this is called, but the fastest route is to take the
@@ -19,7 +19,7 @@ def diagonal_distance(pa : int, pb : int) -> int:
     dist = min(xdist, ydist) + abs(xdist - ydist)
     return dist
 
-def determine_direction(pa : int, pb : int) -> Optional[str]:
+def determine_direction(pa : Tuple[int, int], pb : Tuple[int, int]) -> Optional[str]:
     """
     Determines which compass direction coord pb is from pa.
     This would normally be easy, but guess which idiot made everything work in

@@ -8,7 +8,7 @@ from ALTANTIS.world.extras import all_in_submap
 from ..sub import Submarine
 
 import random
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 class PowerManager():
     def __init__(self, sub : Submarine):
@@ -79,7 +79,7 @@ class PowerManager():
     def unused_power(self) -> int:
         return self.total_power - self.power_use(self.power)
     
-    def apply_power_schedule(self) -> str:
+    def apply_power_schedule(self) -> Optional[str]:
         # Check for changes and add these to the string.
         message = ""
         for system in self.power:

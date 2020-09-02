@@ -3,7 +3,7 @@ Deals with the engineering puzzles, which need to be imported, served and marked
 """
 import json, glob
 from random import choice
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from ALTANTIS.utils.control import notify_control
 from ..sub import Submarine
@@ -71,7 +71,7 @@ class EngineeringPuzzles():
         await self.sub.send_message(f"Puzzle for **{reason}** received! You have until your submarine next moves to solve it!", "engineer", self.current_puzzle[0])
         return True
     
-    async def resolve_puzzle(self, answer : str) -> bool:
+    async def resolve_puzzle(self, answer : Optional[str]) -> bool:
         """
         Resolve the current puzzle, if able. Called with answer=None if time ran out.
         """

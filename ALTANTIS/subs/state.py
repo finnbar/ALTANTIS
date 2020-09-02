@@ -5,7 +5,7 @@ Manages the state dictionary, which keeps track of all submarines.
 from ALTANTIS.subs.sub import sub_from_dict, Submarine
 from ALTANTIS.utils.actions import DiscordAction
 
-from typing import Dict, List, Any, Callable, Awaitable
+from typing import Dict, List, Any, Callable, Awaitable, Optional
 import discord
 
 state : Dict[str, Submarine] = {}
@@ -15,6 +15,9 @@ def get_subs() -> List[str]:
     Gets all possible teams.
     """
     return list(state.keys())
+
+def get_sub_objects() -> List[Submarine]:
+    return list(state.values())
 
 def filtered_teams(pred) -> List[str]:
     """
@@ -26,7 +29,7 @@ def filtered_teams(pred) -> List[str]:
             subs.append(sub)
     return subs
 
-def get_sub(name : str) -> Submarine:
+def get_sub(name : str) -> Optional[Submarine]:
     """
     Gets the Submarine object associated with `name`.
     """
