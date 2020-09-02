@@ -1,6 +1,6 @@
 import json, httpx
 from discord.ext import commands
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Sequence
 
 from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, MAP_DOMAIN, MAP_TOKEN, X_LIMIT, Y_LIMIT
 from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team, main_loop
@@ -56,12 +56,12 @@ class Status(commands.Cog):
         """
         await perform(get_scan, ctx, get_team(ctx.channel))
 
-async def print_map(team : str, options : List[str] = ["w", "d", "s"]) -> DiscordAction:
+async def print_map(team : str, options:Sequence[str] = ("w", "d", "s")) -> DiscordAction:
     """
     Prints the map from the perspective of one submarine, or all if team is None.
     """
     subs = []
-    max_options = ["w", "d", "s", "t", "n", "c", "r", "j", "m", "e"]
+    max_options = ["w", "d", "s", "t", "n", "r", "j", "m", "e"]
     if options is True:
         options = max_options
     options = list(filter(lambda v: v in max_options, options))
