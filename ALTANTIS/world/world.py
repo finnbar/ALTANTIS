@@ -167,9 +167,10 @@ class Cell():
 
     def difficulty(self) -> int:
         difficulties = {"storm": 8, "rough": 6, "normal": 4, "calm": 2}
+        modifier = 1 if "ruins" in self.attributes else 0
         if "weather" in self.attributes:
-            return difficulties.get(self.attributes['weather'], 4)
-        return 4
+            return difficulties.get(self.attributes['weather'], 4) + modifier
+        return 4 + modifier
 
     def add_attribute(self, attr: str, val="") -> bool:
         if attr not in ATTRIBUTES:
@@ -191,23 +192,18 @@ class Cell():
             return True
         return False
 
-
 undersea_map = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
-
 
 def in_world(x: int, y: int) -> bool:
     return 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT
 
-
 def possible_directions() -> List[str]:
     return list(directions.keys())
-
 
 def get_square(x: int, y: int) -> Optional[Cell]:
     if in_world(x, y):
         return undersea_map[x][y]
     return None
-
 
 def bury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
     (x, y) = pos
@@ -215,19 +211,16 @@ def bury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
         return undersea_map[x][y].bury_treasure(name)
     return False
 
-
 def pick_up_treasure(pos: Tuple[int, int], power: int) -> List[str]:
     (x, y) = pos
     if in_world(x, y):
         return undersea_map[x][y].pick_up(power)
     return []
 
-
 def map_tick():
     for x in range(X_LIMIT):
         for y in range(Y_LIMIT):
             undersea_map[x][y].cell_tick()
-
 
 def map_to_dict() -> Dict[str, Any]:
     """
@@ -240,7 +233,6 @@ def map_to_dict() -> Dict[str, Any]:
         for j in range(Y_LIMIT):
             undersea_map_dicts[i][j] = undersea_map[i][j].__dict__
     return {"map": undersea_map_dicts, "x_limit": X_LIMIT, "y_limit": Y_LIMIT}
-
 
 def map_from_dict(dictionary: Dict[str, Any]):
     """

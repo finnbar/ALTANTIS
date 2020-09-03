@@ -184,6 +184,7 @@ class Urchin(NPC):
         self.health = 2
         self.treasure = [random.choice(RESOURCES)]
         self.stealth = 1
+        self.observant = True
         # Which subs were in this square previously.
         self.visited = []
     

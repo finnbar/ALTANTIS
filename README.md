@@ -67,10 +67,10 @@ New features:
 - [x] Implement "ticking" - if you take damage, shit might explode.
 - [x] Resource-rich squares that scanners can pick up.
 - [x] Ruins use letter A now
+- [x] Ruins slow subs down
+- [x] Biocamoflage - make Sea Urchins and (coughthulu cough) ignore it.
 - [ ] Varied shark NPCs (see pin in #spoilers)
-- [ ] Biocamoflage - make Sea Urchins and (coughthulu cough) ignore it.
 - [ ] Animal photos
-- [ ] Ruins slow subs down
 - [ ] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
 - [ ] Team-specific mechanics.
 

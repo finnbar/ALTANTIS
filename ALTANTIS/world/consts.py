@@ -5,6 +5,7 @@ ATTRIBUTES = ["deposit", "diverse", "hiddenness", "weather", "docking", "obstacl
 WEATHER = {"calm": "C", "normal": ".", "rough": "R", "stormy": "S"}
 # A list of characters able to be used for wall alternate styles (such as in bases)
 WALL_STYLES = ["b", "h", "z", "v", "p", "l"]
+
 """
 All possible "command line options"
 w: walls (obstacle)

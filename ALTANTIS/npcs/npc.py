@@ -24,7 +24,8 @@ class NPC(Entity):
         self.id = id
         self.stealth = 0
         self.damage_to_apply = 0
-        self.keywords = []
+        self.camo = False
+        self.observant = False
     
     async def on_tick(self):
         await self.damage_tick()
@@ -41,10 +42,12 @@ class NPC(Entity):
         return False
 
     def attackable(self, entity) -> bool:
+        if self.observant:
+            return True
         if type(entity) is Submarine:
             return not "camo" in entity.upgrades.keywords
         else:
-            return not "camo" in entity.keywords
+            return not entity.camo
     
     def name(self) -> str:
         return f"{self.classname.title()} (#{self.id})"
