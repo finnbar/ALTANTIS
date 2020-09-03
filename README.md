@@ -69,8 +69,8 @@ New features:
 - [x] Ruins use letter A now
 - [x] Ruins slow subs down
 - [x] Biocamoflage - make Sea Urchins and (coughthulu cough) ignore it.
-- [ ] Varied shark NPCs (see pin in #spoilers)
-- [ ] Animal photos
+- [x] Varied shark NPCs (see pin in #spoilers)
+- [x] Animal photos
 - [ ] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
 - [ ] Team-specific mechanics.
 

@@ -64,6 +64,9 @@ class Inventory():
                 return False
         return True
     
+    def has(self, item: str) -> bool:
+        return item in self.inventory
+    
     def drop(self, item : str) -> str:
         if item not in self.inventory or self.inventory[item] <= 0:
             return f"Cannot drop an item that you don't own."

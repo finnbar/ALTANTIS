@@ -26,6 +26,8 @@ class NPC(Entity):
         self.damage_to_apply = 0
         self.camo = False
         self.observant = False
+        self.photo = ""
+        self.typename = self.classname.title()
     
     async def on_tick(self):
         await self.damage_tick()
@@ -50,10 +52,10 @@ class NPC(Entity):
             return not entity.camo
     
     def name(self) -> str:
-        return f"{self.classname.title()} (#{self.id})"
+        return f"{self.typename} (#{self.id})"
     
     def full_name(self) -> str:
-        return f"{self.classname.title()} (#{self.id} at {self.x}, {self.y})"
+        return f"{self.typename} (#{self.id} at {self.x}, {self.y})"
 
     async def send_message(self, content, _):
         await notify_control(f"Event from {self.name()}! {content}")
@@ -113,7 +115,7 @@ class NPC(Entity):
     def is_weak(self) -> bool:
         return True
     
-    async def interact(self, sub, arg) -> str:
+    async def interact(self, sub: Submarine, arg: Any) -> str:
         return ""
     
     def all_subs_in_square(self) -> List[Optional[Submarine]]:
@@ -134,17 +136,25 @@ class NPC(Entity):
         for npc in self.all_npcs_in_square():
             result.append(npc)
         return result
+    
+    def take_photo(self, sub : Submarine):
+        if self.photo == "":
+            return ""
+        photo_name = f"{self.typename.lower()} photo*"
+        if sub.inventory.has(photo_name):
+            return "Your photo came out all blurry..."
+        sub.inventory.add(photo_name)
+        return f"You took a photo of a {self.typename}! {self.photo}"
 
 npc_types = {}
 
 def load_npc_types():
     # Woo let's continue to avoid circular imports!
-    import ALTANTIS.npcs.templates as _npc
+    from ALTANTIS.npcs.templates import ALL_NPCS
 
     # Available NPC types. Note that "NPC" is used liberally here - it can refer to
     # monsters, non-player characters, and structures such as mines.
-    npc_classes = [_npc.Squid, _npc.BigSquid, _npc.Dolphin, _npc.Eel, _npc.Mine, _npc.StormGenerator, _npc.Whale, _npc.Octopus, _npc.NewsBouy, _npc.GoldTrader, _npc.Urchin, _npc.MantaRay, _npc.AnglerFish, _npc.Shark, _npc.Crab]
-    for cl in npc_classes:
+    for cl in ALL_NPCS:
         npc_types[cl.classname] = cl
 
 # All NPCs, listed by ID.

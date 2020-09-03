@@ -12,13 +12,22 @@ from ALTANTIS.npcs.npc import NPC, add_npc
 
 # TODO: DeepOne NPC, Large Storm Generator
 
-class Squid(NPC):
+class PhotographableNPC(NPC):
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.photo = "https://www.warwicktabletop.co.uk/static/megagame/2020/"
+
+    async def interact(self, sub, _) -> str:
+        return self.take_photo(sub)
+
+class Squid(PhotographableNPC):
     classname = "squid"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.tick_count = 0
         self.health = 2
         self.treasure = [CURRENCY_NAME]
+        self.photo += "squid.png"
     
     async def attack(self):
         if self.tick_count >= 3:
@@ -28,18 +37,16 @@ class Squid(NPC):
         else:
             self.tick_count += 1
 
-class BigSquid(NPC):
+class BigSquid(PhotographableNPC):
     classname = "giant_squid"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.tick_count = 0
         self.health = 3
         self.treasure = [CURRENCY_NAME, CURRENCY_NAME]
+        self.typename = "Giant Squid"
+        self.photo += "giant-squid.png"
 
-    def name(self):
-        # Override to add a space
-        return f"Giant Squid (#{self.id})"
-    
     async def attack(self):
         if self.tick_count >= 2:
             self.tick_count -= 2
@@ -48,18 +55,16 @@ class BigSquid(NPC):
         else:
             self.tick_count += 1
 
-class Octopus(NPC):
+class Octopus(PhotographableNPC):
     classname = "octopus"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.tick_count = 0
         self.health = 1
         self.treasure = [random.choice(RESOURCES)]
+        self.typename = "Giant Octopus"
+        self.photo += "giant-octopus.png"
 
-    def name(self):
-        # Override to add the fact that it's big
-        return f"Giant Octopus (#{self.id})"
-    
     async def attack(self):
         if self.tick_count >= 2:
             self.tick_count -= 2
@@ -68,7 +73,7 @@ class Octopus(NPC):
         else:
             self.tick_count += 1
 
-class Shark(NPC):
+class Shark(PhotographableNPC):
     classname = "shark"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -86,7 +91,27 @@ class Shark(NPC):
         else:
             self.tick_count += 1
 
-class Whale(NPC):
+class Hammerhead(Shark):
+    classname = "hammerhead"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.typename = "Hammerhead Shark"
+        self.photo += "hammerhead.png"
+
+class Bull(Shark):
+    classname = "bullshark"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.typename = "Bull Shark"
+        self.photo += "bull-shark.png"
+
+class Orca(Shark):
+    classname = "orca"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.photo += "orca.png"
+
+class Whale(PhotographableNPC):
     classname = "whale"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -98,29 +123,43 @@ class Whale(NPC):
         for sub in self.all_subs_in_square():
             await sub.send_message(f"{self.name()} is having a _whale_ of a time.", "captain")
 
-class Dolphin(NPC):
+class WhaleShark(Whale):
+    classname = "whaleshark"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.typename = "Whale Shark"
+        self.photo += "whale-shark.png"
+
+class Humpback(Whale):
+    classname = "humpback"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.photo += "humpback-whale.png"
+
+class Dolphin(PhotographableNPC):
     classname = "dolphin"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.health = 2
         self.treasure = ["unexploded bomb*"]
+        self.photo += "dolphin.png"
 
-    async def interact(self, *_):
-        return "The dolphin made a few happy noises!"
+    async def interact(self, sub, arg):
+        photo_message = super().interact(sub, arg)
+        return f"The dolphin made a few happy noises!\n{photo_message}"
 
-class MantaRay(NPC):
+class MantaRay(PhotographableNPC):
     classname = "mantaray"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.health = 2
         self.treasure = [random.choice(RESOURCES)] * 2
+        self.typename = "Manta Ray"
+        self.photo += "manta-ray.png"
     
-    def name(self):
-        # Override to add a space
-        return f"Manta Ray (#{self.id})"
-
-    async def interact(self, *_):
-        return "The manta ray swims happily!"
+    async def interact(self, sub, arg):
+        photo_message = super().interact(sub, arg)
+        return f"The manta ray swims happily!\n{photo_message}"
     
     async def deathrattle(self):
         hears_rattle = all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
@@ -132,18 +171,38 @@ class MantaRay(NPC):
         for location in locations:
             add_npc("eel", location[0], location[1])
 
-class Eel(NPC):
+class Turtle(PhotographableNPC):
+    classname = "turtle"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.health = 2
+        self.treasure = [CURRENCY_NAME] * 3
+        self.photo += "turtle.png"
+    
+    async def interact(self, sub, arg):
+        photo_message = super().interact(sub, arg)
+        return f"The turtle swims happily!\n{photo_message}"
+    
+    async def deathrattle(self):
+        hears_rattle = all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
+        for entity in hears_rattle:
+            await entity.send_message(f"Turtle at ({self.x}, {self.y}) was killed. The Turtle Revenge Squad hears its cry!", "captain")
+        # Then summon four eel as a "fuck you".
+        locations = [(0,1), (1,0), (-1,0), (0,-1)]
+        locations = list(map(lambda p: (self.x+p[0], self.y+p[1]), locations))
+        for location in locations:
+            add_npc("squid", location[0], location[1])
+
+class Eel(PhotographableNPC):
     classname = "eel"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.health = 2
         self.treasure = [random.choice(RESOURCES)]
         self.tick_count = 0
+        self.typename = "Giant Eel"
+        self.photo += "electric-eel.png"
     
-    def name(self):
-        # Override to add the fact that it's big
-        return f"Giant Eel (#{self.id})"
-
     async def attack(self):
         if self.tick_count >= 2:
             self.tick_count -= 2
@@ -156,7 +215,7 @@ class Eel(NPC):
         else:
             self.tick_count += 1
 
-class AnglerFish(NPC):
+class AnglerFish(PhotographableNPC):
     classname = "angler"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -164,11 +223,9 @@ class AnglerFish(NPC):
         self.health = 2
         self.treasure = [CURRENCY_NAME, random.choice(RESOURCES)]
         self.stealth = 2
+        self.typename = "Angler Fish"
+        self.photo += "angler-fish.png"
 
-    def name(self):
-        # Override to add a space
-        return f"Angler Fish (#{self.id})"
-    
     async def attack(self):
         if self.tick_count >= 2:
             self.tick_count -= 2
@@ -177,7 +234,7 @@ class AnglerFish(NPC):
         else:
             self.tick_count += 1
 
-class Urchin(NPC):
+class Urchin(PhotographableNPC):
     classname = "urchin"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -187,6 +244,7 @@ class Urchin(NPC):
         self.observant = True
         # Which subs were in this square previously.
         self.visited = []
+        self.photo += "giant-sea-urchin.png"
     
     async def attack(self):
         new_visited = []
@@ -196,16 +254,14 @@ class Urchin(NPC):
                 await self.do_attack(sub, 1, f"{self.name()} jumped out from hiding and did 1 damage on your arrival!")
         self.visited = new_visited
 
-class Crab(NPC):
+class Crab(PhotographableNPC):
     classname = "crab"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.treasure = ["crab meat"]
+        self.typename = "Giant Crab"
+        self.photo += "giant-crab.png"
     
-    def name(self):
-        # crab big
-        return f"Giant Crab (#{self.id})"
-
     async def attack(self):
         for sub in self.all_subs_in_square():
             if sub.inventory.crane_down:
@@ -215,6 +271,13 @@ class Crab(NPC):
                     message = sub.inventory.crane_falters()
                     if message:
                         await sub.send_message(message, "captain")
+
+class Jellyfish(PhotographableNPC):
+    classname = "jellyfish"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.stealth = 2
+        self.photo += "giant-jellyfish.png"
 
 class NewsBouy(NPC):
     classname = "bouy"
@@ -262,10 +325,8 @@ class GoldTrader(NPC):
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.resource = random.choice(RESOURCES)
+        self.typename = f"{self.resource.title()} Trader"
 
-    def name(self):
-        return f"{self.resource.title()} Trader (#{self.id})"
-    
     async def on_tick(self):
         await super().on_tick()
         for sub in self.all_subs_in_square():
@@ -283,3 +344,5 @@ class GoldTrader(NPC):
                 return f"Traded one {self.resource.title()} for two Gold!"
             return "Could not perform that trade!"
         return "Invalid option."
+
+ALL_NPCS = [AnglerFish, BigSquid, Bull, Crab, Dolphin, Eel, GoldTrader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Squid, StormGenerator, Turtle, Urchin]
