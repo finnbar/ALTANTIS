@@ -6,20 +6,12 @@ from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.utils.direction import reverse_dir, directions
 from ALTANTIS.utils.consts import X_LIMIT, Y_LIMIT
 from ALTANTIS.world.validators import InValidator, NopValidator, TypeValidator, BothValidator, LenValidator, RangeValidator
+from ALTANTIS.world.consts import ATTRIBUTES, WEATHER, WALL_STYLES
 
 import random
 from typing import List, Optional, Tuple, Any, Dict
 
-
 class Cell():
-    # A list of implemented attributes
-    # Other attributes will do nothing, so are prevented from being added
-    ATTRIBUTES = ["deposit", "diverse", "hiddenness", "weather", "docking", "obstacle", "ruins", "junk", "wallstyle"]
-    # A mapping of the permissible weather states and their map characters.
-    WEATHER = {"calm": "C", "normal": ".", "rough": "R", "stormy": "S"}
-    # A list of characters able to be used for wall alternate styles (such as in bases)
-    # Currently just b for base.
-    WALL_STYLES = ["b"]
     # A dictionary of validators to apply to the attributes
     VALIDATORS = {
         "weather": InValidator(WEATHER.keys()),
@@ -51,11 +43,7 @@ class Cell():
 
     def square_status(self) -> str:
         return f"This square has treasures {self.treasure_string()} and attributes {self.attributes}."
-
-    def is_obstacle(self) -> bool:
-        # obstacle: this cell cannot be entered.
-        return "obstacle" in self.attributes
-
+    
     def pick_up(self, power: int) -> List[str]:
         power = min(power, len(self.treasure))
         treasures = []
@@ -68,11 +56,25 @@ class Cell():
     def bury_treasure(self, treasure: str) -> bool:
         self.treasure.append(treasure)
         return True
+    
+    def name(self, to_show : List[str] = ["d", "a", "m", "e", "j"]) -> Optional[str]:
+        if "name" in self.attributes:
+            name = self.attributes["name"].title()
+            if name != "": return name
+        to_check = {"d": "docking", "a": "ruins", "m": "deposit", "e": "diverse", "j": "junk"}
+        for attr in to_check:
+            if attr in to_show and to_check[attr] in self.attributes:
+                name = self.attributes[to_check[attr]].title()
+                if name != "": return name
+        return None
 
     def outward_broadcast(self, strength: int) -> str:
         # This is what the sub sees when scanning this cell.
-        if "hiddenness" in self.attributes and self.attributes["hiddenness"] > strength:
-            return ""
+        suffix = ""
+        if "hiddenness" in self.attributes:
+            if self.attributes["hiddenness"] > strength:
+                return ""
+            suffix = " (was hidden)"
         broadcast = []
         if self.attributes.get("weather", "normal") == "stormy":
             broadcast.append("storm brewing")
@@ -87,62 +89,74 @@ class Cell():
         if "diverse" in self.attributes:
             broadcast.append("a diverse ecosystem")
         if "ruins" in self.attributes:
-            broadcast.append(f"some ruins ({self.attributes['ruins']})")
+            broadcast.append(f"some ruins")
         if "junk" in self.attributes:
             broadcast.append("some submarine debris")
         if "deposit" in self.attributes:
             broadcast.append("a mineral deposit")
         if "docking" in self.attributes:
-            broadcast.append(f"docking station \"{self.attributes['docking'].title()}\"")
-        return list_to_and_separated(broadcast).capitalize()
+            broadcast.append(f"a docking station")
+        prefix = "An unnamed square, containing: "
+        square_name = self.name()
+        if square_name is not None:
+            prefix = f"An square named {square_name}, containing: "
+        if len(broadcast) > 0:
+            return f"{prefix}{list_to_and_separated(broadcast)}{suffix}"
+        return ""
 
     # We can't type check this because it would cause a circular import.
-    def on_entry(self, sub) -> str:
+    def on_entry(self, sub) -> Tuple[str, bool]:
         # This is what happens when a sub attempts to enter this space.
         # This includes docking and damage.
         if "docking" in self.attributes:
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
             sub.power.activate(False)
             (x, y) = sub.movement.get_position()
-            return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped. Please call !exit_sub to leave the submarine and enter the docking station."
+            return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped. Please call !exit_sub to leave the submarine and enter the docking station.", False
         if "obstacle" in self.attributes:
             message = sub.damage(1)
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
-            return f"The submarine hit a wall and took one damage!\n{message}"
-        return ""
+            return f"The submarine hit a wall and took one damage!\n{message}", True
+        return "", False
 
-    def to_char(self, to_show: List[str]) -> str:
-        if "t" in to_show and len(self.treasure) > 0:
-            return "T"
-        if "r" in to_show and "ruins" in self.attributes:
-            return "R"
-        if "j" in to_show and "junk" in self.attributes:
-            return "J"
-        if "m" in to_show and "deposit" in self.attributes:
-            return "M"
-        if "e" in to_show and "diverse" in self.attributes:
-            return "D"
-        if "w" in to_show and "obstacle" in self.attributes:
-            if "wallstyle" in self.attributes and self.attributes['wallstyle'] in self.WALL_STYLES:
-                return self.attributes['wallstyle']
-            else:
-                return "W"
-        if "d" in to_show and "docking" in self.attributes:
-            return "D"
+    def to_char(self, to_show: List[str], show_hidden: bool = False) -> str:
+        if show_hidden or not ("hiddenness" in self.attributes and self.attributes["hiddenness"] > 0):
+            if "t" in to_show and len(self.treasure) > 0:
+                return "T"
+            if "a" in to_show and "ruins" in self.attributes:
+                return "A"
+            if "j" in to_show and "junk" in self.attributes:
+                return "J"
+            if "m" in to_show and "deposit" in self.attributes:
+                return "M"
+            if "e" in to_show and "diverse" in self.attributes:
+                return "D"
+            if "w" in to_show and "obstacle" in self.attributes:
+                if "wallstyle" in self.attributes and self.attributes['wallstyle'] in WALL_STYLES:
+                    return self.attributes['wallstyle']
+                else:
+                    return "W"
+            if "d" in to_show and "docking" in self.attributes:
+                return "D"
         if "s" in to_show and "weather" in self.attributes:
-            return self.WEATHER.get(self.attributes.get("weather", "normal"), ".")
+            return WEATHER.get(self.attributes.get("weather", "normal"), ".")
         return "."
 
-    def map_name(self, to_show: List[str]) -> Optional[str]:
+    def map_name(self, to_show: List[str], show_hidden: bool = False) -> Optional[str]:
         # For Thomas' map drawing code.
         # Gives names to squares that make sense.
-        name = ""
+        treasure = ""
+        if not show_hidden and "hiddenness" in self.attributes and self.attributes["hiddenness"] > 0:
+            return ""
         if "t" in to_show and len(self.treasure) > 0:
-            name = self.treasure_string()
-        if "d" in to_show and "docking" in self.attributes:
-            name = self.attributes["docking"].title()
-        if name != "":
+            treasure = self.treasure_string()
+        name = self.name(to_show)
+        if name is not None:
+            if treasure != "":
+                return f"{name} (with treasure {treasure})"
             return name
+        if treasure != "":
+            return f"has {treasure}"
         return None
 
     def docked_at(self) -> Optional[str]:
@@ -158,7 +172,7 @@ class Cell():
         return 4
 
     def add_attribute(self, attr: str, val="") -> bool:
-        if attr not in self.ATTRIBUTES:
+        if attr not in ATTRIBUTES:
             return False
 
         validator = self.VALIDATORS.get(attr, NopValidator())

@@ -7,6 +7,7 @@ from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_a
 from ALTANTIS.utils.actions import DiscordAction, Message, FAIL_REACT
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.world.world import in_world, get_square
+from ALTANTIS.world.consts import MAX_OPTIONS
 from ALTANTIS.npcs.npc import filtered_npcs, get_npc
 from ALTANTIS.subs.state import get_sub, get_sub_objects, filtered_teams, with_sub
 from ALTANTIS.subs.sub import Submarine
@@ -56,14 +57,14 @@ class Status(commands.Cog):
         """
         await perform(get_scan, ctx, get_team(ctx.channel))
 
-async def print_map(team : str, options:Sequence[str] = ("w", "d", "s")) -> DiscordAction:
+async def print_map(team: str, options: Sequence[str] = ("w", "d", "s", "a", "m", "e"), show_hidden: bool = False) -> DiscordAction:
     """
     Prints the map from the perspective of one submarine, or all if team is None.
     """
     subs = []
-    max_options = ["w", "d", "s", "t", "n", "r", "j", "m", "e"]
+    max_options = ["w", "d", "s", "t", "n", "a", "j", "m", "e"]
     if options is True:
-        options = max_options
+        options = MAX_OPTIONS
     options = list(filter(lambda v: v in max_options, options))
     if team is None:
         subs = get_sub_objects()
@@ -73,7 +74,7 @@ async def print_map(team : str, options:Sequence[str] = ("w", "d", "s")) -> Disc
             return FAIL_REACT
         else:
             subs = [sub]
-    map_string, map_arr = draw_map(subs, options)
+    map_string, map_arr = draw_map(subs, list(options), show_hidden)
     map_json = json.dumps(map_arr)
     async with httpx.AsyncClient() as client:
         url = MAP_DOMAIN+"/api/map/"
@@ -83,7 +84,7 @@ async def print_map(team : str, options:Sequence[str] = ("w", "d", "s")) -> Disc
             return Message(f"The map is visible here: {final_url}")
     return FAIL_REACT
 
-def draw_map(subs : List[Submarine], to_show : List[str]) -> Tuple[str, List[Dict[str, Any]]]:
+def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tuple[str, List[Dict[str, Any]]]:
     """
     Draws an ASCII version of the map.
     Also returns a JSON of additional information.
@@ -95,8 +96,8 @@ def draw_map(subs : List[Submarine], to_show : List[str]) -> Tuple[str, List[Dic
         row = ""
         for x in range(X_LIMIT):
             square = get_square(x, y)
-            tile_char = square.to_char(to_show)
-            tile_name = square.map_name(to_show)
+            tile_char = square.to_char(to_show, show_hidden)
+            tile_name = square.map_name(to_show, show_hidden)
             if "n" in to_show:
                 npcs_in_square = filtered_npcs(lambda n: n.x == x and n.y == y)
                 if len(npcs_in_square) > 0:

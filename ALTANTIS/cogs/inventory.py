@@ -15,9 +15,7 @@ class Inventory(commands.Cog):
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def drop(self, ctx, item):
         """
-        Drops the item specified by <item> and optional quantity <quantity>.
-        You cannot drop items in ALL CAPS. (These are undroppable due to being
-        important or dangerous.)
+        Drops the item specified by <item>. You cannot drop key items (those ending in *).
         """
         await perform(drop_item, ctx, get_team(ctx.channel), item)
 

@@ -2,9 +2,9 @@
 Allows the sub to move.
 """
 import math, datetime
-from typing import Tuple
+from typing import Tuple, Optional
 
-from ALTANTIS.world.world import possible_directions, get_square, in_world
+from ALTANTIS.world.world import possible_directions, get_square, in_world, Cell
 from ALTANTIS.utils.consts import GAME_SPEED, direction_emoji, TICK, CROSS
 from ALTANTIS.utils.direction import directions, reverse_dir
 from ..sub import Submarine
@@ -67,6 +67,9 @@ class MovementControls():
 
     def get_position(self) -> Tuple[int, int]:
         return (self.x, self.y)
+    
+    def get_square(self) -> Optional[Cell]:
+        return get_square(self.x, self.y)
 
     async def move(self) -> str:
         motion = directions[self.direction]
@@ -76,8 +79,8 @@ class MovementControls():
             # Crashed into the boundaries of the world, whoops.
             self.set_direction(reverse_dir[self.get_direction()])
             return f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{self.direction.upper()}**) and did not move this turn!"
-        message = get_square(new_x, new_y).on_entry(self.sub)
-        if get_square(new_x, new_y).is_obstacle():
+        message, obstacle = get_square(new_x, new_y).on_entry(self.sub)
+        if obstacle:
             return message
         self.x = new_x
         self.y = new_y

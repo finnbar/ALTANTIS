@@ -84,8 +84,7 @@ class Submarine(Entity):
             role_names = map(lambda r: r.name, roles)
             return self._name in role_names
 
-        (x, y) = self.movement.get_position()
-        square = get_square(x, y)
+        square = self.movement.get_square()
         location = square.docked_at()
         if location:
             role_name = f"docked-at-{location.lower()}"

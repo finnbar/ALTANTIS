@@ -38,7 +38,7 @@ class ScanSystem():
         Perform a scanner sweep of the local area.
         This finds all subs and objects in range, and returns them.
         """
-        scanners_range = 2*self.sub.power.get_power("scanners") - 2
+        scanners_range = int(1.5*self.sub.power.get_power("scanners"))
         if scanners_range < 0:
             return []
         my_position = self.sub.movement.get_position()
@@ -82,12 +82,12 @@ def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[str]
             if event != "":
                 direction = determine_direction((cx, cy), (x, y))
                 if direction is None:
-                    event = f"{event} in your current square!"
+                    event = f"{event} - in your current square!"
                 else:
                     distance_measure = ""
                     if with_distance:
                         distance_measure = f" at a distance of {this_dist} away"
-                    event = f"{event} in direction {direction.upper()}{distance_measure}!"
+                    event = f"{event} - in direction {direction.upper()}{distance_measure}!"
                 events.append(event)
 
     # Then, submarines.
