@@ -70,6 +70,7 @@ class NPC(Entity):
             else:
                 await notify_control(f"**{self.full_name()}** took a total of {self.damage_to_apply} damage!")
             self.damage_to_apply = 0
+            self.observant = True
 
     async def deathrattle(self):
         hears_rattle = all_in_submap(self.get_position(), 5, npc_exclusions=[self.id])
