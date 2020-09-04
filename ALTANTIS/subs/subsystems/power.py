@@ -187,17 +187,16 @@ class PowerManager():
             self.activate(False)
             return "**SUBMARINE DESTROYED. PLEASE SPEAK TO CONTROL.**"
         # Otherwise, if there is unused power, damage that first.
-        system = ""
-        if self.power_use(self.power) < self.total_power:
-            system = "reserves"
-        else:
+        system_message = ""
+        if self.power_use(self.power) >= self.total_power:
             # Pick a system at random to lose power.
             available_systems = filter(lambda system: self.power[system] > 0, self.power)
             system = random.choice(list(available_systems))
             self.unpower_systems([system])
+            system_message = f" {system.capitalize()} lost some power!"
         # Else continue taking damage.
         message = self.run_damage(amount - 1)
-        return f"Damage taken to {system}!\n" + message
+        return f"Damage taken to reserves!{system_message}\n" + message
     
     def damage(self, amount : int):
         self.scheduled_damage.append(amount)

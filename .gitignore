@@ -135,3 +135,5 @@ npcs.json
 
 # Puzzles
 puzzles/*
+# Weather presets
+weather/*
