@@ -1,10 +1,13 @@
 from discord.ext import commands
 from typing import Optional
 
+from discord.ext.commands.core import command
+
 from ALTANTIS.utils.consts import CONTROL_ROLE
-from ALTANTIS.utils.bot import perform_async_unsafe, get_team
-from ALTANTIS.utils.actions import DiscordAction, OKAY_REACT, FAIL_REACT
+from ALTANTIS.utils.bot import perform_async_unsafe, get_team, perform_unsafe
+from ALTANTIS.utils.actions import DiscordAction, OKAY_REACT, FAIL_REACT, Message
 from ALTANTIS.subs.state import with_sub_async
+from ALTANTIS.subs.subsystems.upgrades import VALID_UPGRADES
 
 class UpgradeManagement(commands.Cog):
     """
@@ -60,6 +63,14 @@ class UpgradeManagement(commands.Cog):
         (CONTROL) Removes <keyword> from this team. (This is for upgrades outside of power.)
         """
         await perform_async_unsafe(remove_keyword_from_sub, ctx, get_team(ctx.channel), keyword)
+    
+    @commands.command(name="list_upgrades")
+    @commands.has_role(CONTROL_ROLE)
+    async def list_upgrades(self, ctx):
+        """
+        (CONTROL) Lists all keywords that are implemented in code along with their ability.
+        """
+        await perform_unsafe(list_keywords, ctx)
 
 async def upgrade_sub(team : str, amount : int) -> DiscordAction:
     async def do_upgrade(sub):
@@ -94,9 +105,10 @@ async def add_system(team : str, system : str) -> DiscordAction:
 
 async def add_keyword_to_sub(team : str, keyword : str, turn_limit : Optional[int], damage : int) -> DiscordAction:
     async def do_add(sub):
-        if sub.upgrades.add_keyword(keyword, turn_limit, damage):
+        message = sub.upgrades.add_keyword(keyword, turn_limit, damage)
+        if message is not None:
             await sub.send_message(f"Submarine **{team.title()}** was upgraded with the keyword **{keyword}**!", "engineer")
-            return OKAY_REACT
+            return Message(message)
         return FAIL_REACT
     return await with_sub_async(team, do_add, FAIL_REACT)
 
@@ -107,3 +119,9 @@ async def remove_keyword_from_sub(team : str, keyword : str) -> DiscordAction:
             return OKAY_REACT
         return FAIL_REACT
     return await with_sub_async(team, do_remove, FAIL_REACT)
+
+def list_keywords() -> DiscordAction:
+    message = ""
+    for upgrade in VALID_UPGRADES:
+        message += f"`{upgrade}`: {VALID_UPGRADES[upgrade]}\n"
+    return Message(message)
