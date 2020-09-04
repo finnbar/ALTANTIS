@@ -29,8 +29,6 @@ class Cell():
         self.attributes = {}
 
     def cell_tick(self):
-        if not ("deposit" in self.attributes or "diverse" in self.attributes):
-            return
         if "deposit" in self.attributes and random.random() < 0.03:
             self.treasure.append(random.choice(["tool", "plating"]))
         if "diverse" in self.attributes and random.random() < 0.03:
@@ -77,7 +75,7 @@ class Cell():
             suffix = " (was hidden)"
         broadcast = []
         if self.attributes.get("weather", "normal") == "stormy":
-            broadcast.append("storm brewing")
+            broadcast.append("a storm brewing")
         if len(self.treasure) > 0:
             if strength > 2:
                 broadcast.append(self.treasure_string())
@@ -89,13 +87,13 @@ class Cell():
         if "diverse" in self.attributes:
             broadcast.append("a diverse ecosystem")
         if "ruins" in self.attributes:
-            broadcast.append(f"some ruins")
+            broadcast.append("some ruins")
         if "junk" in self.attributes:
             broadcast.append("some submarine debris")
         if "deposit" in self.attributes:
             broadcast.append("a mineral deposit")
         if "docking" in self.attributes:
-            broadcast.append(f"a docking station")
+            broadcast.append("a docking station")
         prefix = "An unnamed square, containing: "
         square_name = self.name()
         if square_name is not None:
