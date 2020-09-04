@@ -72,7 +72,7 @@ New features:
 - [x] Varied shark NPCs (see pin in #spoilers)
 - [x] Animal photos
 - [x] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
-- [ ] Team-specific mechanics.
+- [x] Team-specific mechanics.
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.

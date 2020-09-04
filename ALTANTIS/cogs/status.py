@@ -106,7 +106,7 @@ def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tu
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
-                    tile_char = str(i)
+                    tile_char = str(i+1)
                     tile_name = subs[i].name()
             row += tile_char
             if tile_name is not None:
