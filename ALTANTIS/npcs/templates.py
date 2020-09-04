@@ -174,7 +174,7 @@ class MantaRay(PhotographableNPC):
         locations = [(0,1), (1,0), (-1,0), (0,-1)]
         locations = list(map(lambda p: (self.x+p[0], self.y+p[1]), locations))
         for location in locations:
-            add_npc("eel", location[0], location[1])
+            add_npc("eel", location[0], location[1], None)
 
 class Turtle(PhotographableNPC):
     classname = "turtle"
@@ -196,7 +196,7 @@ class Turtle(PhotographableNPC):
         locations = [(0,1), (1,0), (-1,0), (0,-1)]
         locations = list(map(lambda p: (self.x+p[0], self.y+p[1]), locations))
         for location in locations:
-            add_npc("squid", location[0], location[1])
+            add_npc("squid", location[0], location[1], None)
 
 class Eel(PhotographableNPC):
     classname = "eel"
@@ -300,6 +300,31 @@ class DeepOne(NPC):
     def is_carbon(self) -> bool:
         return True
 
+class Ears(NPC):
+    classname = "ears"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.health = 3
+    
+    async def on_tick(self):
+        parent = self.get_parent()
+        if parent is None:
+            return
+        scanned = all_in_submap(self.get_position(), 1, [parent._name], [self.id])
+        message = ""
+        if len(scanned) == 0:
+            return
+        for entity in scanned:
+            message += f"**{entity.name()}** at ({entity.x}, {entity.y})\n"
+        await parent.send_message(f"**Ears** (#{self.id}) scanned this turn:\n{message}", "scientist")
+    
+    async def send_message(self, content, channel):
+        await super().send_message(content, channel)
+        parent = self.get_parent()
+        if parent is not None:
+            full_message = f"Event from Ears ({self.x}, {self.y}):\n{content}"
+            await parent.send_message(full_message, "scientist")
+
 class DeepOneTwo(DeepOne):
     classname = "deeponetwo"
     def __init__(self, id, x, y):
@@ -339,13 +364,13 @@ class StormGenerator(NPC):
         for dx in range(-2,3):
             for dy in range(-2,3):
                 sq = get_square(self.x + dx, self.y + dy)
-                if sq: sq.add_attribute("stormy")
+                if sq: sq.add_attribute("weather", "storm")
 
     async def deathrattle(self):
         for dx in range(-2,3):
             for dy in range(-2,3):
                 sq = get_square(self.x + dx, self.y + dy)
-                if sq: sq.remove_attribute("stormy")
+                if sq: sq.add_attribute("weather", "normal")
 
 class Trader(NPC):
     classname = "trader"
@@ -405,4 +430,4 @@ class BreedingGround(NPC):
     def is_carbon(self) -> bool:
         return True
 
-ALL_NPCS = [AnglerFish, BigSquid, BreedingGround, Bull, Crab, DeepOne, DeepOneTwo, Dolphin, Eel, Trader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Quarry, Squid, StormGenerator, Turtle, Urchin]
+ALL_NPCS = [AnglerFish, BigSquid, BreedingGround, Bull, Crab, DeepOne, DeepOneTwo, Dolphin, Ears, Eel, Trader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Quarry, Squid, StormGenerator, Turtle, Urchin]

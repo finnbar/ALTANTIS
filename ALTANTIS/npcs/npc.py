@@ -28,6 +28,7 @@ class NPC(Entity):
         self.observant = False
         self.photo = ""
         self.typename = self.classname.title()
+        self.parent = None
     
     async def on_tick(self):
         await self.damage_tick()
@@ -145,6 +146,14 @@ class NPC(Entity):
             return "Your photo came out all blurry..."
         sub.inventory.add(photo_name)
         return f"You took a photo of a {self.typename}! {self.photo}"
+    
+    def add_parent(self, parent : str):
+        self.parent = parent
+    
+    def get_parent(self) -> Optional[Submarine]:
+        if self.parent is None:
+            return None
+        return get_sub(self.parent)
 
 npc_types = {}
 
@@ -201,12 +210,15 @@ def get_npc(npcid : int) -> Optional[NPC]:
         return npcs[npcid]
     return None
 
-def add_npc(npctype : str, x : int, y : int):
+def add_npc(npctype : str, x : int, y : int, sub : Optional[str]):
     if not in_world(x, y):
         return "Cannot place an NPC outside of the map."
     if npctype in npc_types:
         id = len(npcs)
-        npcs.append(npc_types[npctype](id, x, y))
+        new_npc = npc_types[npctype](id, x, y)
+        if sub is not None:
+            new_npc.add_parent(sub)
+        npcs.append(new_npc)
         return f"Created NPC #{id} of type {npctype.title()}!"
     return "That NPC type does not exist."
 

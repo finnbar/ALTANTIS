@@ -31,9 +31,9 @@ class Status(commands.Cog):
         (CONTROL) Shows a map of the world, including all submarines.
         """
         if opts == ():
-            await perform_async_unsafe(print_map, ctx, None, True)
+            await perform_async_unsafe(print_map, ctx, None, True, True)
         else:
-            await perform_async_unsafe(print_map, ctx, None, list(opts))
+            await perform_async_unsafe(print_map, ctx, None, list(opts), True)
     
     @commands.command(name="zoom")
     @commands.has_role(CONTROL_ROLE)

@@ -2,9 +2,10 @@ from discord.ext import commands
 from typing import Optional
 
 from ALTANTIS.utils.consts import CONTROL_ROLE
-from ALTANTIS.utils.bot import perform_unsafe
+from ALTANTIS.utils.bot import perform_unsafe, get_team
 from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
 from ALTANTIS.utils.text import list_to_and_separated
+from ALTANTIS.subs.state import get_sub
 from ALTANTIS.npcs.npc import add_npc, kill_npc, get_npc_types
 
 class NPCs(commands.Cog):
@@ -17,7 +18,7 @@ class NPCs(commands.Cog):
         """
         (CONTROL) Add an NPC <npcname> of <npctype> to the map at (<x>, <y>).
         """
-        await perform_unsafe(add_npc_to_map, ctx, npctype, x, y)
+        await perform_unsafe(add_npc_to_map, ctx, npctype, x, y, get_team(ctx.channel))
     
     @commands.command(name="remove_npc")
     @commands.has_role(CONTROL_ROLE)
@@ -35,8 +36,11 @@ class NPCs(commands.Cog):
         """
         await perform_unsafe(printout_npc_types, ctx)
 
-def add_npc_to_map(ntype : str, x : int, y : int) -> DiscordAction:
-    return Message(add_npc(ntype, x, y))
+def add_npc_to_map(ntype : str, x : int, y : int, team : Optional[str]) -> DiscordAction:
+    sub = None
+    if team and get_sub(team):
+        sub = team
+    return Message(add_npc(ntype, x, y, sub))
 
 def remove_npc_from_map(npcid : int) -> DiscordAction:
     if kill_npc(npcid):
