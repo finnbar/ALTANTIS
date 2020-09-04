@@ -10,7 +10,7 @@ from ALTANTIS.world.world import get_square
 from ALTANTIS.world.extras import all_in_submap, explode
 from ALTANTIS.npcs.npc import NPC, add_npc
 
-# TODO: DeepOne NPC, Large Storm Generator
+# TODO: Large Storm Generator
 
 class PhotographableNPC(NPC):
     def __init__(self, id, x, y):
@@ -85,12 +85,14 @@ class Shark(PhotographableNPC):
         self.treasure = [random.choice(RESOURCES)]
     
     async def attack(self):
-        # TODO: retreat after attack?
         if self.tick_count >= 3:
             self.tick_count -= 3
             self.move_towards_sub(4)
-            for sub in self.all_subs_in_square():
+            targets = self.all_subs_in_square()
+            for sub in targets:
                 await self.do_attack(sub, 1, f"{self.name()} snapped you for one damage!")
+            if len(targets) > 0:
+                self.move(random.choice([-1,0,1]), random.choice([-1,0,1]))
         else:
             self.tick_count += 1
 
@@ -282,6 +284,28 @@ class Jellyfish(PhotographableNPC):
         self.stealth = 2
         self.photo += "giant-jellyfish.png"
 
+class DeepOne(NPC):
+    classname = "deepone"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.health = 5
+    
+    async def on_tick(self):
+        self.move_towards_sub(4)
+        targets = self.all_subs_in_square()
+        for sub in targets:
+            if not "culty" in sub.upgrades.keywords:
+                await self.do_attack(sub, 1, f"{self.name()} did one eldrich damage!")
+    
+    def is_carbon(self) -> bool:
+        return True
+
+class DeepOneTwo(DeepOne):
+    classname = "deeponetwo"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.stealth = 2
+
 class NewsBouy(NPC):
     classname = "bouy"
     def __init__(self, id, x, y):
@@ -323,8 +347,8 @@ class StormGenerator(NPC):
                 sq = get_square(self.x + dx, self.y + dy)
                 if sq: sq.remove_attribute("stormy")
 
-class GoldTrader(NPC):
-    classname = "gold_trader"
+class Trader(NPC):
+    classname = "trader"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.resource = random.choice(RESOURCES)
@@ -348,4 +372,37 @@ class GoldTrader(NPC):
             return "Could not perform that trade!"
         return "Invalid option."
 
-ALL_NPCS = [AnglerFish, BigSquid, Bull, Crab, Dolphin, Eel, GoldTrader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Squid, StormGenerator, Turtle, Urchin]
+class Quarry(NPC):
+    classname = "quarry"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.health = 14
+    
+    async def on_tick(self):
+        await super().on_tick()
+        if random.random() > 0.6:
+            square = get_square(self.x, self.y)
+            if square: square.bury_treasure("plating")
+    
+    def is_weak(self) -> bool:
+        return False
+
+class BreedingGround(NPC):
+    classname = "breeding"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.health = 10
+    
+    async def on_tick(self):
+        await super().on_tick()
+        if random.random() > 0.6:
+            square = get_square(self.x, self.y)
+            if square: square.bury_treasure("specimen")
+    
+    def is_weak(self) -> bool:
+        return False
+    
+    def is_carbon(self) -> bool:
+        return True
+
+ALL_NPCS = [AnglerFish, BigSquid, BreedingGround, Bull, Crab, DeepOne, DeepOneTwo, Dolphin, Eel, Trader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Quarry, Squid, StormGenerator, Turtle, Urchin]

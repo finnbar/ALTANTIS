@@ -48,7 +48,7 @@ class UpgradeManagement(commands.Cog):
         """
         await perform_async_unsafe(add_system, ctx, get_team(ctx.channel), system)
     
-    @commands.command(name="install_keyword")
+    @commands.command(name="add_keyword")
     @commands.has_role(CONTROL_ROLE)
     async def install_keyword(self, ctx, keyword, turn_limit : Optional[int] = None, damage : int = 1):
         """
@@ -56,7 +56,7 @@ class UpgradeManagement(commands.Cog):
         """
         await perform_async_unsafe(add_keyword_to_sub, ctx, get_team(ctx.channel), keyword, turn_limit, damage)
 
-    @commands.command(name="uninstall_keyword")
+    @commands.command(name="remove_keyword")
     @commands.has_role(CONTROL_ROLE)
     async def uninstall_keyword(self, ctx, keyword):
         """

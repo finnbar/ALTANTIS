@@ -20,7 +20,8 @@ VALID_UPGRADES = {"clarity": "Gives you unscrambled messages up to a distance of
                   "camo": "Undamaged NPCs don't attack you. (Restrictions apply.)",
                   "triangulation": "Objects in the scanner now have their distance as well as direction.",
                   "antiplastic": "Damaging shots deal more damage to manmade structures.",
-                  "anticarbon": "Damaging shots deal more damage to biological structures."}
+                  "anticarbon": "Damaging shots deal more damage to biological structures.",
+                  "culty": "You've done enough rituals that you're _probably_ fine."}
 
 class Upgrades():
     def __init__(self, sub : Submarine):
