@@ -19,6 +19,9 @@ class PhotographableNPC(NPC):
 
     async def interact(self, sub, _) -> str:
         return self.take_photo(sub)
+    
+    def is_carbon(self) -> bool:
+        return True
 
 class Squid(PhotographableNPC):
     classname = "squid"

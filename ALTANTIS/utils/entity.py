@@ -28,3 +28,6 @@ class Entity():
         The primary key.
         """
         raise NotImplementedError
+
+    def is_carbon(self) -> bool:
+        return False

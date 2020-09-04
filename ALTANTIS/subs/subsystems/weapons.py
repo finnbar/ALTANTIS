@@ -100,13 +100,23 @@ class Weaponry():
             if target.is_weak():
                 target.damage(1)
         return results
+    
+    def damage_mod(self, entity : Entity) -> int:
+        mod = 0
+        if entity.is_carbon():
+            if "anticarbon" in self.sub.upgrades.keywords:
+                mod += 1
+        else:
+            if "antiplastic" in self.sub.upgrades.keywords:
+                mod += 1
+        return mod
 
     def damaging(self, x : int, y : int) -> Dict[str, List[Entity]]:
         results = self.hits(x, y)
         for target in results["indirect"]:
-            target.damage(2)
+            target.damage(2 + self.damage_mod(target))
         for target in results["direct"]:
-            target.damage(1)
+            target.damage(1 + self.damage_mod(target))
         return results
     
     def status(self) -> str:
