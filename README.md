@@ -74,8 +74,9 @@ New features:
 - [x] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
 - [x] Team-specific mechanics.
 - [x] Stormy boi
+- [x] Animals can move through walls etc. (but you can summon animals in walls)
+- [ ] Should only be able to interact things which you can see.
 - [ ] Docking at the start of a game
-- [ ] Animals can move through walls etc. (but you can summon animals in walls)
 - [ ] Random resource drops seem incredibly common. [Temporarily on hold as yet to be reproduced.]
 
 Quality of life things:

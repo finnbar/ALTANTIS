@@ -141,6 +141,9 @@ class Cell():
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
             return f"The submarine hit a wall and took one damage!\n{message}", True
         return "", False
+    
+    def can_npc_enter(self) -> bool:
+        return not ("docking" in self.attributes or "obstacle" in self.attributes)
 
     def to_char(self, to_show: List[str], show_hidden: bool = False,
                 perspective: Optional[Collection[str]] = None) -> str:

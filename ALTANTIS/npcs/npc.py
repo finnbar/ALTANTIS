@@ -6,7 +6,7 @@ Deals with NPCs in general, and how they operate.
 
 from ALTANTIS.subs.state import filtered_teams, get_sub
 from ALTANTIS.subs.sub import Submarine
-from ALTANTIS.world.world import bury_treasure_at, in_world
+from ALTANTIS.world.world import bury_treasure_at, in_world, get_square
 from ALTANTIS.world.extras import all_in_submap
 from ALTANTIS.utils.control import notify_control
 from ALTANTIS.utils.entity import Entity
@@ -89,7 +89,8 @@ class NPC(Entity):
         return ""
     
     def move(self, dx : int, dy : int):
-        if in_world(self.x + dx, self.y + dy):
+        sq = get_square(self.x + dx, self.y + dy)
+        if sq is not None and sq.can_npc_enter():
             self.x += dx
             self.y += dy
     
