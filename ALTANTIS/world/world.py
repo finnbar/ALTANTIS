@@ -51,7 +51,7 @@ class Cell():
 
     def cell_tick(self):
         if "deposit" in self.attributes and random.random() < 0.03:
-            self.treasure.append(random.choice(["tool", "plating"]))
+            self.treasure.append("plating")
         if "diverse" in self.attributes and random.random() < 0.03:
             self.treasure.append("specimen")
         if "ruins" in self.attributes and random.random() < 0.03:
