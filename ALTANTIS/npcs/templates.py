@@ -291,7 +291,7 @@ class DeepOne(NPC):
         super().__init__(id, x, y)
         self.health = 5
     
-    async def on_tick(self):
+    async def attack(self):
         self.move_towards_sub(4)
         targets = self.all_subs_in_square()
         for sub in targets:
@@ -307,7 +307,7 @@ class Ears(NPC):
         super().__init__(id, x, y)
         self.health = 3
     
-    async def on_tick(self):
+    async def attack(self):
         parent = self.get_parent()
         if parent is None:
             return
@@ -348,7 +348,7 @@ class Mine(NPC):
         self.countdown = 10
         self.stealth = 1
 
-    async def on_tick(self):
+    async def attack(self):
         for sub in self.all_subs_in_square():
             if self.countdown <= 0:
                 self.damage(1)
@@ -363,15 +363,52 @@ class Mine(NPC):
 class StormGenerator(NPC):
     classname = "stormer"
     async def on_tick(self):
+        await super().on_tick()
         for dx in range(-2,3):
             for dy in range(-2,3):
                 sq = get_square(self.x + dx, self.y + dy)
                 if sq: sq.add_attribute("weather", "storm")
 
     async def deathrattle(self):
+        await super().deathrattle()
         for dx in range(-2,3):
             for dy in range(-2,3):
                 sq = get_square(self.x + dx, self.y + dy)
+                if sq: sq.add_attribute("weather", "normal")
+
+class RoughSeasGenerator(NPC):
+    classname = "rougher"
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
+        self.storm_dist = 0
+        self.tick_count = 0
+        self.stealth = 13
+        self.health = 100
+
+    async def on_tick(self):
+        await super().on_tick()
+        self.tick_count += 1
+        if self.tick_count >= 2:
+            self.tick_count -= 2
+            # Make all squares which are storm_dist away rough seas.
+            # Because we use diagonal distance, this is a square perimeter.
+            sd = self.storm_dist
+            corners = [(sd, sd), (-sd, -sd)]
+            for corner in corners:
+                for x in range(-sd, sd+1):
+                    sq = get_square(self.x+x, self.y+corner[1])
+                    if sq: sq.add_attribute("weather", "rough")
+                for y in range(-sd, sd+1):
+                    sq = get_square(self.x+corner[0], self.y+y)
+                    if sq: sq.add_attribute("weather", "rough")
+            self.storm_dist += 1
+    
+    async def deathrattle(self):
+        await super().deathrattle()
+        sd = self.storm_dist
+        for dx in range(-sd, sd+1):
+            for dy in range(-sd, sd+1):
+                sq = get_square(self.x+dx, self.y+dy)
                 if sq: sq.add_attribute("weather", "normal")
 
 class Trader(NPC):
@@ -432,4 +469,4 @@ class BreedingGround(NPC):
     def is_carbon(self) -> bool:
         return True
 
-ALL_NPCS = [AnglerFish, BigSquid, BreedingGround, Bull, Crab, DeepOne, DeepOneTwo, Dolphin, Ears, Eel, Trader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Quarry, Squid, StormGenerator, Turtle, Urchin]
+ALL_NPCS = [AnglerFish, BigSquid, BreedingGround, Bull, Crab, DeepOne, DeepOneTwo, Dolphin, Ears, Eel, Trader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Quarry, RoughSeasGenerator, Squid, StormGenerator, Turtle, Urchin]

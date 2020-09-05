@@ -2,7 +2,7 @@ from discord.ext import commands
 from typing import Optional
 
 from ALTANTIS.utils.consts import CONTROL_ROLE
-from ALTANTIS.utils.bot import perform_unsafe, get_team
+from ALTANTIS.utils.bot import perform_unsafe, get_team, perform_async_unsafe
 from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.subs.state import get_sub
@@ -12,7 +12,7 @@ class NPCs(commands.Cog):
     """
     Allows control of NPCs
     """    
-    @commands.command(name="add_npc")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def add_npc(self, ctx, npctype, x : int, y : int):
         """
@@ -20,15 +20,15 @@ class NPCs(commands.Cog):
         """
         await perform_unsafe(add_npc_to_map, ctx, npctype, x, y, get_team(ctx.channel))
     
-    @commands.command(name="remove_npc")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def remove_npc(self, ctx, npcid : int):
+    async def remove_npc(self, ctx, npcid : int, rattle : bool = True):
         """
         (CONTROL) Remove the NPC with the given id.
         """
-        await perform_unsafe(remove_npc_from_map, ctx, npcid)
+        await perform_async_unsafe(remove_npc_from_map, ctx, npcid, rattle)
     
-    @commands.command(name="npc_types")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def npc_types(self, ctx):
         """
@@ -42,8 +42,8 @@ def add_npc_to_map(ntype : str, x : int, y : int, team : Optional[str]) -> Disco
         sub = team
     return Message(add_npc(ntype, x, y, sub))
 
-def remove_npc_from_map(npcid : int) -> DiscordAction:
-    if kill_npc(npcid):
+async def remove_npc_from_map(npcid : int, rattle : bool) -> DiscordAction:
+    if await kill_npc(npcid, rattle):
         return OKAY_REACT
     return FAIL_REACT
 

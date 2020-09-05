@@ -10,7 +10,7 @@ class DangerZone(commands.Cog):
     """
     DO NOT USE COMMANDS HERE UNLESS YOU ARE ABSOLUTELY CERTAIN.
     """
-    @commands.command(name="death")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def death(self, ctx, subname):
         """
@@ -18,7 +18,7 @@ class DangerZone(commands.Cog):
         """
         await perform_async(kill_sub, ctx, get_team(ctx.channel), subname)
 
-    @commands.command(name="kill_team")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def kill_team(self, ctx, team):
         """
@@ -28,7 +28,7 @@ class DangerZone(commands.Cog):
         """
         await perform_unsafe(delete_team, ctx, team)
     
-    @commands.command(name="explode")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def explode(self, ctx, x : int, y : int, amount : int):
         """

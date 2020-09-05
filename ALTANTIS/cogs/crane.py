@@ -9,7 +9,7 @@ class Crane(commands.Cog):
     """
     Commands for operating the crane.
     """
-    @commands.command(name="crane")
+    @commands.command()
     @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
     async def crane(self, ctx):
         """

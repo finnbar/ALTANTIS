@@ -13,7 +13,7 @@ class GameManagement(commands.Cog):
     """
     Control commands for starting, pausing and ending the game.
     """
-    @commands.command(name="load")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def load(self, ctx, arg):
         """
@@ -21,7 +21,7 @@ class GameManagement(commands.Cog):
         """
         await perform_unsafe(load_game, ctx, arg, bot)
     
-    @commands.command(name="save")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def save(self, ctx):
         """
@@ -36,23 +36,23 @@ class GameManagement(commands.Cog):
         else:
             await FAIL_REACT.do_status(ctx)
     
-    @commands.command(name="make_submarine")
+    @commands.command()
     async def make_sub(self, ctx, name, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int = 0, y : int = 0):
         """
         (CONTROL) Creates channels, roles and a sub for the inputted team.
         """
         await perform_async_unsafe(make_submarine, ctx, ctx.guild, name, captain, engineer, scientist, x, y)
 
-    @commands.command(name="register")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def register_team(self, ctx, x : int = 0, y : int = 0):
+    async def register(self, ctx, x : int = 0, y : int = 0):
         """
         (CONTROL) Registers a new team (with sub at (x,y) defaulting to (0,0)) to the parent channel category.
         Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #captain and #scientist.
         """
         await perform_async_unsafe(register, ctx, ctx.message.channel.category, x, y)
 
-    @commands.command(name="startloop")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def startloop(self, ctx):
         """
@@ -62,7 +62,7 @@ class GameManagement(commands.Cog):
         main_loop.start()
         await OKAY_REACT.do_status(ctx)
 
-    @commands.command(name="stoploop")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def stoploop(self, ctx):
         """
@@ -72,7 +72,7 @@ class GameManagement(commands.Cog):
         main_loop.stop()
         await OKAY_REACT.do_status(ctx)
     
-    @commands.command(name="set_alerts_channel")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def set_alerts_channel(self, ctx):
         """
@@ -81,7 +81,7 @@ class GameManagement(commands.Cog):
         init_control_notifs(ctx.channel)
         await OKAY_REACT.do_status(ctx)
 
-    @commands.command(name="set_news_channel")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def set_news_channel(self, ctx):
         """

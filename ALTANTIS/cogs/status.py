@@ -16,17 +16,17 @@ class Status(commands.Cog):
     """
     All commands that get the status of your submarine and its local environment.
     """
-    @commands.command(name="map")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
-    async def player_map(self, ctx):
+    async def map(self, ctx):
         """
         Shows a map of the world, including your submarine!
         """
         await perform_async(print_map, ctx, get_team(ctx.channel))
 
-    @commands.command(name="mapall")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def control_map(self, ctx, *opts):
+    async def mapall(self, ctx, *opts):
         """
         (CONTROL) Shows a map of the world, including all submarines.
         """
@@ -35,7 +35,7 @@ class Status(commands.Cog):
         else:
             await perform_async_unsafe(print_map, ctx, None, list(opts), True)
     
-    @commands.command(name="zoom")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def zoom(self, ctx, x : int, y : int):
         """
@@ -43,14 +43,14 @@ class Status(commands.Cog):
         """
         await perform_unsafe(zoom_in, ctx, x, y, main_loop)
 
-    @commands.command(name="status")
+    @commands.command()
     async def status(self, ctx):
         """
         Reports the status of the submarine, including power and direction.
         """
         await perform(get_status, ctx, get_team(ctx.channel), main_loop)
     
-    @commands.command(name="scan")
+    @commands.command()
     async def scan(self, ctx):
         """
         Repeats the scan message sent at the start of the current tick.

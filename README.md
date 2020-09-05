@@ -73,10 +73,10 @@ New features:
 - [x] Animal photos
 - [x] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
 - [x] Team-specific mechanics.
-- [ ] Stormy boi
+- [x] Stormy boi
 - [ ] Docking at the start of a game
-- [ ] wtf is going on with random gen
 - [ ] Animals can move through walls etc. (but you can summon animals in walls)
+- [ ] Random resource drops seem incredibly common. [Temporarily on hold as yet to be reproduced.]
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.

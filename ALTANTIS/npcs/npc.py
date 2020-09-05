@@ -175,8 +175,9 @@ def get_npc_types() -> List[str]:
 def get_npcs() -> List[int]:
     return list(range(len(npcs)))
 
-def kill_npc(id : int) -> bool:
+async def kill_npc(id : int, rattle : bool = True) -> bool:
     if id in range(len(npcs)):
+        if rattle: await npcs[id].deathrattle()
         del npcs[id]
         return True
     return False

@@ -10,43 +10,43 @@ class Movement(commands.Cog):
     """
     All commands that allow you to move the submarine.
     """
-    @commands.command(name="setdir")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
-    async def player_move(self, ctx, direction):
+    async def setdir(self, ctx, direction):
         """
         Sets the direction of your submarine to <direction>.
         """
         await perform(move, ctx, direction, get_team(ctx.channel))
 
-    @commands.command(name="teleport")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def teleport_sub(self, ctx, x : int, y : int):
+    async def teleport(self, ctx, x : int, y : int):
         """
         (CONTROL) Teleports the submarine of the team of the channel to a given (<x>, <y>). Does not inform them.
         Also does _not_ check if the position is blocked, but does check if it's a valid point in the world.
         """
         await perform_unsafe(teleport, ctx, get_team(ctx.channel), x, y)
 
-    @commands.command(name="activate")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
-    async def on(self, ctx):
+    async def activate(self, ctx):
         """
         Activates your submarine, allowing it to move and do actions in real-time.
         """
         await perform_async(set_activation, ctx, get_team(ctx.channel), ctx.guild, True)
 
-    @commands.command(name="deactivate")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
-    async def off(self, ctx):
+    async def deactivate(self, ctx):
         """
         Deactivates your submarine, stopping it from moving and performing actions.
         Needed for docking.
         """
         await perform_async(set_activation, ctx, get_team(ctx.channel), ctx.guild, False)
     
-    @commands.command(name="exit_sub")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
-    async def leave_sub(self, ctx):
+    async def exit_sub(self, ctx):
         """
         Allows crew to leave a sub. Call only while you are docked.
         """
