@@ -212,9 +212,10 @@ async def interact_in_square(sub : Submarine, square : Tuple[int, int], arg) -> 
     message = ""
     for npcid in in_square:
         npc = get_npc(npcid)
-        npc_message = await npc.interact(sub, arg)
-        if npc_message != "":
-            message += f"Interaction with **{npc.name()}**: {npc_message}\n"
+        if sub.power.get_power("scanners") >= npc.stealth:
+            npc_message = await npc.interact(sub, arg)
+            if npc_message != "":
+                message += f"Interaction with **{npc.name()}**: {npc_message}\n"
     return message
 
 def get_npc(npcid : int) -> Optional[NPC]:
