@@ -137,9 +137,9 @@ class Cell():
             (x, y) = sub.movement.get_position()
             return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped. Please call !exit_sub to leave the submarine and enter the docking station.", False
         if "obstacle" in self.attributes:
-            message = sub.damage(1)
+            sub.damage(1)
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
-            return f"The submarine hit a wall and took one damage!\n{message}", True
+            return f"The submarine hit a wall and took one damage!", True
         return "", False
     
     def can_npc_enter(self) -> bool:
