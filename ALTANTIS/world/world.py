@@ -80,7 +80,7 @@ class Cell():
         self.treasure.append(treasure)
         return True
 
-    def name(self, to_show: List[str] = ["d", "a", "m", "e", "j"]) -> Optional[str]:
+    def name(self, to_show: Collection[str] = ("d", "a", "m", "e", "j")) -> Optional[str]:
         if "name" in self.attributes:
             name = string.capwords(self.attributes["name"], " ")
             if name != "":
