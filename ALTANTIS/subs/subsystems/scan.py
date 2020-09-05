@@ -2,7 +2,7 @@
 Allows the sub to scan and be scanned.
 """
 from random import shuffle
-from typing import Tuple, List
+from typing import Tuple, List, Collection
 
 from ALTANTIS.utils.direction import diagonal_distance, determine_direction
 from ALTANTIS.utils.consts import X_LIMIT, Y_LIMIT
@@ -44,6 +44,7 @@ class ScanSystem():
         my_position = self.sub.movement.get_position()
         with_distance = "triangulation" in self.sub.upgrades.keywords
         events = explore_submap(my_position, scanners_range, sub_exclusions=[self.sub._name], with_distance=with_distance)
+        get_square(*my_position).has_been_scanned(self.sub._name, self.sub.power.get_power("scanners"))
         shuffle(events)
         return events
     
@@ -60,7 +61,7 @@ class ScanSystem():
     def previous_scan(self) -> str:
         return self.prev_scan
     
-def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[str] = [], npc_exclusions : List[int] = [], with_distance : bool = False) -> List[str]:
+def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : Collection[str] = (), npc_exclusions : Collection[int] = (), with_distance : bool = False) -> List[str]:
     """
     Explores the area centered around pos = (cx, cy) spanning distance dist.
     Returns all outward_broadcast events (as a list) formatted for output.

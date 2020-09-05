@@ -1,15 +1,20 @@
 """
 Deals with the world map, which submarines explore.
 """
+import operator
+import string
+from functools import reduce
 
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.utils.direction import reverse_dir, directions
 from ALTANTIS.utils.consts import X_LIMIT, Y_LIMIT
-from ALTANTIS.world.validators import InValidator, NopValidator, TypeValidator, BothValidator, LenValidator, RangeValidator
+from ALTANTIS.world.validators import InValidator, NopValidator, TypeValidator, BothValidator, LenValidator, \
+    RangeValidator
 from ALTANTIS.world.consts import ATTRIBUTES, WEATHER, WALL_STYLES
 
 import random
-from typing import List, Optional, Tuple, Any, Dict
+from typing import List, Optional, Tuple, Any, Dict, Collection
+
 
 class Cell():
     # A dictionary of validators to apply to the attributes
@@ -27,6 +32,24 @@ class Cell():
         # throughout the class. A cell with no attributes acts like Empty from
         # the previous version - has no extra difficulty etc.
         self.attributes = {}
+        # The list of subs for whom the hiddenness attribute no longer affects the rendering of the map
+        self.explored = set([])
+
+    @classmethod
+    def _from_dict(cls, serialisation):
+        p = cls()
+        p.treasure = list(serialisation['treasure'])
+        p.attributes = dict(serialisation['attributes'])
+        if "explored" in serialisation:
+            p.explored = set(serialisation["explored"])
+        return p
+
+    def _to_dict(self):
+        return {
+            "treasure": list(self.treasure),
+            "attributes": dict(self.attributes),
+            "explored": list(self.explored)
+        }
 
     def cell_tick(self):
         if "deposit" in self.attributes and random.random() < 0.03:
@@ -35,13 +58,15 @@ class Cell():
             self.treasure.append("specimen")
         if "ruins" in self.attributes and random.random() < 0.03:
             self.treasure.append(random.choice(["tool", "circuitry"]))
+        if random.random() < 0.01:
+            self.explored.clear()
 
     def treasure_string(self) -> str:
         return list_to_and_separated(list(map(lambda t: t.title(), self.treasure)))
 
     def square_status(self) -> str:
         return f"This square has treasures {self.treasure_string()} and attributes {self.attributes}."
-    
+
     def pick_up(self, power: int) -> List[str]:
         power = min(power, len(self.treasure))
         treasures = []
@@ -54,23 +79,25 @@ class Cell():
     def bury_treasure(self, treasure: str) -> bool:
         self.treasure.append(treasure)
         return True
-    
-    def name(self, to_show : List[str] = ["d", "a", "m", "e", "j"]) -> Optional[str]:
+
+    def name(self, to_show: Collection[str] = ("d", "a", "m", "e", "j")) -> Optional[str]:
         if "name" in self.attributes:
-            name = self.attributes["name"].title()
-            if name != "": return name
+            name = string.capwords(self.attributes["name"], " ")
+            if name != "":
+                return name
         to_check = {"d": "docking", "a": "ruins", "m": "deposit", "e": "diverse", "j": "junk"}
         for attr in to_check:
             if attr in to_show and to_check[attr] in self.attributes:
                 name = self.attributes[to_check[attr]].title()
-                if name != "": return name
+                if name != "":
+                    return name
         return None
 
     def outward_broadcast(self, strength: int) -> str:
         # This is what the sub sees when scanning this cell.
         suffix = ""
         if "hiddenness" in self.attributes:
-            if self.attributes["hiddenness"] > strength:
+            if self._hidden(strength):
                 return ""
             suffix = " (was hidden)"
         broadcast = []
@@ -117,8 +144,9 @@ class Cell():
             return f"The submarine hit a wall and took one damage!\n{message}", True
         return "", False
 
-    def to_char(self, to_show: List[str], show_hidden: bool = False) -> str:
-        if show_hidden or not ("hiddenness" in self.attributes and self.attributes["hiddenness"] > 0):
+    def to_char(self, to_show: List[str], show_hidden: bool = False,
+                perspective: Optional[Collection[str]] = None) -> str:
+        if show_hidden or not self._hidden(0, perspective):
             if "t" in to_show and len(self.treasure) > 0:
                 return "T"
             if "a" in to_show and "ruins" in self.attributes:
@@ -128,7 +156,7 @@ class Cell():
             if "m" in to_show and "deposit" in self.attributes:
                 return "M"
             if "e" in to_show and "diverse" in self.attributes:
-                return "D"
+                return "E"
             if "w" in to_show and "obstacle" in self.attributes:
                 if "wallstyle" in self.attributes and self.attributes['wallstyle'] in WALL_STYLES:
                     return self.attributes['wallstyle']
@@ -140,11 +168,12 @@ class Cell():
             return WEATHER.get(self.attributes.get("weather", "normal"), ".")
         return "."
 
-    def map_name(self, to_show: List[str], show_hidden: bool = False) -> Optional[str]:
+    def map_name(self, to_show: List[str], show_hidden: bool = False,
+                 perspective: Optional[Collection[str]] = None) -> Optional[str]:
         # For Thomas' map drawing code.
         # Gives names to squares that make sense.
         treasure = ""
-        if not show_hidden and "hiddenness" in self.attributes and self.attributes["hiddenness"] > 0:
+        if not show_hidden and self._hidden(0, perspective):
             return ""
         if "t" in to_show and len(self.treasure) > 0:
             treasure = self.treasure_string()
@@ -166,9 +195,17 @@ class Cell():
     def difficulty(self) -> int:
         difficulties = {"storm": 8, "rough": 6, "normal": 4, "calm": 2}
         modifier = 1 if "ruins" in self.attributes else 0
-        if "weather" in self.attributes:
-            return difficulties.get(self.attributes['weather'], 4) + modifier
-        return 4 + modifier
+        return difficulties.get(self.attributes.get('weather', "normal"), 4) + modifier
+
+    def has_been_scanned(self, subname: str, strength: int) -> None:
+        if not self._hidden(strength):
+            self.explored.add(subname)
+
+    def _hidden(self, strength: int, ships: Optional[Collection[str]] = None) -> bool:
+        if ships and not self.explored.isdisjoint(ships):
+            return False
+        else:
+            return "hiddenness" in self.attributes and self.attributes["hiddenness"] > strength
 
     def add_attribute(self, attr: str, val="") -> bool:
         if attr not in ATTRIBUTES:
@@ -181,27 +218,34 @@ class Cell():
 
         if attr not in self.attributes or self.attributes[attr] != clean:
             self.attributes[attr] = clean
+            self.explored.clear()
             return True
         return False
 
     def remove_attribute(self, attr: str) -> bool:
         if attr in self.attributes:
             del self.attributes[attr]
+            self.explored.clear()
             return True
         return False
 
+
 undersea_map = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
+
 
 def in_world(x: int, y: int) -> bool:
     return 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT
 
+
 def possible_directions() -> List[str]:
     return list(directions.keys())
+
 
 def get_square(x: int, y: int) -> Optional[Cell]:
     if in_world(x, y):
         return undersea_map[x][y]
     return None
+
 
 def bury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
     (x, y) = pos
@@ -209,16 +253,19 @@ def bury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
         return undersea_map[x][y].bury_treasure(name)
     return False
 
+
 def pick_up_treasure(pos: Tuple[int, int], power: int) -> List[str]:
     (x, y) = pos
     if in_world(x, y):
         return undersea_map[x][y].pick_up(power)
     return []
 
+
 def map_tick():
     for x in range(X_LIMIT):
         for y in range(Y_LIMIT):
             undersea_map[x][y].cell_tick()
+
 
 def map_to_dict() -> Dict[str, Any]:
     """
@@ -229,8 +276,9 @@ def map_to_dict() -> Dict[str, Any]:
     undersea_map_dicts = [[{} for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
     for i in range(X_LIMIT):
         for j in range(Y_LIMIT):
-            undersea_map_dicts[i][j] = undersea_map[i][j].__dict__
+            undersea_map_dicts[i][j] = undersea_map[i][j]._to_dict()
     return {"map": undersea_map_dicts, "x_limit": X_LIMIT, "y_limit": Y_LIMIT}
+
 
 def map_from_dict(dictionary: Dict[str, Any]):
     """
@@ -240,8 +288,5 @@ def map_from_dict(dictionary: Dict[str, Any]):
     X_LIMIT = dictionary["x_limit"]
     Y_LIMIT = dictionary["y_limit"]
     map_dicts = dictionary["map"]
-    undersea_map_new = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
-    for i in range(X_LIMIT):
-        for j in range(Y_LIMIT):
-            undersea_map_new[i][j].__dict__ = map_dicts[i][j]
+    undersea_map_new = [[Cell._from_dict(map_dicts[x][y]) for y in range(Y_LIMIT)] for x in range(X_LIMIT)]
     undersea_map = undersea_map_new

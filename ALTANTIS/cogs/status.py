@@ -96,8 +96,8 @@ def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tu
         row = ""
         for x in range(X_LIMIT):
             square = get_square(x, y)
-            tile_char = square.to_char(to_show, show_hidden)
-            tile_name = square.map_name(to_show, show_hidden)
+            tile_char = square.to_char(to_show, show_hidden, list(map(lambda sub: sub._name, subs)))
+            tile_name = square.map_name(to_show, show_hidden, list(map(lambda sub: sub._name, subs)))
             if "n" in to_show:
                 npcs_in_square = filtered_npcs(lambda n: n.x == x and n.y == y)
                 if len(npcs_in_square) > 0:
