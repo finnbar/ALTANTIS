@@ -134,6 +134,7 @@ class WhaleShark(Whale):
         super().__init__(id, x, y)
         self.typename = "Whale Shark"
         self.photo += "whale-shark.png"
+        self.treasure.append("petuniabowl")
 
 class Humpback(Whale):
     classname = "humpback"
@@ -345,6 +346,7 @@ class Mine(NPC):
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.countdown = 10
+        self.stealth = 1
 
     async def on_tick(self):
         for sub in self.all_subs_in_square():
