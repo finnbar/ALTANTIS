@@ -44,7 +44,7 @@ Important non-gameplay features:
 - [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
 - [x] Sort commands by functionality.
 - [x] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
-- [ ] Multiple saves. (~10 turns back, probably just use loop saving.)
+- [x] Multiple saves. (~10 turns back, probably just use loop saving.)
 - [ ] Complete README.
 
 New features:
@@ -77,8 +77,8 @@ New features:
 - [x] Animals can move through walls etc. (but you can summon animals in walls)
 - [x] Should only be able to interact things which you can see.
 - [x] Docking at the start of a game. (Not a bug! If you summon a submarine at a docking station, it'll be deactivated as subs start deactivated and you can !exit_sub as normal.)
-- [ ] Random resource drops seem incredibly common. [Temporarily on hold as yet to be reproduced.]
 - [ ] Multiple sub types (via keyword to !register/!make_sub).
+- [ ] Random resource drops seem incredibly common. [Temporarily on hold as yet to be reproduced.]
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.

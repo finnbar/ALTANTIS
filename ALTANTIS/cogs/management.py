@@ -15,11 +15,11 @@ class GameManagement(commands.Cog):
     """
     @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def load(self, ctx, arg):
+    async def load(self, ctx, arg, offset: int = 0):
         """
-        (CONTROL) Loads either the map, state or both from file. You must specify "map", "state" or "both" as the single argument.
+        (CONTROL) Loads some combination of the map, state and/or npcs from file. You must specify "map", "state", "npcs" or "all" as the single argument. Also takes an optional offset, which is the number of saves to go back in time - e.g. specifying offset=2 will give you the third newest save (as 0 is the latest save).
         """
-        await perform_unsafe(load_game, ctx, arg, bot)
+        await perform_unsafe(load_game, ctx, arg, offset, bot)
     
     @commands.command()
     @commands.has_role(CONTROL_ROLE)

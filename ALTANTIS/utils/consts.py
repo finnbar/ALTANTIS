@@ -18,6 +18,9 @@ COMMS_COOLDOWN = 30
 X_LIMIT = 40
 Y_LIMIT = 40
 
+# How many saves to keep
+SAVES_COUNT = 10
+
 direction_emoji = {"n": "⬆", "e": "➡", "s": "⬇",
                    "w": "⬅", "ne": "↗",
                    "nw": "↖", "se": "↘",

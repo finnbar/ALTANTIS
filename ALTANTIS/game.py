@@ -6,8 +6,9 @@ from ALTANTIS.subs.state import get_subs, get_sub, state_to_dict, state_from_dic
 from ALTANTIS.npcs.npc import npc_tick, npcs_to_json, npcs_from_json
 from ALTANTIS.world.world import map_tick, map_to_dict, map_from_dict
 from ALTANTIS.utils.actions import FAIL_REACT, OKAY_REACT
+from ALTANTIS.utils.consts import SAVES_COUNT
 
-import json
+import json, datetime, os
 from typing import List, Dict
 
 NO_SAVE = False
@@ -124,37 +125,52 @@ def save_game():
     if NO_SAVE:
         print("SAVE FAILED")
         return False
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     state_dict = state_to_dict()
     map_dict = map_to_dict()
     npcs_dict = npcs_to_json()
-    with open("state.json", "w") as state_file:
+    # Write a new save at this timestamp.
+    with open(f"saves/state/{timestamp}.json", "w") as state_file:
         state_file.write(json.dumps(state_dict))
-    with open("map.json", "w") as map_file:
+    with open(f"saves/map/{timestamp}.json", "w") as map_file:
         map_file.write(json.dumps(map_dict))
-    with open("npcs.json", "w") as npcs_file:
+    with open(f"saves/npc/{timestamp}.json", "w") as npcs_file:
         npcs_file.write(json.dumps(npcs_dict))
+    # Then delete excessive saves.
+    for folder in ["map", "npc", "state"]:
+        directory = f"{os.curdir}/saves/{folder}/"
+        saves = sorted(os.listdir(directory), reverse=True)
+        to_delete = saves[SAVES_COUNT:len(saves)+1]
+        for filename in to_delete:
+            os.remove(directory + filename)
     return True
 
-def load_game(which : str, bot):
+def load_game(which : str, offset : int, bot):
     """
     Loads the state (from state.json), map (from map.json), npcs (from npcs.json) or all.
     Does not check whether the files exist.
     This is destructive, so needs the exact correct argument.
     """
+    prefix = f"{os.curdir}/saves"
+    filenames = sorted(os.listdir(f"{prefix}/map/"), reverse=True)
+    if offset >= len(filenames):
+        return FAIL_REACT
+    # Get the relevant timestamp. We arbitrarily choose map to find the correct name.
+    filename = filenames[offset]
     if which not in ["all", "map", "npcs", "state"]:
         return FAIL_REACT
     if which in ["all", "map"]:
-        with open("map.json", "r") as map_file:
+        with open(f"{prefix}/map/{filename}", "r") as map_file:
             map_string = map_file.read()
             map_json = json.loads(map_string)
             map_from_dict(map_json)
     if which in ["all", "state"]:
-        with open("state.json", "r") as state_file:
+        with open(f"{prefix}/state/{filename}", "r") as state_file:
             state_string = state_file.read()
             state_json = json.loads(state_string)
             state_from_dict(state_json, bot)
     if which in ["all", "npcs"]:
-        with open("npcs.json", "r") as npc_file:
+        with open(f"{prefix}/npc/{filename}", "r") as npc_file:
             npc_string = npc_file.read()
             npc_json = json.loads(npc_string)
             npcs_from_json(npc_json)
