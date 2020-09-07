@@ -136,7 +136,8 @@ async def make_submarine(guild : discord.Guild, name : str, captain : discord.Me
     await category.create_text_channel("captain", overwrites=allow_control_and_one(specific_capt))
     await category.create_text_channel("engineer", overwrites=allow_control_and_one(specific_engi))
     await category.create_text_channel("scientist", overwrites=allow_control_and_one(specific_sci))
-    await category.create_text_channel("control", overwrites=allow_control_and_one(None))
+    await category.create_text_channel("secret", overwrites=allow_control_and_one(None))
+    await category.create_text_channel("control-room", overwrites=allow_control_and_one(submarine_role))
     await category.create_voice_channel("submarine", overwrites=allow_control_and_one(submarine_role))
     return await register(category, x, y)
 

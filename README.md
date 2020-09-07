@@ -76,7 +76,7 @@ New features:
 - [x] Stormy boi
 - [x] Animals can move through walls etc. (but you can summon animals in walls)
 - [x] Should only be able to interact things which you can see.
-- [ ] Docking at the start of a game
+- [x] Docking at the start of a game. (Not a bug! If you summon a submarine at a docking station, it'll be deactivated as subs start deactivated and you can !exit_sub as normal.)
 - [ ] Random resource drops seem incredibly common. [Temporarily on hold as yet to be reproduced.]
 
 Quality of life things:
