@@ -2,6 +2,7 @@
 Manages the state dictionary, which keeps track of all submarines.
 """
 
+import keyword
 from ALTANTIS.subs.sub import sub_from_dict, Submarine
 from ALTANTIS.utils.actions import DiscordAction
 
@@ -49,7 +50,7 @@ async def with_sub_async(name : str, function : Callable[[Submarine], Awaitable[
         return await function(sub)
     return fail
 
-def add_team(name : str, category : discord.CategoryChannel, x : int, y : int) -> bool:
+def add_team(name : str, category : discord.CategoryChannel, x : int, y : int, keyword : str) -> bool:
     """
     Adds a team with the name, if able.
     """
@@ -58,7 +59,7 @@ def add_team(name : str, category : discord.CategoryChannel, x : int, y : int) -
         channel_dict = {}
         for channel in child_channels:
             channel_dict[channel.name] = channel
-        state[name] = Submarine(name, channel_dict, x, y)
+        state[name] = Submarine(name, channel_dict, x, y, keyword)
         return True
     return False
 

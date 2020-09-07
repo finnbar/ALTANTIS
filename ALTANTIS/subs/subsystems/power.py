@@ -10,8 +10,15 @@ from ..sub import Submarine
 import random
 from typing import Dict, List, Optional
 
+PRESETS = {
+    "scout": {"power": {"engines": 1, "scanners": 2, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"engines": 1}, "total": 3},
+    "battle": {"power": {"engines": 2, "scanners": 1, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"weapons": 1}, "total": 3},
+    "messenger": {"power": {"engines": 2, "scanners": 1, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"comms": 1}, "total": 3},
+    "pickup": {"power": {"engines": 1, "scanners": 1, "comms": 1, "crane": 2, "weapons": 1}, "innate": {"engines": 1}, "total": 3}
+}
+
 class PowerManager():
-    def __init__(self, sub : Submarine):
+    def __init__(self, sub : Submarine, keyword : str):
         self.sub = sub
         self.active = False
         # power is a dictionary mapping systems to their current power.
@@ -25,6 +32,11 @@ class PowerManager():
         # innate power is power that you're not allowed to change.
         # Control can use this to provide a mandatory upgrade.
         self.innate_power = {"engines": 1}
+        if keyword in PRESETS:
+            self.power_max = PRESETS[keyword]["power"].copy()
+            self.innate_power = PRESETS[keyword]["innate"].copy()
+            self.total_power = PRESETS[keyword]["total"]
+            self.total_power_max = self.total_power
         # Power only updates at game tick, so we need to keep track of the changes made.
         self.scheduled_power = self.power.copy()
         # Damage only happens at game tick, so we need to keep track of any taken.
