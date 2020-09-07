@@ -6,15 +6,20 @@ perform and how to do so.
 from discord.ext import commands
 
 from ALTANTIS.utils.bot import bot
-from ALTANTIS.utils.consts import TOKEN
+from ALTANTIS.utils.consts import ADMIN_NAME, TOKEN
 
 @bot.event
 async def on_command_error(ctx, error):
-    print(error)
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send("You do not have the correct role for this command.")
+    elif isinstance(error, commands.errors.CommandNotFound):
+        await ctx.send("No command under that name was found!")
+    elif isinstance(error, commands.errors.MaxConcurrencyReached):
+        await ctx.send("Please wait, ALTANTIS is dealing with too many requests right now!")
+    elif isinstance(error, commands.errors.UserInputError):
+        await ctx.send(f"Sorry, that input wasn't understood. Try running !help <command> if you are unsure what went wrong. The exact error returned was: {error}")
     else:
-        await ctx.send(f"ERROR: {error}")
+        await ctx.send(f"ERROR: {error}.\n**PAGING {ADMIN_NAME} to make sure that ALTANTIS is working okay.**")
 
 from ALTANTIS.cogs.comms import Comms
 from ALTANTIS.cogs.crane import Crane

@@ -78,6 +78,7 @@ New features:
 - [x] Should only be able to interact things which you can see.
 - [x] Docking at the start of a game. (Not a bug! If you summon a submarine at a docking station, it'll be deactivated as subs start deactivated and you can !exit_sub as normal.)
 - [ ] Random resource drops seem incredibly common. [Temporarily on hold as yet to be reproduced.]
+- [ ] Multiple sub types (via keyword to !register/!make_sub).
 
 Quality of life things:
 - [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
