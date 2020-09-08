@@ -6,8 +6,9 @@ from ALTANTIS.subs.state import get_subs, get_sub, state_to_dict, state_from_dic
 from ALTANTIS.npcs.npc import npc_tick, npcs_to_json, npcs_from_json
 from ALTANTIS.world.world import map_tick, map_to_dict, map_from_dict
 from ALTANTIS.utils.actions import FAIL_REACT, OKAY_REACT
+from ALTANTIS.utils.emergencies import emergencies
 
-import json, datetime, os, gzip
+import json, datetime, os, gzip, random
 from typing import List, Dict
 
 NO_SAVE = False
@@ -33,6 +34,15 @@ async def perform_timestep(counter : int):
     subsubset : List[str] = list(filter(is_active_sub, get_subs()))
     submessages : Dict[str, Dict[str, str]] = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_subs()}
     message_opening : str = f"---------**TURN {counter}**----------\n"
+
+    # Emergency messaging
+    for subname in subsubset:
+        sub = get_sub(subname)
+        if sub.power.total_power == 1:
+            emergency_message = f"EMERGENCY!!! {random.choice(emergencies)}\n"
+            submessages[subname]["captain"] += emergency_message
+            submessages[subname]["scientist"] += emergency_message
+            submessages[subname]["engineer"] += emergency_message
 
     # Power management
     for subname in subsubset:
