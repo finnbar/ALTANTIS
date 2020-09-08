@@ -90,6 +90,7 @@ def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tu
     Also returns a JSON of additional information.
     `subs` is a list of submarines, which are marked 0-9 on the map.
     """
+    SUB_CHARS = ['1','2','3','4','5','6','7','8','9','0','-','+','=']
     map_string = ""
     map_json = []
     for y in range(Y_LIMIT):
@@ -106,7 +107,7 @@ def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tu
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
-                    tile_char = str(i+1)
+                    tile_char = SUB_CHARS[i]
                     tile_name = subs[i].name()
             row += tile_char
             if tile_name is not None:
