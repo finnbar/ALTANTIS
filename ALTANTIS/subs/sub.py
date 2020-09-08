@@ -12,7 +12,7 @@ from ALTANTIS.world.world import get_square
 subsystems = ["power", "comms", "movement", "puzzles", "scan", "inventory", "weapons", "upgrades"]
 
 class Submarine(Entity):
-    def __init__(self, name : str, channels : Dict[str, discord.TextChannel], x : int, y : int):
+    def __init__(self, name : str, channels : Dict[str, discord.TextChannel], x : int, y : int, keyword : str):
         # To avoid circular dependencies.
         # The one dependency is that Scan and Comms need the list of available
         # subs, but that needs this class, which needs Scan and Comms.
@@ -27,7 +27,7 @@ class Submarine(Entity):
 
         self._name = name
         self.channels = channels
-        self.power = PowerManager(self)
+        self.power = PowerManager(self, keyword)
         self.comms = CommsSystem(self)
         self.movement = MovementControls(self, x, y)
         self.puzzles = EngineeringPuzzles(self)
@@ -147,7 +147,7 @@ def sub_from_dict(dictionary : Dict[str, Any], client : discord.Client) -> Subma
     """
     Creates a submarine from a serialised dictionary.
     """
-    newsub = Submarine("", {}, 0, 0)
+    newsub = Submarine("", {}, 0, 0, "")
 
     # self.channels: turn channel IDs into their objects.
     channels = dictionary["channels"]

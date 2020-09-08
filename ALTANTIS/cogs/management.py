@@ -13,15 +13,15 @@ class GameManagement(commands.Cog):
     """
     Control commands for starting, pausing and ending the game.
     """
-    @commands.command(name="load")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def load(self, ctx, arg):
+    async def load(self, ctx, arg, offset: int = 0):
         """
-        (CONTROL) Loads either the map, state or both from file. You must specify "map", "state" or "both" as the single argument.
+        (CONTROL) Loads some combination of the map, state and/or npcs from file. You must specify "map", "state", "npcs" or "all" as the single argument. Also takes an optional offset, which is the number of saves to go back in time - e.g. specifying offset=2 will give you the third newest save (as 0 is the latest save).
         """
-        await perform_unsafe(load_game, ctx, arg, bot)
+        await perform_unsafe(load_game, ctx, arg, offset, bot)
     
-    @commands.command(name="save")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def save(self, ctx):
         """
@@ -36,23 +36,23 @@ class GameManagement(commands.Cog):
         else:
             await FAIL_REACT.do_status(ctx)
     
-    @commands.command(name="make_submarine")
-    async def make_sub(self, ctx, name, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int = 0, y : int = 0):
+    @commands.command()
+    async def make_sub(self, ctx, name, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int = 0, y : int = 0, keyword : str = ""):
         """
         (CONTROL) Creates channels, roles and a sub for the inputted team.
         """
-        await perform_async_unsafe(make_submarine, ctx, ctx.guild, name, captain, engineer, scientist, x, y)
+        await perform_async_unsafe(make_submarine, ctx, ctx.guild, name, captain, engineer, scientist, x, y, keyword)
 
-    @commands.command(name="register")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def register_team(self, ctx, x : int = 0, y : int = 0):
+    async def register(self, ctx, x : int = 0, y : int = 0, keyword : str = ""):
         """
         (CONTROL) Registers a new team (with sub at (x,y) defaulting to (0,0)) to the parent channel category.
         Assumes that its name is the name of channel category, and that a channel exists per role in that category: #engineer, #captain and #scientist.
         """
-        await perform_async_unsafe(register, ctx, ctx.message.channel.category, x, y)
+        await perform_async_unsafe(register, ctx, ctx.message.channel.category, x, y, keyword)
 
-    @commands.command(name="startloop")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def startloop(self, ctx):
         """
@@ -62,7 +62,7 @@ class GameManagement(commands.Cog):
         main_loop.start()
         await OKAY_REACT.do_status(ctx)
 
-    @commands.command(name="stoploop")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def stoploop(self, ctx):
         """
@@ -72,7 +72,7 @@ class GameManagement(commands.Cog):
         main_loop.stop()
         await OKAY_REACT.do_status(ctx)
     
-    @commands.command(name="set_alerts_channel")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def set_alerts_channel(self, ctx):
         """
@@ -81,7 +81,7 @@ class GameManagement(commands.Cog):
         init_control_notifs(ctx.channel)
         await OKAY_REACT.do_status(ctx)
 
-    @commands.command(name="set_news_channel")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def set_news_channel(self, ctx):
         """
@@ -90,7 +90,7 @@ class GameManagement(commands.Cog):
         init_news_notifs(ctx.channel)
         await OKAY_REACT.do_status(ctx)
 
-async def make_submarine(guild : discord.Guild, name : str, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int, y : int) -> DiscordAction:
+async def make_submarine(guild : discord.Guild, name : str, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int, y : int, keyword : str) -> DiscordAction:
     """
     Makes a submarine with the name <name> and members Captain, Engineer and Scientist.
     Creates a category with <name>, then channels for each player.
@@ -136,17 +136,18 @@ async def make_submarine(guild : discord.Guild, name : str, captain : discord.Me
     await category.create_text_channel("captain", overwrites=allow_control_and_one(specific_capt))
     await category.create_text_channel("engineer", overwrites=allow_control_and_one(specific_engi))
     await category.create_text_channel("scientist", overwrites=allow_control_and_one(specific_sci))
-    await category.create_text_channel("control", overwrites=allow_control_and_one(None))
+    await category.create_text_channel("secret", overwrites=allow_control_and_one(None))
+    await category.create_text_channel("control-room", overwrites=allow_control_and_one(submarine_role))
     await category.create_voice_channel("submarine", overwrites=allow_control_and_one(submarine_role))
-    return await register(category, x, y)
+    return await register(category, x, y, keyword)
 
-async def register(category : discord.CategoryChannel, x : int, y : int) -> DiscordAction:
+async def register(category : discord.CategoryChannel, x : int, y : int, keyword : str) -> DiscordAction:
     """
     Registers a team, setting them up with everything they could need.
     Requires a category with the required subchannels.
     ONLY RUNNABLE BY CONTROL.
     """
-    if add_team(category.name.lower(), category, x, y):
+    if add_team(category.name.lower(), category, x, y, keyword):
         sub = get_sub(category.name.lower())
         if sub:
             await sub.send_to_all(f"Channel registered for sub **{category.name.title()}**.")

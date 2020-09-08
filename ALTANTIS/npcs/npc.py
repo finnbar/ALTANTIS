@@ -6,11 +6,11 @@ Deals with NPCs in general, and how they operate.
 
 from ALTANTIS.subs.state import filtered_teams, get_sub
 from ALTANTIS.subs.sub import Submarine
-from ALTANTIS.world.world import bury_treasure_at, in_world
+from ALTANTIS.world.world import bury_treasure_at, in_world, get_square
 from ALTANTIS.world.extras import all_in_submap
 from ALTANTIS.utils.control import notify_control
 from ALTANTIS.utils.entity import Entity
-from ALTANTIS.utils.direction import diagonal_distance, determine_direction, go_in_direction
+from ALTANTIS.utils.direction import diagonal_distance, determine_direction, go_in_direction, rotate_direction
 
 from typing import Tuple, List, Callable, Dict, Any, Optional
 
@@ -88,12 +88,15 @@ class NPC(Entity):
             return self.name()
         return ""
     
-    def move(self, dx : int, dy : int):
-        if in_world(self.x + dx, self.y + dy):
+    def move(self, dx : int, dy : int) -> bool:
+        sq = get_square(self.x + dx, self.y + dy)
+        if sq is not None and sq.can_npc_enter():
             self.x += dx
             self.y += dy
+            return True
+        return False
     
-    def move_towards_sub(self, dist : int):
+    def move_towards_sub(self, dist : int) -> bool:
         """
         Looks for the closest sub in range, and moves towards it.
         """
@@ -108,7 +111,15 @@ class NPC(Entity):
         if closest[0] is not None:
             direction = determine_direction(self.get_position(), closest[0].get_position())
             if direction is not None:
-                self.move(*go_in_direction(direction))
+                rotated = rotate_direction(direction)
+                directions = [direction]
+                if rotated is not None:
+                    directions.append(rotated[0])
+                    directions.append(rotated[1])
+                for possible_direction in directions:
+                    if self.move(*go_in_direction(possible_direction)):
+                        return True
+        return False
     
     def get_position(self) -> Tuple[int, int]:
         return (self.x, self.y)
@@ -175,8 +186,9 @@ def get_npc_types() -> List[str]:
 def get_npcs() -> List[int]:
     return list(range(len(npcs)))
 
-def kill_npc(id : int) -> bool:
+async def kill_npc(id : int, rattle : bool = True) -> bool:
     if id in range(len(npcs)):
+        if rattle: await npcs[id].deathrattle()
         del npcs[id]
         return True
     return False
@@ -200,9 +212,10 @@ async def interact_in_square(sub : Submarine, square : Tuple[int, int], arg) -> 
     message = ""
     for npcid in in_square:
         npc = get_npc(npcid)
-        npc_message = await npc.interact(sub, arg)
-        if npc_message != "":
-            message += f"Interaction with **{npc.name()}**: {npc_message}\n"
+        if sub.power.get_power("scanners") >= npc.stealth:
+            npc_message = await npc.interact(sub, arg)
+            if npc_message != "":
+                message += f"Interaction with **{npc.name()}**: {npc_message}\n"
     return message
 
 def get_npc(npcid : int) -> Optional[NPC]:

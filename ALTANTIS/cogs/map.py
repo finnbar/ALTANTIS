@@ -12,7 +12,7 @@ class MapModification(commands.Cog):
     """
     Allows control to add and remove things from the map.
     """
-    @commands.command(name="bury")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def bury(self, ctx, treasure, x : int, y : int):
         """
@@ -20,7 +20,7 @@ class MapModification(commands.Cog):
         """
         await perform_unsafe(bury_treasure, ctx, treasure, x, y)
 
-    @commands.command(name="add_attribute")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def add_attribute(self, ctx, attribute, value, x : int, y : int):
         """
@@ -28,7 +28,7 @@ class MapModification(commands.Cog):
         """
         await perform_unsafe(add_attribute_to, ctx, x, y, attribute, value)
 
-    @commands.command(name="remove_attribute")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def remove_attribute(self, ctx, attribute, x : int, y : int):
         """
@@ -36,7 +36,7 @@ class MapModification(commands.Cog):
         """
         await perform_unsafe(remove_attribute_from, ctx, x, y, attribute)
     
-    @commands.command(name="mass_weather")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def mass_weather(self, ctx, preset):
         """

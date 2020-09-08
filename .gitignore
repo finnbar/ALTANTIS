@@ -129,9 +129,8 @@ dmypy.json
 .pyre/
 
 # Data files
-map.json
-state.json
-npcs.json
+*.json
+*.gz
 
 # Puzzles
 puzzles/*

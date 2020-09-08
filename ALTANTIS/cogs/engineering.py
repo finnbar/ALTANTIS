@@ -9,9 +9,9 @@ class Engineering(commands.Cog):
     """
     Commands for dealing with the engineering issues.
     """
-    @commands.command(name="puzzle")
+    @commands.command()
     @commands.has_any_role(ENGINEER, CONTROL_ROLE)
-    async def repair_puzzle(self, ctx):
+    async def puzzle(self, ctx):
         """
         Gives you a puzzle, which must be solved before you next move. If you
         already have a puzzle in progress, it will be treated as if you ran out of
@@ -19,15 +19,15 @@ class Engineering(commands.Cog):
         """
         await perform_async(give_team_puzzle, ctx, get_team(ctx.channel), "repair")
 
-    @commands.command(name="answer")
+    @commands.command()
     @commands.has_any_role(ENGINEER, CONTROL_ROLE)
-    async def answer_puzzle(self, ctx, answer: str):
+    async def answer(self, ctx, answer: str):
         """
         Lets you answer a set puzzle that hasn't resolved yet.
         """
         await perform_async(answer_team_puzzle, ctx, get_team(ctx.channel), answer)
 
-    @commands.command(name="force_puzzle")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def force_puzzle(self, ctx):
         """

@@ -10,17 +10,17 @@ class Weaponry(commands.Cog):
     Allows your submarine to shoot.
     """
 
-    @commands.command(name="shoot_damaging")
+    @commands.command()
     @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
-    async def damaging(self, ctx, x : int, y : int):
+    async def shoot_damaging(self, ctx, x : int, y : int):
         """
         Schedules a damaging shot at (<x>, <y>). This uses two weapons charges.
         """
         await perform(schedule_shot, ctx, x, y, get_team(ctx.channel), True)
     
-    @commands.command(name="shoot_stunning")
+    @commands.command()
     @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
-    async def nondamaging(self, ctx, x : int, y : int):
+    async def shoot_stunning(self, ctx, x : int, y : int):
         """
         Schedules a nondamaging shot at (<x>, <y>). This uses two weapons charges.
         """

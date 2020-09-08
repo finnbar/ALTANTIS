@@ -10,7 +10,7 @@ class PowerManagement(commands.Cog):
     """
     Commands for powering, unpowering, healing and damaging subsystems.
     """
-    @commands.command(name="power")
+    @commands.command()
     @commands.has_any_role(ENGINEER, CONTROL_ROLE)
     async def power(self, ctx, *systems):
         """
@@ -20,7 +20,7 @@ class PowerManagement(commands.Cog):
         """
         await perform(power_systems, ctx, get_team(ctx.channel), list(systems))
 
-    @commands.command(name="unpower")
+    @commands.command()
     @commands.has_any_role(ENGINEER, CONTROL_ROLE)
     async def unpower(self, ctx, *systems):
         """
@@ -30,7 +30,7 @@ class PowerManagement(commands.Cog):
         """
         await perform(unpower_systems, ctx, get_team(ctx.channel), list(systems))
 
-    @commands.command(name="damage")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def damage(self, ctx, amount : int, reason=""):
         """
@@ -38,9 +38,9 @@ class PowerManagement(commands.Cog):
         """
         await perform_async(deal_damage, ctx, get_team(ctx.channel), amount, reason)
 
-    @commands.command(name="heal")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def perform_healing(self, ctx, amount : int, reason=""):
+    async def heal(self, ctx, amount : int, reason=""):
         """
         (CONTROL) Forces this team to take <amount> healing at next loop. You can optionally specify a <reason> which will be messaged to them before.
         """

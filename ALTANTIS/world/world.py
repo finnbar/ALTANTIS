@@ -1,15 +1,13 @@
 """
 Deals with the world map, which submarines explore.
 """
-import operator
 import string
 from functools import reduce
 
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.utils.direction import reverse_dir, directions
 from ALTANTIS.utils.consts import X_LIMIT, Y_LIMIT
-from ALTANTIS.world.validators import InValidator, NopValidator, TypeValidator, BothValidator, LenValidator, \
-    RangeValidator
+from ALTANTIS.world.validators import InValidator, NopValidator, TypeValidator, BothValidator, LenValidator, RangeValidator
 from ALTANTIS.world.consts import ATTRIBUTES, WEATHER, WALL_STYLES
 
 import random
@@ -52,11 +50,11 @@ class Cell():
         }
 
     def cell_tick(self):
-        if "deposit" in self.attributes and random.random() < 0.03:
-            self.treasure.append(random.choice(["tool", "plating"]))
-        if "diverse" in self.attributes and random.random() < 0.03:
+        if "deposit" in self.attributes and random.random() < 0.015:
+            self.treasure.append("plating")
+        if "diverse" in self.attributes and random.random() < 0.015:
             self.treasure.append("specimen")
-        if "ruins" in self.attributes and random.random() < 0.03:
+        if "ruins" in self.attributes and random.random() < 0.015:
             self.treasure.append(random.choice(["tool", "circuitry"]))
         if random.random() < 0.01:
             self.explored.clear()
@@ -139,10 +137,13 @@ class Cell():
             (x, y) = sub.movement.get_position()
             return f"Docked at **{self.attributes['docking'].title()}** at position ({x}, {y})! The power has been stopped. Please call !exit_sub to leave the submarine and enter the docking station.", False
         if "obstacle" in self.attributes:
-            message = sub.damage(1)
+            sub.damage(1)
             sub.movement.set_direction(reverse_dir[sub.movement.get_direction()])
-            return f"The submarine hit a wall and took one damage!\n{message}", True
+            return f"The submarine hit a wall and took one damage!", True
         return "", False
+    
+    def can_npc_enter(self) -> bool:
+        return not ("docking" in self.attributes or "obstacle" in self.attributes)
 
     def to_char(self, to_show: List[str], show_hidden: bool = False,
                 perspective: Optional[Collection[str]] = None) -> str:
@@ -229,23 +230,18 @@ class Cell():
             return True
         return False
 
-
 undersea_map = [[Cell() for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
-
 
 def in_world(x: int, y: int) -> bool:
     return 0 <= x < X_LIMIT and 0 <= y < Y_LIMIT
 
-
 def possible_directions() -> List[str]:
     return list(directions.keys())
-
 
 def get_square(x: int, y: int) -> Optional[Cell]:
     if in_world(x, y):
         return undersea_map[x][y]
     return None
-
 
 def bury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
     (x, y) = pos
@@ -253,19 +249,16 @@ def bury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
         return undersea_map[x][y].bury_treasure(name)
     return False
 
-
 def pick_up_treasure(pos: Tuple[int, int], power: int) -> List[str]:
     (x, y) = pos
     if in_world(x, y):
         return undersea_map[x][y].pick_up(power)
     return []
 
-
 def map_tick():
     for x in range(X_LIMIT):
         for y in range(Y_LIMIT):
             undersea_map[x][y].cell_tick()
-
 
 def map_to_dict() -> Dict[str, Any]:
     """
@@ -278,7 +271,6 @@ def map_to_dict() -> Dict[str, Any]:
         for j in range(Y_LIMIT):
             undersea_map_dicts[i][j] = undersea_map[i][j]._to_dict()
     return {"map": undersea_map_dicts, "x_limit": X_LIMIT, "y_limit": Y_LIMIT}
-
 
 def map_from_dict(dictionary: Dict[str, Any]):
     """

@@ -11,7 +11,7 @@ class Inventory(commands.Cog):
     """
     Commands for trading with subs on the same space as you, and generally interacting with inventories.
     """
-    @commands.command(name="drop")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def drop(self, ctx, item):
         """
@@ -19,7 +19,7 @@ class Inventory(commands.Cog):
         """
         await perform(drop_item, ctx, get_team(ctx.channel), item)
 
-    @commands.command(name="trade")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def trade(self, ctx, team, *args):
         """
@@ -28,7 +28,7 @@ class Inventory(commands.Cog):
         """
         await perform_async(arrange_trade, ctx, get_team(ctx.channel), team, list(args))
 
-    @commands.command(name="offer")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def offer(self, ctx, *args):
         """
@@ -37,7 +37,7 @@ class Inventory(commands.Cog):
         """
         await perform_async(make_offer, ctx, get_team(ctx.channel), list(args))
 
-    @commands.command(name="accept_trade")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def accept_trade(self, ctx):
         """
@@ -45,7 +45,7 @@ class Inventory(commands.Cog):
         """
         await perform_async(accept_offer, ctx, get_team(ctx.channel))
 
-    @commands.command(name="reject_trade")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def reject_trade(self, ctx):
         """
@@ -53,7 +53,7 @@ class Inventory(commands.Cog):
         """
         await perform_async(reject_offer, ctx, get_team(ctx.channel))
     
-    @commands.command(name="interact")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
     async def interact(self, ctx, arg = None):
         """
@@ -61,7 +61,7 @@ class Inventory(commands.Cog):
         """
         await perform_async(sub_interacts, ctx, get_team(ctx.channel), arg)
 
-    @commands.command(name="give")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def give(self, ctx, item, quantity : int = 1):
         """
@@ -69,7 +69,7 @@ class Inventory(commands.Cog):
         """
         await perform_async_unsafe(give_item_to_team, ctx, get_team(ctx.channel), item, quantity)
 
-    @commands.command(name="pay")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def pay(self, ctx, amount : int):
         """
@@ -77,7 +77,7 @@ class Inventory(commands.Cog):
         """
         await perform_async_unsafe(give_item_to_team, ctx, get_team(ctx.channel), CURRENCY_NAME, amount)
 
-    @commands.command(name="take")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def take(self, ctx, item, quantity : int = 1):
         """
@@ -85,7 +85,7 @@ class Inventory(commands.Cog):
         """
         await perform_async_unsafe(take_item_from_team, ctx, get_team(ctx.channel), item, quantity)
 
-    @commands.command(name="get_paid")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def get_paid(self, ctx, amount : int):
         """

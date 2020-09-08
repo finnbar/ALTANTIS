@@ -5,6 +5,7 @@ directions = {"n": (0, -1), "ne": (1, -1), "e": (1, 0), "se": (1, 1),
               "s": (0, 1), "sw": (-1, 1), "w": (-1, 0), "nw": (-1, -1)}
 reverse_dir = {"n": "s", "ne": "sw", "e": "w", "se": "nw", "s": "n",
                "sw": "ne", "w": "e", "nw": "se"}
+ordered_dirs = ["n", "ne", "e", "se", "s", "sw", "w", "nw"]
 
 def diagonal_distance(pa : Tuple[int, int], pb : Tuple[int, int]) -> int:
     """
@@ -57,3 +58,11 @@ def determine_direction(pa : Tuple[int, int], pb : Tuple[int, int]) -> Optional[
 
 def go_in_direction(direction : str) -> Tuple[int, int]:
     return directions[direction]
+
+def rotate_direction(direction : str) -> Optional[Tuple[str, str]]:
+    if direction not in ordered_dirs:
+        return None
+    index = ordered_dirs.index(direction)
+    left_dir = ordered_dirs[(index - 1) % len(ordered_dirs)]
+    right_dir = ordered_dirs[(index + 1) % len(ordered_dirs)]
+    return (left_dir, right_dir)

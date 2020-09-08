@@ -27,6 +27,8 @@ TICK = "<:greentick:745348214210822255>"
 CROSS = "<:redcross:745348213149532170>"
 PLUS = "<:greenplus:745389551597519061>"
 
+ADMIN_NAME = "<@!366644564137738240>"
+
 # env stuff
 
 from dotenv import load_dotenv

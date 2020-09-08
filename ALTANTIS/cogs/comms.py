@@ -9,17 +9,17 @@ class Comms(commands.Cog):
     """
     Commands for communicating with your fellow subs.
     """
-    @commands.command(name="broadcast")
+    @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
-    async def do_broadcast(self, ctx, message):
+    async def broadcast(self, ctx, message):
         """
         Broadcasts a <message> to all in range. Requires the sub to be activated.
         """
         await perform_async(broadcast, ctx, get_team(ctx.channel), message)
     
-    @commands.command(name="control_message")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def message_team(self, ctx, message):
+    async def control_message(self, ctx, message):
         """
         (CONTROL) Sends to this team the message <message>, regardless of distance.
         """

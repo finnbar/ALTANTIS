@@ -13,7 +13,7 @@ class UpgradeManagement(commands.Cog):
     """
     Commands for upgrading and downgrading submarines.
     """
-    @commands.command(name="upgrade")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def upgrade(self, ctx, amount : int):
         """
@@ -22,7 +22,7 @@ class UpgradeManagement(commands.Cog):
         """
         await perform_async_unsafe(upgrade_sub, ctx, get_team(ctx.channel), amount)
 
-    @commands.command(name="upgrade_system")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def upgrade_system(self, ctx, system, amount : int):
         """
@@ -31,7 +31,7 @@ class UpgradeManagement(commands.Cog):
         """
         await perform_async_unsafe(upgrade_sub_system, ctx, get_team(ctx.channel), system, amount)
 
-    @commands.command(name="upgrade_innate")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def upgrade_innate(self, ctx, system, amount : int):
         """
@@ -40,31 +40,31 @@ class UpgradeManagement(commands.Cog):
         """
         await perform_async_unsafe(upgrade_sub_innate, ctx, get_team(ctx.channel), system, amount)
 
-    @commands.command(name="install_system")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def new_system(self, ctx, system):
+    async def install_system(self, ctx, system):
         """
         (CONTROL) Gives this team access to new system <system>.
         """
         await perform_async_unsafe(add_system, ctx, get_team(ctx.channel), system)
     
-    @commands.command(name="add_keyword")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def install_keyword(self, ctx, keyword, turn_limit : Optional[int] = None, damage : int = 1):
+    async def add_keyword(self, ctx, keyword, turn_limit : Optional[int] = None, damage : int = 1):
         """
         (CONTROL) Gives this team a brand new <keyword>! (This is for upgrades outside of power.)
         """
         await perform_async_unsafe(add_keyword_to_sub, ctx, get_team(ctx.channel), keyword, turn_limit, damage)
 
-    @commands.command(name="remove_keyword")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def uninstall_keyword(self, ctx, keyword):
+    async def remove_keyword(self, ctx, keyword):
         """
         (CONTROL) Removes <keyword> from this team. (This is for upgrades outside of power.)
         """
         await perform_async_unsafe(remove_keyword_from_sub, ctx, get_team(ctx.channel), keyword)
     
-    @commands.command(name="list_upgrades")
+    @commands.command()
     @commands.has_role(CONTROL_ROLE)
     async def list_upgrades(self, ctx):
         """
