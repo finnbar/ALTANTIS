@@ -25,5 +25,6 @@ emergencies = [
     "SUBMARINE TOO HEAVY. PLEASE REMOVE ONE [1] LIFEFORM",
     "YOUR CALL IS IMPORTANT TO US",
     "Out of oxygen. Please stop breathing",
-    "(elevator music starts playing)"
+    "(elevator music starts playing)",
+    "we are number one! health, that is, we're at one health (<https://www.youtube.com/watch?v=PfYnvDL0Qcw>)"
 ]

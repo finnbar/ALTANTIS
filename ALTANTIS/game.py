@@ -39,7 +39,7 @@ async def perform_timestep(counter : int):
     for subname in subsubset:
         sub = get_sub(subname)
         if sub.power.total_power == 1:
-            emergency_message = f"EMERGENCY!!! {random.choice(emergencies)}\n"
+            emergency_message = f"**EMERGENCY!!!** {random.choice(emergencies)}\n"
             submessages[subname]["captain"] += emergency_message
             submessages[subname]["scientist"] += emergency_message
             submessages[subname]["engineer"] += emergency_message
