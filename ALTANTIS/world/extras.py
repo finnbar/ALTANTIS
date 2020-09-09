@@ -14,13 +14,13 @@ def all_in_submap(pos : Tuple[int, int], dist : int, sub_exclusions : List[str] 
     subs_in_range = filtered_teams(
         lambda sub: diagonal_distance(sub.movement.get_position(), pos) <= dist and sub._name not in sub_exclusions
     )
-    for sub in map(get_sub, subs_in_range):
-        if sub: result.append(sub)
+    for sub in subs_in_range:
+        result.append(sub)
     npcs_in_range = filtered_npcs(
         lambda npc: diagonal_distance(npc.get_position(), pos) <= dist and npc.id not in npc_exclusions
     )
-    for npc in map(get_npc, npcs_in_range):
-        if npc: result.append(npc)
+    for npc in npcs_in_range:
+        result.append(npc)
     return result
 
 async def explode(pos : Tuple[int, int], power : int, sub_exclusions : List[str] = [], npc_exclusions : List[int] = []):
@@ -29,13 +29,12 @@ async def explode(pos : Tuple[int, int], power : int, sub_exclusions : List[str]
     power-1 to the surrounding ones, power-2 to those that surround and
     so on.
     """
-    from ALTANTIS.subs.state import get_subs, get_sub
-    from ALTANTIS.npcs.npc import get_npcs, get_npc
-    for subname in get_subs():
-        if subname in sub_exclusions:
+    from ALTANTIS.subs.state import get_sub_objects
+    from ALTANTIS.npcs.npc import get_npc_objects
+    for sub in get_sub_objects():
+        if sub._name in sub_exclusions:
             continue
 
-        sub = get_sub(subname)
         sub_pos = sub.movement.get_position()
         sub_dist = diagonal_distance(pos, sub_pos)
         damage = power - sub_dist
@@ -44,15 +43,14 @@ async def explode(pos : Tuple[int, int], power : int, sub_exclusions : List[str]
             await sub.send_message(f"Explosion in {pos}!", "captain")
             sub.damage(damage)
     
-    for npcid in get_npcs():
-        if npcid in npc_exclusions:
+    for npc in get_npc_objects():
+        if npc.id in npc_exclusions:
             continue
         
-        npc_obj = get_npc(npcid)
-        npc_pos = npc_obj.get_position()
+        npc_pos = npc.get_position()
         npc_dist = diagonal_distance(pos, npc_pos)
         damage = power - npc_dist
 
         if damage > 0:
-            await npc_obj.send_message(f"Explosion in {pos}!", "captain")
-            npc_obj.damage(damage)
+            await npc.send_message(f"Explosion in {pos}!", "captain")
+            npc.damage(damage)

@@ -3,7 +3,7 @@ from typing import Container, Type, Any, Optional
 
 class Validator:
     def __call__(self, val: Optional[Any]) -> Optional[Any]:
-        raise NotImplemented()
+        raise NotImplementedError
 
 
 class NopValidator(Validator):
@@ -33,7 +33,7 @@ class LenValidator(Validator):
         self.max = max_
 
     def __call__(self, val: Optional[Any]) -> Optional[Any]:
-        return val if self.min <= len(val) < self.max else None
+        return val if val is not None and self.min <= len(val) < self.max else None
 
 
 class RangeValidator(Validator):

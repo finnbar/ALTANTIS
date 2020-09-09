@@ -6,9 +6,10 @@ from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, MAP_DOMAIN, MAP_TOKEN, 
 from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team, main_loop
 from ALTANTIS.utils.actions import DiscordAction, Message, FAIL_REACT
 from ALTANTIS.utils.text import list_to_and_separated
+from ALTANTIS.utils.errors import SquareOutOfBoundsError
 from ALTANTIS.world.world import in_world, get_square
 from ALTANTIS.world.consts import MAX_OPTIONS
-from ALTANTIS.npcs.npc import filtered_npcs, get_npc
+from ALTANTIS.npcs.npc import filtered_npcs
 from ALTANTIS.subs.state import get_sub, get_sub_objects, filtered_teams, with_sub
 from ALTANTIS.subs.sub import Submarine
 
@@ -97,13 +98,15 @@ def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tu
         row = ""
         for x in range(X_LIMIT):
             square = get_square(x, y)
+            if square is None:
+                raise SquareOutOfBoundsError((x, y))
             tile_char = square.to_char(to_show, show_hidden, list(map(lambda sub: sub._name, subs)))
             tile_name = square.map_name(to_show, show_hidden, list(map(lambda sub: sub._name, subs)))
             if "n" in to_show:
                 npcs_in_square = filtered_npcs(lambda n: n.x == x and n.y == y)
                 if len(npcs_in_square) > 0:
                     tile_char = "N"
-                    tile_name = list_to_and_separated(list(map(lambda n: get_npc(n).name(), npcs_in_square)))
+                    tile_name = list_to_and_separated(list(map(lambda n: n.name(), npcs_in_square)))
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
@@ -118,11 +121,11 @@ def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tu
 def zoom_in(x : int, y : int, loop) -> DiscordAction:
     if in_world(x, y):
         report = f"Report for square **({x}, {y})**\n"
-        report += get_square(x, y).square_status() + "\n\n"
+        # since in_world => get_square : Cell (not None)
+        report += get_square(x, y).square_status() + "\n\n" # type: ignore
         # See if any subs are here, and if so print their status.
         subs_in_square = filtered_teams(lambda sub: sub.movement.x == x and sub.movement.y == y)
-        for subname in subs_in_square:
-            sub = get_sub(subname)
+        for sub in subs_in_square:
             report += sub.status_message(loop) + "\n\n"
         return Message(report)
     return Message("Chosen square is outside the world boundaries!")

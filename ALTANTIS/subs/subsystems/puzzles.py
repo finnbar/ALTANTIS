@@ -34,7 +34,7 @@ class EngineeringPuzzles():
     def __init__(self, sub : Submarine):
         self.sub = sub
         self.puzzles = load_all_puzzles()
-        self.current_puzzle = None
+        self.current_puzzle : Optional[Tuple[str, List[str]]] = None
         self.puzzle_reason = ""
         # wear_and_tear is a counter until we introduce a puzzle!
         self.wear_and_tear = 5

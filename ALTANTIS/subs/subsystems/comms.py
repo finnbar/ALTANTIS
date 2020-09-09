@@ -4,8 +4,8 @@ Allows submarines to communicate with one another.
 from random import random
 from time import time as now
 
-from ALTANTIS.subs.state import get_subs, get_sub
-from ALTANTIS.npcs.npc import get_npcs, get_npc
+from ALTANTIS.subs.state import get_sub_objects
+from ALTANTIS.npcs.npc import get_npc_objects
 from ALTANTIS.utils.direction import diagonal_distance
 from ALTANTIS.utils.consts import GARBLE, COMMS_COOLDOWN
 from ..sub import Submarine
@@ -44,20 +44,16 @@ class CommsSystem():
             return False
         
         my_pos = self.sub.movement.get_position()
-        for subname in get_subs():
-            if subname == self.sub._name:
+        for sub in get_sub_objects():
+            if sub._name == self.sub._name:
                 continue
-
-            sub = get_sub(subname)
 
             dist = diagonal_distance(my_pos, sub.movement.get_position())
             garbled = self.garble(content, dist)
             if garbled is not None:
                 await sub.send_message(f"**Message received from {self.sub.name()}**:\n`{garbled}`\n**END MESSAGE**", "captain")
 
-        for npcid in get_npcs():
-            npc = get_npc(npcid)
-
+        for npc in get_npc_objects():
             dist = diagonal_distance(my_pos, npc.get_position())
             garbled = self.garble(content, dist)
             if garbled is not None:

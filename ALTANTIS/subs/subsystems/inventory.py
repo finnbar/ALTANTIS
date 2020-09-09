@@ -30,9 +30,9 @@ class Inventory():
         # An aside: we don't save this data because it is difficult to serialise
         # and restoring an incomplete trade isn't actually helpful.
         # Who you're trading with, as a Submarine object.
-        self.trading_partner = None
+        self.trading_partner : Optional[Submarine] = None
         # What you've offered.
-        self.offer = {}
+        self.offer : Dict[str, int] = {}
         self.accepting = False
         self.my_turn = False
     
@@ -255,6 +255,9 @@ class Inventory():
         await self.sub.send_message(f"Received counteroffer of **{offer_text}**.", "captain")
     
     async def accept_trade(self) -> str:
+        if not self.trading_partner:
+            return "You are currently not in a trade!"
+
         self.accepting = True
         if not self.trading_partner.inventory.accepting:
             self.my_turn = False

@@ -20,14 +20,14 @@ def get_subs() -> List[str]:
 def get_sub_objects() -> List[Submarine]:
     return list(state.values())
 
-def filtered_teams(pred) -> List[str]:
+def filtered_teams(pred : Callable[[Submarine], bool]) -> List[Submarine]:
     """
-    Gets all names of subs that satisfy some predicate.
+    Gets all subs that satisfy some predicate.
     """
     subs = []
     for sub in state:
         if pred(state[sub]):
-            subs.append(sub)
+            subs.append(state[sub])
     return subs
 
 def get_sub(name : str) -> Optional[Submarine]:

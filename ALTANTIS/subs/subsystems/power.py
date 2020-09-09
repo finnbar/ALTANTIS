@@ -8,9 +8,9 @@ from ALTANTIS.world.extras import all_in_submap
 from ..sub import Submarine
 
 import random
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-PRESETS = {
+PRESETS : Dict[str, Dict[str, Any]]= {
     "scout": {"power": {"engines": 1, "scanners": 2, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"engines": 1}, "total": 3},
     "battle": {"power": {"engines": 2, "scanners": 1, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"weapons": 1}, "total": 3},
     "messenger": {"power": {"engines": 2, "scanners": 1, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"comms": 1}, "total": 3},
@@ -40,7 +40,7 @@ class PowerManager():
         # Power only updates at game tick, so we need to keep track of the changes made.
         self.scheduled_power = self.power.copy()
         # Damage only happens at game tick, so we need to keep track of any taken.
-        self.scheduled_damage = []
+        self.scheduled_damage : List[int] = []
 
     def activate(self, value : bool) -> bool:
         if self.total_power > 0 or not value:

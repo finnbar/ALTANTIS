@@ -6,8 +6,8 @@ from typing import Tuple, List, Collection
 
 from ALTANTIS.utils.direction import diagonal_distance, determine_direction
 from ALTANTIS.utils.consts import X_LIMIT, Y_LIMIT
-from ALTANTIS.subs.state import get_sub, get_subs
-from ALTANTIS.npcs.npc import get_npc, get_npcs
+from ALTANTIS.subs.state import get_sub_objects
+from ALTANTIS.npcs.npc import get_npc_objects
 from ALTANTIS.world.world import get_square
 from ..sub import Submarine
 
@@ -44,7 +44,7 @@ class ScanSystem():
         my_position = self.sub.movement.get_position()
         with_distance = "triangulation" in self.sub.upgrades.keywords
         events = explore_submap(my_position, scanners_range, sub_exclusions=[self.sub._name], with_distance=with_distance)
-        get_square(*my_position).has_been_scanned(self.sub._name, self.sub.power.get_power("scanners"))
+        self.sub.movement.get_square().has_been_scanned(self.sub._name, self.sub.power.get_power("scanners"))
         shuffle(events)
         return events
     
@@ -79,7 +79,10 @@ def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : Collectio
             if y < 0 or y >= Y_LIMIT:
                 continue
             this_dist = diagonal_distance((0, 0), (i, j))
-            event = get_square(x, y).outward_broadcast(dist - this_dist)
+            sq = get_square(x, y)
+            if sq is None:
+                continue
+            event = sq.outward_broadcast(dist - this_dist)
             if event != "":
                 direction = determine_direction((cx, cy), (x, y))
                 if direction is None:
@@ -92,11 +95,10 @@ def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : Collectio
                 events.append(event)
 
     # Then, submarines.
-    for subname in get_subs():
-        if subname in sub_exclusions:
+    for sub in get_sub_objects():
+        if sub._name in sub_exclusions:
             continue
 
-        sub = get_sub(subname)
         sub_pos = sub.movement.get_position()
         sub_dist = diagonal_distance(pos, sub_pos)
 
@@ -113,18 +115,17 @@ def explore_submap(pos : Tuple[int, int], dist : int, sub_exclusions : Collectio
         events.append(event)
     
     # Finally, NPCs.
-    for npcid in get_npcs():
-        if npcid in npc_exclusions:
+    for npc in get_npc_objects():
+        if npc.id in npc_exclusions:
             continue
         
-        npc_obj = get_npc(npcid)
-        npc_pos = npc_obj.get_position()
+        npc_pos = npc.get_position()
         npc_dist = diagonal_distance(pos, npc_pos)
 
         if npc_dist > dist:
             continue
 
-        event = npc_obj.outward_broadcast(dist - npc_dist)
+        event = npc.outward_broadcast(dist - npc_dist)
         direction = determine_direction(pos, npc_pos)
         if direction is None:
             event = f"{event} in your current square!"

@@ -18,7 +18,7 @@ class NPC(Entity):
     classname = ""
     def __init__(self, id : int, x : int, y : int):
         self.health = 1
-        self.treasure = []
+        self.treasure : List[str] = []
         self.x = x
         self.y = y
         self.id = id
@@ -28,7 +28,7 @@ class NPC(Entity):
         self.observant = False
         self.photo = ""
         self.typename = self.classname.title()
-        self.parent = None
+        self.parent : Optional[str] = None
     
     async def on_tick(self):
         await self.damage_tick()
@@ -130,19 +130,17 @@ class NPC(Entity):
     async def interact(self, sub: Submarine, arg: Any) -> str:
         return ""
     
-    def all_subs_in_square(self) -> List[Optional[Submarine]]:
-        subs_in_square = filtered_teams(lambda sub: sub.movement.x == self.x and sub.movement.y == self.y)
-        return list(map(get_sub, subs_in_square))
+    def all_subs_in_square(self) -> List[Submarine]:
+        return filtered_teams(lambda sub: sub.movement.x == self.x and sub.movement.y == self.y)
     
-    def all_npcs_in_square(self) -> List[Optional[NPC]]:
-        npcs_in_square = filtered_npcs(lambda npc: npc.x == self.x and npc.y == self.y and npc != self)
-        return list(map(get_npc, npcs_in_square))
+    def all_npcs_in_square(self) -> List[NPC]:
+        return filtered_npcs(lambda npc: npc.x == self.x and npc.y == self.y and npc != self)
 
     def all_in_square(self) -> List[Entity]:
         """
         Gets all entities (subs and NPCs) in your square except yourself.
         """
-        result = []
+        result : List[Entity] = []
         for sub in self.all_subs_in_square():
             result.append(sub)
         for npc in self.all_npcs_in_square():
@@ -178,13 +176,16 @@ def load_npc_types():
         npc_types[cl.classname] = cl
 
 # All NPCs, listed by ID.
-npcs = []
+npcs : List[NPC] = []
 
 def get_npc_types() -> List[str]:
     return list(npc_types.keys())
 
 def get_npcs() -> List[int]:
     return list(range(len(npcs)))
+
+def get_npc_objects() -> List[NPC]:
+    return npcs
 
 async def kill_npc(id : int, rattle : bool = True) -> bool:
     if id in range(len(npcs)):
@@ -197,21 +198,21 @@ async def npc_tick():
     for npc in npcs:
         await npc.on_tick()
 
-def filtered_npcs(pred : Callable[[NPC], bool]) -> List[int]:
+def filtered_npcs(pred : Callable[[NPC], bool]) -> List[NPC]:
     """
     Gets all names of npcs that satisfy some predicate.
     """
     result = []
     for index in range(len(npcs)):
+        npc = npcs[index]
         if pred(npcs[index]):
-            result.append(index)
+            result.append(npc)
     return result
 
 async def interact_in_square(sub : Submarine, square : Tuple[int, int], arg) -> str:
     in_square = filtered_npcs(lambda npc: (npc.x, npc.y) == square)
     message = ""
-    for npcid in in_square:
-        npc = get_npc(npcid)
+    for npc in in_square:
         if sub.power.get_power("scanners") >= npc.stealth:
             npc_message = await npc.interact(sub, arg)
             if npc_message != "":

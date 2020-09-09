@@ -2,7 +2,8 @@
 Runs the game, performing the right actions at fixed time intervals.
 """
 
-from ALTANTIS.subs.state import get_subs, get_sub, state_to_dict, state_from_dict
+from ALTANTIS.subs.state import get_subs, get_sub, state_to_dict, state_from_dict, get_sub_objects
+from ALTANTIS.subs.sub import Submarine
 from ALTANTIS.npcs.npc import npc_tick, npcs_to_json, npcs_from_json
 from ALTANTIS.world.world import map_tick, map_to_dict, map_from_dict
 from ALTANTIS.utils.actions import FAIL_REACT, OKAY_REACT
@@ -23,43 +24,40 @@ async def perform_timestep(counter : int):
 
     print(f"Running turn {counter}.")
 
-    def is_active_sub(subname):
-        sub = get_sub(subname)
-        if not sub: return False
+    def is_active_sub(sub):
         return sub.power.activated()
 
     # Get all active subs. (Can you tell I'm a functional programmer?)
     # Note: we still collect all messages for all subs, as there are some
     # messages that inactive subs should receive.
-    subsubset : List[str] = list(filter(is_active_sub, get_subs()))
+    subsubset : List[Submarine] = list(filter(is_active_sub, get_sub_objects()))
     submessages : Dict[str, Dict[str, str]] = {i: {"engineer": "", "captain": "", "scientist": ""} for i in get_subs()}
     message_opening : str = f"---------**TURN {counter}**----------\n"
 
     # Emergency messaging
-    for subname in subsubset:
-        sub = get_sub(subname)
+    for sub in subsubset:
         if sub.power.total_power == 1:
+            subname = sub._name
             emergency_message = f"**EMERGENCY!!!** {random.choice(emergencies)}\n"
             submessages[subname]["captain"] += emergency_message
             submessages[subname]["scientist"] += emergency_message
             submessages[subname]["engineer"] += emergency_message
 
     # Power management
-    for subname in subsubset:
-        sub = get_sub(subname)
+    for sub in subsubset:
         power_message = sub.power.apply_power_schedule()
         if power_message:
+            subname = sub._name
             power_message = f"{power_message}\n"
             submessages[subname]["captain"] += power_message
             submessages[subname]["engineer"] += power_message
 
     # Weapons
-    for subname in subsubset:
-        sub = get_sub(subname)
+    for sub in subsubset:
         weapons_message = sub.weapons.weaponry_tick()
         if weapons_message:
             weapons_message = f"{weapons_message}\n"
-            submessages[subname]["captain"] += weapons_message
+            submessages[sub._name]["captain"] += weapons_message
     
     # NPCs
     await npc_tick()
@@ -67,51 +65,47 @@ async def perform_timestep(counter : int):
     map_tick()
 
     # The crane
-    for subname in subsubset:
-        sub = get_sub(subname)
+    for sub in subsubset:
         crane_message = await sub.inventory.crane_tick()
         if crane_message:
             crane_message = f"{crane_message}\n"
-            submessages[subname]["scientist"] += crane_message
+            submessages[sub._name]["scientist"] += crane_message
 
     # Movement, trade and puzzles
-    for subname in subsubset:
-        sub = get_sub(subname)
+    for sub in subsubset:
         move_message, trade_messages = await sub.movement.movement_tick()
         if move_message:
             move_message = f"{move_message}\n"
-            submessages[subname]["captain"] += move_message
+            submessages[sub._name]["captain"] += move_message
         for target in trade_messages:
             submessages[target]["captain"] += trade_messages[target] + "\n"
     
     # Scanning (as we enter a new square only)
-    for subname in subsubset:
-        sub = get_sub(subname)
+    for sub in subsubset:
         scan_message = sub.scan.scan_string()
         if scan_message != "":
+            subname = sub._name
             submessages[subname]["captain"] += scan_message
             submessages[subname]["scientist"] += scan_message
     
     # Postponed events
-    for subname in subsubset:
-        sub = get_sub(subname)
+    for sub in subsubset:
         await sub.upgrades.postponed_tick()
 
     # Damage
-    for subname in get_subs():
-        sub = get_sub(subname)
+    for sub in get_sub_objects():
         damage_message = await sub.power.damage_tick()
         if damage_message:
+            subname = sub._name
             damage_message = f"{damage_message}\n"
             submessages[subname]["captain"] += damage_message
             submessages[subname]["engineer"] += damage_message
             submessages[subname]["scientist"] += damage_message
 
-    for subname in get_subs():
-        messages = submessages[subname]
-        sub = get_sub(subname)
+    for sub in get_sub_objects():
+        messages = submessages[sub._name]
         if messages["captain"] == "":
-            if subname not in subsubset:
+            if sub._name not in map(lambda s: s._name, subsubset):
                 messages["captain"] = "Your submarine is deactivated so nothing happened.\n"
             else:
                 messages["captain"] = "Your submarine is active, but there is nothing to notify you about.\n"

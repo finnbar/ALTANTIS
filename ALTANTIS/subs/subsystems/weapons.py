@@ -2,8 +2,8 @@
 Allows subs to charge and fire (stunning) weapons.
 """
 
-from ALTANTIS.subs.state import get_subs, get_sub
-from ALTANTIS.npcs.npc import get_npcs, get_npc
+from ALTANTIS.subs.state import get_sub_objects
+from ALTANTIS.npcs.npc import get_npc_objects
 from ALTANTIS.utils.direction import diagonal_distance
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.utils.entity import Entity
@@ -67,10 +67,9 @@ class Weaponry():
     
     def hits(self, x : int, y : int) -> Dict[str, List[Entity]]:
         # Returns a list of indirect and direct hits.
-        indirect = []
-        direct = []
-        for subname in get_subs():
-            sub = get_sub(subname)
+        indirect : List[Entity] = []
+        direct : List[Entity] = []
+        for sub in get_sub_objects():
             pos = sub.movement.get_position()
             distance = diagonal_distance(pos, (x, y))
             if distance == 0:
@@ -78,8 +77,7 @@ class Weaponry():
             elif distance == 1:
                 indirect.append(sub)
         
-        for npcid in get_npcs():
-            npc = get_npc(npcid)
+        for npc in get_npc_objects():
             pos = npc.get_position()
             distance = diagonal_distance(pos, (x, y))
             if distance == 0:

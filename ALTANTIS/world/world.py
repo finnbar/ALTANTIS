@@ -266,7 +266,7 @@ def map_to_dict() -> Dict[str, Any]:
     trivially converted into dicts, we just convert them individually.
     We also append a class identifier so they can be recreated correctly.
     """
-    undersea_map_dicts = [[{} for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
+    undersea_map_dicts : List[List[Dict[str, Any]]] = [[{} for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
     for i in range(X_LIMIT):
         for j in range(Y_LIMIT):
             undersea_map_dicts[i][j] = undersea_map[i][j]._to_dict()

@@ -27,7 +27,7 @@ class Upgrades():
     def __init__(self, sub : Submarine):
         self.sub = sub
         # Used for special abilities gifted by control.
-        self.keywords = []
+        self.keywords : List[str] = []
         # Used for events that should happen on a given turn.
         # Consists of (int, string, (fn name, argument)) triples.
         self.postponed_events : List[Tuple[int, str, Tuple[str, Any, Any]]] = []

@@ -33,8 +33,12 @@ ADMIN_NAME = "<@!366644564137738240>"
 
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 
-MAP_TOKEN = os.getenv('MAP_TOKEN')
-MAP_DOMAIN = os.getenv('MAP_DOMAIN')
-TOKEN = os.getenv('DISCORD_TOKEN')
+MAP_TOKEN = os.getenv('MAP_TOKEN', "")
+assert MAP_TOKEN != ""
+MAP_DOMAIN = os.getenv('MAP_DOMAIN', "")
+assert MAP_DOMAIN != ""
+TOKEN = os.getenv('DISCORD_TOKEN', "")
+assert TOKEN != ""

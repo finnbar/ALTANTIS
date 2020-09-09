@@ -1,6 +1,7 @@
 """
 Allows the sub to move.
 """
+from ALTANTIS.utils.errors import SubmarineOutOfBoundsError
 import math, datetime
 from typing import Tuple, Optional
 
@@ -68,8 +69,11 @@ class MovementControls():
     def get_position(self) -> Tuple[int, int]:
         return (self.x, self.y)
     
-    def get_square(self) -> Optional[Cell]:
-        return get_square(self.x, self.y)
+    def get_square(self) -> Cell:
+        sq = get_square(self.x, self.y)
+        if sq is None:
+            raise SubmarineOutOfBoundsError((self.x, self.y))
+        return sq
 
     async def move(self) -> str:
         motion = directions[self.direction]
@@ -79,7 +83,8 @@ class MovementControls():
             # Crashed into the boundaries of the world, whoops.
             self.set_direction(reverse_dir[self.get_direction()])
             return f"Your submarine reached the boundaries of the world, so was pushed back (now facing **{self.direction.upper()}**) and did not move this turn!"
-        message, obstacle = get_square(new_x, new_y).on_entry(self.sub)
+        # in_world(new_x, new_y) => get_square(new_x, new_y) : Cell (not None)
+        message, obstacle = get_square(new_x, new_y).on_entry(self.sub) # type: ignore
         if obstacle:
             return message
         self.x = new_x
@@ -94,7 +99,7 @@ class MovementControls():
             time_until_next = math.inf
             if loop and loop.next_iteration:
                 time_until_next = loop.next_iteration.timestamp() - datetime.datetime.now().timestamp()
-            threshold = get_square(self.x, self.y).difficulty()
+            threshold = self.get_square().difficulty()
             turns_until_move = math.ceil(max(threshold - self.movement_progress, 0) / power_system.get_power("engines"))
             turns_plural = "turns" if turns_until_move > 1 else "turn"
             time_until_move = time_until_next + GAME_SPEED * (turns_until_move - 1)
