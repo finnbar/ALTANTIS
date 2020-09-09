@@ -89,7 +89,7 @@ async def upgrade_sub_system(team : str, system : str, amount : int) -> DiscordA
 
 async def upgrade_sub_innate(team : str, system : str, amount : int) -> DiscordAction:
     async def do_upgrade(sub):
-        if sub.power.modify_innate(system, amount):
+        if sub.power.modify_innate_system(system, amount):
             await sub.send_message(f"Submarine **{team.title()}** was upgraded! **{system.title()}** innate power increased by {amount}.", "engineer")
             return OKAY_REACT
         return FAIL_REACT

@@ -106,7 +106,10 @@ async def perform_timestep(counter : int):
         messages = submessages[sub._name]
         if messages["captain"] == "":
             if sub._name not in map(lambda s: s._name, subsubset):
-                messages["captain"] = "Your submarine is deactivated so nothing happened.\n"
+                if sub.power.total_power == 0:
+                    messages["captain"] = "Your submarine is **dead** so nothing happened.\n"
+                else:
+                    messages["captain"] = "Your submarine is deactivated so nothing happened.\n"
             else:
                 messages["captain"] = "Your submarine is active, but there is nothing to notify you about.\n"
         await sub.send_message(f"{message_opening}{messages['captain'][:-1]}", "captain")
@@ -147,11 +150,11 @@ def load_game(which : str, offset : int, bot):
     Does not check whether the files exist.
     This is destructive, so needs the exact correct argument.
     """
+    # Get the relevant timestamp. We arbitrarily choose map to find the correct name.
     prefix = f"{os.curdir}/saves"
     filenames = sorted(os.listdir(f"{prefix}/map/"), reverse=True)
     if offset >= len(filenames):
         return FAIL_REACT
-    # Get the relevant timestamp. We arbitrarily choose map to find the correct name.
     filename = filenames[offset]
     if which not in ["all", "map", "npcs", "state"]:
         return FAIL_REACT
