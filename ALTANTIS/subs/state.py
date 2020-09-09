@@ -2,7 +2,6 @@
 Manages the state dictionary, which keeps track of all submarines.
 """
 
-import keyword
 from ALTANTIS.subs.sub import sub_from_dict, Submarine
 from ALTANTIS.utils.actions import DiscordAction
 

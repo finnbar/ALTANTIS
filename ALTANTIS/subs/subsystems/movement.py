@@ -1,13 +1,13 @@
 """
 Allows the sub to move.
 """
-from ALTANTIS.utils.errors import SubmarineOutOfBoundsError
 import math, datetime
 from typing import Tuple, Optional
 
 from ALTANTIS.world.world import possible_directions, get_square, in_world, Cell
 from ALTANTIS.utils.consts import GAME_SPEED, direction_emoji, TICK, CROSS
 from ALTANTIS.utils.direction import directions, reverse_dir
+from ALTANTIS.utils.errors import SubmarineOutOfBoundsError
 from ..sub import Submarine
 
 class MovementControls():
