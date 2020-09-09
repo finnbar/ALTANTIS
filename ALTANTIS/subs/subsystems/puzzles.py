@@ -3,29 +3,25 @@ Deals with the engineering puzzles, which need to be imported, served and marked
 """
 import json, glob
 from random import choice
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Dict, Union
 
 from ALTANTIS.utils.control import notify_control
 from ..sub import Submarine
 
-answers = {}
+answers : Dict[str, Union[List[str], str]] = {}
 with open("puzzles/answers.json", "r") as ans_file:
     answers = json.loads(ans_file.read())
 
-questions = glob.glob("puzzles/*")
-questions.remove("puzzles/answers.json")
+puzzles_available = glob.glob("puzzles/*")
 
-def attach_answer(question : str) -> Tuple[str, List[str]]:
-    answer = []
-    if question in answers:
-        answer = answers[question]
-        if type(answer) is str:
-            answer = [answer]
-        for i in range(len(answer)):
-            answer[i] = answer[i].lower()
-    return (question, answer)
-
-puzzles = list(map(attach_answer, questions))
+puzzles : List[Tuple[str, List[str]]] = []
+for filename in answers:
+    if filename in puzzles_available:
+        answer = answers[filename]
+        if isinstance(answer, str):
+            puzzles.append((filename, [answer]))
+        else:
+            puzzles.append((filename, answer))
 
 def load_all_puzzles() -> List[Tuple[str, List[str]]]:
     return puzzles.copy()
