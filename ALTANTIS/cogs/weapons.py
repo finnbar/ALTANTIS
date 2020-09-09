@@ -22,7 +22,7 @@ class Weaponry(commands.Cog):
     @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
     async def shoot_stunning(self, ctx, x : int, y : int):
         """
-        Schedules a nondamaging shot at (<x>, <y>). This uses two weapons charges.
+        Schedules a nondamaging shot at (<x>, <y>). This uses one weapons charge.
         """
         await perform(schedule_shot, ctx, x, y, get_team(ctx.channel), False)
 
