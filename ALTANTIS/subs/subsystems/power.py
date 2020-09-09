@@ -14,7 +14,8 @@ PRESETS : Dict[str, Dict[str, Any]]= {
     "scout": {"power": {"engines": 1, "scanners": 2, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"engines": 1}, "total": 3},
     "battle": {"power": {"engines": 2, "scanners": 1, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"weapons": 1}, "total": 3},
     "messenger": {"power": {"engines": 2, "scanners": 1, "comms": 1, "crane": 1, "weapons": 1}, "innate": {"comms": 1}, "total": 3},
-    "pickup": {"power": {"engines": 1, "scanners": 1, "comms": 1, "crane": 2, "weapons": 1}, "innate": {"engines": 1}, "total": 3}
+    "pickup": {"power": {"engines": 1, "scanners": 1, "comms": 1, "crane": 2, "weapons": 1}, "innate": {"engines": 1}, "total": 3},
+    "powerful": {"power": {"engines": 3, "scanners": 3, "comms": 3, "crane": 3, "weapons": 3}, "innate": {"engines": 1}, "total": 8}
 }
 
 class PowerManager():
