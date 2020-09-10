@@ -9,6 +9,10 @@ from ALTANTIS.subs.state import get_subs
 
 bot = commands.Bot(command_prefix="!")
 
+@bot.check
+async def globally_block_control_room(ctx):
+    return ctx.message.channel.name != "control-room"
+
 def get_team(channel : discord.TextChannel) -> Optional[str]:
     """
     Gets the name of the category channel of the channel the message was sent in.

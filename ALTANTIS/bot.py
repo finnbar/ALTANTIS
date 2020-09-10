@@ -11,7 +11,7 @@ from ALTANTIS.utils.consts import ADMIN_NAME, TOKEN
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send("You do not have the correct role for this command.")
+        await ctx.send("Checks failed! This means that you are either trying to call a command in a channel that's actively blacklisted (all #control-room channels) or don't have the required role for that command.")
     elif isinstance(error, commands.errors.CommandNotFound):
         await ctx.send("No command under that name was found!")
     elif isinstance(error, commands.errors.MaxConcurrencyReached):
