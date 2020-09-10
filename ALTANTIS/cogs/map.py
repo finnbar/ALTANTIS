@@ -5,7 +5,7 @@ from discord.ext import commands
 from ALTANTIS.utils.consts import CONTROL_ROLE
 from ALTANTIS.utils.bot import perform_unsafe
 from ALTANTIS.utils.actions import DiscordAction, OKAY_REACT, FAIL_REACT
-from ALTANTIS.world.world import get_square, bury_treasure_at
+from ALTANTIS.world.world import get_square, bury_treasure_at, unbury_treasure_at
 from ALTANTIS.world.consts import WEATHER
 
 class MapModification(commands.Cog):
@@ -19,6 +19,14 @@ class MapModification(commands.Cog):
         (CONTROL) Buries a treasure <treasure> at location (<x>, <y>).
         """
         await perform_unsafe(bury_treasure, ctx, treasure, x, y)
+
+    @commands.command()
+    @commands.has_role(CONTROL_ROLE)
+    async def unbury(self, ctx, treasure, x : int, y : int):
+        """
+        (CONTROL) Removes a treasure <treasure> at location (<x>, <y>).
+        """
+        await perform_unsafe(unbury_treasure, ctx, treasure, x, y)
 
     @commands.command()
     @commands.has_role(CONTROL_ROLE)
@@ -47,6 +55,11 @@ class MapModification(commands.Cog):
 
 def bury_treasure(name : str, x : int, y : int) -> DiscordAction:
     if bury_treasure_at(name, (x, y)):
+        return OKAY_REACT
+    return FAIL_REACT
+
+def unbury_treasure(name : str, x : int, y : int) -> DiscordAction:
+    if unbury_treasure_at(name, (x, y)):
         return OKAY_REACT
     return FAIL_REACT
 

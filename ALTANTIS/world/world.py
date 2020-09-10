@@ -78,6 +78,13 @@ class Cell():
         self.treasure.append(treasure)
         return True
 
+    def unbury_treasure(self, treasure: str) -> bool:
+        if treasure in self.treasure:
+            index = self.treasure.index(treasure)
+            del self.treasure[index]
+            return True
+        return False
+
     def name(self, to_show: Collection[str] = ("d", "a", "m", "e", "j")) -> Optional[str]:
         if "name" in self.attributes:
             name = string.capwords(self.attributes["name"], " ")
@@ -247,6 +254,12 @@ def bury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
     (x, y) = pos
     if in_world(x, y):
         return undersea_map[x][y].bury_treasure(name)
+    return False
+
+def unbury_treasure_at(name: str, pos: Tuple[int, int]) -> bool:
+    (x, y) = pos
+    if in_world(x, y):
+        return undersea_map[x][y].unbury_treasure(name)
     return False
 
 def pick_up_treasure(pos: Tuple[int, int], power: int) -> List[str]:
