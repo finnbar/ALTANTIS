@@ -147,7 +147,7 @@ class Dolphin(PhotographableNPC):
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.health = 2
-        self.treasure = ["unexploded bomb*"]
+        self.treasure = ["unexplodedbomb*"]
         self.photo += "dolphin.png"
 
     async def interact(self, sub, arg):
@@ -264,7 +264,7 @@ class Crab(PhotographableNPC):
     classname = "crab"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
-        self.treasure = ["crab meat"]
+        self.treasure = ["crabmeat"]
         self.typename = "Giant Crab"
         self.photo += "giant-crab.png"
     
