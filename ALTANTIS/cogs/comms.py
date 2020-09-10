@@ -11,11 +11,12 @@ class Comms(commands.Cog):
     """
     @commands.command()
     @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
-    async def broadcast(self, ctx, message):
+    async def broadcast(self, ctx, *message):
         """
         Broadcasts a <message> to all in range. Requires the sub to be activated.
+        Note that this can be provided in quotes or not - we consume all arguments.
         """
-        await perform_async(broadcast, ctx, get_team(ctx.channel), message)
+        await perform_async(broadcast, ctx, get_team(ctx.channel), " ".join(message))
     
     @commands.command()
     @commands.has_role(CONTROL_ROLE)
@@ -34,9 +35,6 @@ async def shout_at_team(team : str, message : str) -> DiscordAction:
 async def broadcast(team : str, message : str) -> DiscordAction:
     async def do_broadcast(sub):
         if sub.power.activated():
-            result = await sub.comms.broadcast(message)
-            if result:
-                return OKAY_REACT
-            return Message("The radio is still in use! (It has a thirty second cooldown.)")
+            return Message(await sub.comms.broadcast(message))
         return FAIL_REACT
     return await with_sub_async(team, do_broadcast, FAIL_REACT)

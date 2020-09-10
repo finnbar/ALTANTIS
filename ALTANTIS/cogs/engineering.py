@@ -21,11 +21,11 @@ class Engineering(commands.Cog):
 
     @commands.command()
     @commands.has_any_role(ENGINEER, CONTROL_ROLE)
-    async def answer(self, ctx, answer: str):
+    async def answer(self, ctx, *answer):
         """
         Lets you answer a set puzzle that hasn't resolved yet.
         """
-        await perform_async(answer_team_puzzle, ctx, get_team(ctx.channel), answer)
+        await perform_async(answer_team_puzzle, ctx, get_team(ctx.channel), " ".join(answer))
 
     @commands.command()
     @commands.has_role(CONTROL_ROLE)

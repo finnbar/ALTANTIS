@@ -39,9 +39,12 @@ class CommsSystem():
                 new_content[i] = "_"
         return "".join(new_content)
 
-    async def broadcast(self, content : str):
+    async def broadcast(self, content : str) -> str:
         if self.last_comms + COMMS_COOLDOWN > now():
-            return False
+            return f"The comms system is still cooling down! (Requires {int(self.last_comms + COMMS_COOLDOWN - now())}s more.)"
+
+        if self.sub.power.get_power("comms") == 0:
+            return "Cannot use comms system that isn't powered!"
         
         my_pos = self.sub.movement.get_position()
         for sub in get_sub_objects():
@@ -59,5 +62,5 @@ class CommsSystem():
             if garbled is not None:
                 await npc.send_message(f"**Message received from {self.sub.name()}**:\n`{garbled}`\n**END MESSAGE**", "")
         self.last_comms = now()
-        return True
+        return "Transmitted message."
     
