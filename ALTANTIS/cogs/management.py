@@ -37,6 +37,7 @@ class GameManagement(commands.Cog):
             await FAIL_REACT.do_status(ctx)
     
     @commands.command()
+    @commands.has_role(CONTROL_ROLE)
     async def make_sub(self, ctx, name, captain : discord.Member, engineer : discord.Member, scientist : discord.Member, x : int = 0, y : int = 0, keyword : str = ""):
         """
         (CONTROL) Creates channels, roles and a sub for the inputted team.

@@ -2,7 +2,7 @@ import json, httpx
 from discord.ext import commands
 from typing import List, Tuple, Dict, Any, Sequence
 
-from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, MAP_DOMAIN, MAP_TOKEN, X_LIMIT, Y_LIMIT
+from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, MAP_DOMAIN, MAP_TOKEN, X_LIMIT, Y_LIMIT, SCIENTIST, ENGINEER
 from ALTANTIS.utils.bot import perform, perform_async, perform_unsafe, perform_async_unsafe, get_team, main_loop
 from ALTANTIS.utils.actions import DiscordAction, Message, FAIL_REACT
 from ALTANTIS.utils.text import list_to_and_separated
@@ -45,6 +45,7 @@ class Status(commands.Cog):
         await perform_unsafe(zoom_in, ctx, x, y, main_loop)
 
     @commands.command()
+    @commands.has_any_role(CAPTAIN, ENGINEER, SCIENTIST, CONTROL_ROLE)
     async def status(self, ctx):
         """
         Reports the status of the submarine, including power and direction.
@@ -52,6 +53,7 @@ class Status(commands.Cog):
         await perform(get_status, ctx, get_team(ctx.channel), main_loop)
     
     @commands.command()
+    @commands.has_any_role(SCIENTIST, CONTROL_ROLE)
     async def scan(self, ctx):
         """
         Repeats the scan message sent at the start of the current tick.
