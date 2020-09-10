@@ -106,7 +106,10 @@ async def arrange_trade(team : str, partner : str, items) -> DiscordAction:
     return Message("Didn't recognise the submarine asked for.")
 
 async def make_offer(team : str, items) -> DiscordAction:
-    pair_list = to_pair_list(items)
+    try:
+        pair_list = to_pair_list(items)
+    except ValueError as _:
+        return Message("Input list is badly formatted.")
     if pair_list is None:
         return Message("Input list is badly formatted.")
     async def do_offer(sub):
