@@ -306,6 +306,7 @@ class Ears(NPC):
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.health = 3
+        self.typename = "Diverse Wildlife"
     
     async def attack(self):
         parent = self.get_parent()
