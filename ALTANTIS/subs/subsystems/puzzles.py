@@ -8,23 +8,22 @@ from typing import Tuple, List, Optional, Dict, Union
 from ALTANTIS.utils.control import notify_control
 from ..sub import Submarine
 
-answers : Dict[str, Union[List[str], str]] = {}
+answers : Dict[str, List[str]] = {}
 with open("puzzles/answers.json", "r") as ans_file:
     answers = json.loads(ans_file.read())
 
 puzzles_available = glob.glob("puzzles/*")
 
-puzzles : List[Tuple[str, List[str]]] = []
-for filename in answers:
-    if filename in puzzles_available:
-        answer = answers[filename]
-        if isinstance(answer, str):
-            puzzles.append((filename, [answer]))
-        else:
-            puzzles.append((filename, answer))
+to_remove : List[str] = []
+for puzzle in answers:
+    if puzzle not in puzzles_available:
+        to_remove.append(puzzle)
 
-def load_all_puzzles() -> List[Tuple[str, List[str]]]:
-    return puzzles.copy()
+for puzzle in to_remove:
+    del answers[puzzle]
+
+def load_all_puzzles() -> List[str]:
+    return list(answers.keys())
 
 class EngineeringPuzzles():
     def __init__(self, sub : Submarine):
@@ -62,7 +61,7 @@ class EngineeringPuzzles():
         
         puzzle_to_deliver = self.puzzles[0]
         self.puzzles = self.puzzles[1:]
-        self.current_puzzle = puzzle_to_deliver
+        self.current_puzzle = (puzzle_to_deliver, answers[puzzle_to_deliver])
         self.puzzle_reason = reason
         await self.sub.send_message(f"Puzzle for **{reason}** received! You have until your submarine next moves to solve it!", "engineer", self.current_puzzle[0])
         return True
@@ -90,7 +89,7 @@ class EngineeringPuzzles():
             else:
                 await self.sub.send_message(f"You got the answer wrong! **{condition}** not sorted.", "engineer")
                 self.sub.damage(1)
-            self.puzzles.append(self.current_puzzle)
+            self.puzzles.append(self.current_puzzle[0])
             await notify_control(f"**{self.sub.name()}** got puzzle **\"{self.current_puzzle[0]}\"** **wrong**!")
         self.current_puzzle = None
         return True

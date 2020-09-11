@@ -6,16 +6,14 @@ A possible bot for an upcoming Megagame run by Warwick Tabletop.
 ## README
 You'll need to do a few things to run this bot. In no particular order:
 
-* Create a directory called `/puzzles` and fill it with puzzles (each a single file). Discord will upload these, so they must fit into Discord's upload limits. These will be presented to the players in alphabetical order, so you can present beginner puzzles in slot `00.png`, and so on. You should also have an `answers.json` file in there with a filename-answer mapping like so:
+* Create a directory called `/puzzles` and fill it with puzzles (each a single file). Discord will upload these, so they must fit into Discord's upload limits. These will be presented to the players in the order provided in the answers file, so you can present beginner puzzles earlier on. You should also have an `answers.json` file in there with a filename-answer mapping like so:
 
 ```json
 {
-    "puzzles/00.png": "a",
-    "puzzles/01.pdf": "001"
+    "puzzles/00.png": ["a"],
+    "puzzles/01.pdf": ["001", "--1"]
 }
 ```
-
-You can also specify multiple answers for a puzzle - just replace the string with a list of strings.
 
 ## Feature list
 
