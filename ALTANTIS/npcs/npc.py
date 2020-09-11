@@ -12,7 +12,7 @@ from ALTANTIS.utils.control import notify_control
 from ALTANTIS.utils.entity import Entity
 from ALTANTIS.utils.direction import diagonal_distance, determine_direction, go_in_direction, rotate_direction
 
-from typing import Tuple, List, Callable, Dict, Any, Optional
+from typing import Tuple, List, Callable, Dict, Any, Optional, Union
 
 class NPC(Entity):
     classname = ""
@@ -164,7 +164,7 @@ class NPC(Entity):
             return None
         return get_sub(self.parent)
 
-npc_types = {}
+npc_types : Dict[str, Callable[[int, int, int], NPC]] = {}
 
 def load_npc_types():
     # Woo let's continue to avoid circular imports!
@@ -176,19 +176,20 @@ def load_npc_types():
         npc_types[cl.classname] = cl
 
 # All NPCs, listed by ID.
-npcs : List[NPC] = []
+npcs : Dict[int, NPC] = {}
+npc_max_id : int = 0
 
 def get_npc_types() -> List[str]:
     return list(npc_types.keys())
 
 def get_npcs() -> List[int]:
-    return list(range(len(npcs)))
+    return list(npcs.keys())
 
 def get_npc_objects() -> List[NPC]:
-    return npcs
+    return list(npcs.values())
 
 async def kill_npc(id : int, rattle : bool = True) -> bool:
-    if id in range(len(npcs)):
+    if id in get_npcs():
         if rattle: await npcs[id].deathrattle()
         del npcs[id]
         return True
@@ -196,14 +197,14 @@ async def kill_npc(id : int, rattle : bool = True) -> bool:
 
 async def npc_tick():
     for npc in npcs:
-        await npc.on_tick()
+        await npcs[npc].on_tick()
 
 def filtered_npcs(pred : Callable[[NPC], bool]) -> List[NPC]:
     """
     Gets all names of npcs that satisfy some predicate.
     """
     result = []
-    for index in range(len(npcs)):
+    for index in get_npcs():
         npc = npcs[index]
         if pred(npcs[index]):
             result.append(npc)
@@ -228,26 +229,29 @@ def add_npc(npctype : str, x : int, y : int, sub : Optional[str]):
     if not in_world(x, y):
         return "Cannot place an NPC outside of the map."
     if npctype in npc_types:
-        id = len(npcs)
+        global npc_max_id
+        id = npc_max_id
+        npc_max_id += 1
         new_npc = npc_types[npctype](id, x, y)
         if sub is not None:
             new_npc.add_parent(sub)
-        npcs.append(new_npc)
+        npcs[id] = new_npc
         return f"Created NPC #{id} of type {npctype.title()}!"
     return "That NPC type does not exist."
 
-def npcs_to_json() -> List[Dict[str, Any]]:
+def npcs_to_json() -> Dict[str, Union[List[Dict[str, Any]], int]]:
     npcs_list = []
     for npc in npcs:
-        npcs_list.append(npc.__dict__.copy())
-        npcs_list[-1]["classname"] = npc.classname
-    return npcs_list
+        npcs_list.append(npcs[npc].__dict__.copy())
+        npcs_list[-1]["classname"] = npcs[npc].classname
+    return {"npcs": npcs_list, "counter": npc_max_id}
 
-def npcs_from_json(json : List[Dict[str, Any]]):
-    global npcs
-    npcs = []
-    for npc in json:
-        new_npc = npc_types[npc["classname"]](0, 0, 0)
+def npcs_from_json(json : Dict[str, Any]):
+    global npcs, npc_max_id
+    npcs = {}
+    npc_max_id = json["counter"]
+    for npc in json["npcs"]:
+        new_npc : NPC = npc_types[npc["classname"]](0, 0, 0)
         del npc["classname"]
         new_npc.__dict__ = npc
-        npcs.append(new_npc)
+        npcs[new_npc.id] = new_npc
