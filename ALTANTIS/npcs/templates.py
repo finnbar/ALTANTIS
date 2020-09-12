@@ -10,8 +10,6 @@ from ALTANTIS.world.world import get_square
 from ALTANTIS.world.extras import all_in_submap, explode
 from ALTANTIS.npcs.npc import NPC, add_npc
 
-# TODO: Large Storm Generator
-
 class PhotographableNPC(NPC):
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
@@ -318,13 +316,13 @@ class Ears(NPC):
             return
         for entity in scanned:
             message += f"**{entity.name()}** at ({entity.x}, {entity.y})\n"
-        await parent.send_message(f"**Ears** (#{self.id}) scanned this turn:\n{message}", "scientist")
+        await parent.send_message(f"**{self.typename}** (#{self.id}) scanned this turn:\n{message}", "scientist")
     
     async def send_message(self, content, channel):
         await super().send_message(content, channel)
         parent = self.get_parent()
         if parent is not None:
-            full_message = f"Event from Ears ({self.x}, {self.y}):\n{content}"
+            full_message = f"Event from {self.typename} ({self.x}, {self.y}):\n{content}"
             await parent.send_message(full_message, "scientist")
 
 class DeepOneTwo(DeepOne):
