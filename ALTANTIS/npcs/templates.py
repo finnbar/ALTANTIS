@@ -331,8 +331,8 @@ class DeepOneTwo(DeepOne):
         super().__init__(id, x, y)
         self.stealth = 2
 
-class NewsBouy(NPC):
-    classname = "bouy"
+class NewsBuoy(NPC):
+    classname = "buoy"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.health = 5
@@ -468,4 +468,4 @@ class BreedingGround(NPC):
     def is_carbon(self) -> bool:
         return True
 
-ALL_NPCS = [AnglerFish, BigSquid, BreedingGround, Bull, Crab, DeepOne, DeepOneTwo, Dolphin, Ears, Eel, Trader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBouy, Octopus, Orca, Quarry, RoughSeasGenerator, Squid, StormGenerator, Turtle, Urchin]
+ALL_NPCS = [AnglerFish, BigSquid, BreedingGround, Bull, Crab, DeepOne, DeepOneTwo, Dolphin, Ears, Eel, Trader, Hammerhead, Humpback, Jellyfish, MantaRay, Mine, NewsBuoy, Octopus, Orca, Quarry, RoughSeasGenerator, Squid, StormGenerator, Turtle, Urchin]
