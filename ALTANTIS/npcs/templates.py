@@ -107,12 +107,14 @@ class Bull(Shark):
         super().__init__(id, x, y)
         self.typename = "Bull Shark"
         self.photo += "bull-shark.png"
+        self.health = 4
 
 class Orca(Shark):
     classname = "orca"
     def __init__(self, id, x, y):
         super().__init__(id, x, y)
         self.photo += "orca.png"
+        self.health = 3
 
 class Whale(PhotographableNPC):
     classname = "whale"
