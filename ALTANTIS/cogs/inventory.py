@@ -87,7 +87,7 @@ class Inventory(commands.Cog):
 
     @commands.command()
     @commands.has_role(CONTROL_ROLE)
-    async def get_paid(self, ctx, amount : int):
+    async def charge(self, ctx, amount : int):
         """
         (CONTROL) Get paid by this team <amount> money. Shorthand for !take with currency name. Do not use this during a trade.
         """
