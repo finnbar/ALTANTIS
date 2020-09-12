@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, CURRENCY_NAME
-from ALTANTIS.utils.bot import perform, perform_async, perform_async_unsafe, get_team
+from ALTANTIS.utils.consts import CONTROL_ROLE, CAPTAIN, CURRENCY_NAME, RESOURCES
+from ALTANTIS.utils.bot import perform, perform_async, perform_async_unsafe, get_team, perform_unsafe
 from ALTANTIS.utils.actions import DiscordAction, Message, OKAY_REACT, FAIL_REACT
 from ALTANTIS.utils.text import to_pair_list
 from ALTANTIS.subs.state import with_sub, with_sub_async, get_sub
@@ -92,6 +92,14 @@ class Inventory(commands.Cog):
         (CONTROL) Get paid by this team <amount> money. Shorthand for !take with currency name. Do not use this during a trade.
         """
         await perform_async_unsafe(take_item_from_team, ctx, get_team(ctx.channel), CURRENCY_NAME, amount)
+    
+    @commands.command()
+    @commands.has_role(CONTROL_ROLE)
+    async def list_resources(self, ctx):
+        """
+        (CONTROL) List the standard resources, as set in consts.
+        """
+        await perform_unsafe(list_resources, ctx)
 
 async def arrange_trade(team : str, partner : str, items) -> DiscordAction:
     pair_list = []
@@ -154,3 +162,6 @@ def drop_item(team : str, item : str) -> DiscordAction:
     def drop(sub):
         return Message(sub.inventory.drop(item))
     return with_sub(team, drop, FAIL_REACT)
+
+def list_resources() -> DiscordAction:
+    return Message(f"Available resources are: {str(RESOURCES)} with currency {CURRENCY_NAME}.")
