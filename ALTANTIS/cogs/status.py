@@ -104,19 +104,20 @@ def draw_map(subs: List[Submarine], to_show: List[str], show_hidden: bool) -> Tu
                 raise SquareOutOfBoundsError((x, y))
             tile_char = square.to_char(to_show, show_hidden, list(map(lambda sub: sub._name, subs)))
             tile_name = square.map_name(to_show, show_hidden, list(map(lambda sub: sub._name, subs)))
+            if tile_name is not None:
+                map_json.append({"x": x, "y": y, "name": tile_name})
             if "n" in to_show:
                 npcs_in_square = filtered_npcs(lambda n: n.x == x and n.y == y)
                 if len(npcs_in_square) > 0:
                     tile_char = "N"
-                    tile_name = list_to_and_separated(list(map(lambda n: n.name(), npcs_in_square)))
+                    npcs_str = list_to_and_separated(list(map(lambda n: n.name(), npcs_in_square)))
+                    map_json.append({"x": x, "y": y, "name": npcs_str})
             for i in range(len(subs)):
                 (sx, sy) = subs[i].movement.get_position()
                 if sx == x and sy == y:
                     tile_char = SUB_CHARS[i]
-                    tile_name = subs[i].name()
+                    map_json.append({"x": x, "y": y, "name": subs[i].name()})
             row += tile_char
-            if tile_name is not None:
-                map_json.append({"x": x, "y": y, "name": tile_name})
         map_string += row + "\n"
     return map_string, map_json
 
