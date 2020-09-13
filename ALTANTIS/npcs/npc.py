@@ -241,9 +241,11 @@ def add_npc(npctype : str, x : int, y : int, sub : Optional[str]):
 
 def npcs_to_json() -> Dict[str, Union[List[Dict[str, Any]], int]]:
     npcs_list = []
-    for npc in npcs:
-        npcs_list.append(npcs[npc].__dict__.copy())
-        npcs_list[-1]["classname"] = npcs[npc].classname
+    all_npcs = list(npcs.keys())
+    for npc in all_npcs:
+        if npc in npcs:
+            npcs_list.append(npcs[npc].__dict__.copy())
+            npcs_list[-1]["classname"] = npcs[npc].classname
     return {"npcs": npcs_list, "counter": npc_max_id}
 
 def npcs_from_json(json : Dict[str, Any]):
