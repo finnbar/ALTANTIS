@@ -151,7 +151,7 @@ class Dolphin(PhotographableNPC):
         self.photo += "dolphin.png"
 
     async def interact(self, sub, arg):
-        photo_message = super().interact(sub, arg)
+        photo_message = await super().interact(sub, arg)
         return f"The dolphin made a few happy noises!\n{photo_message}"
 
 class MantaRay(PhotographableNPC):
@@ -186,7 +186,7 @@ class Turtle(PhotographableNPC):
         self.photo += "turtle.png"
     
     async def interact(self, sub, arg):
-        photo_message = super().interact(sub, arg)
+        photo_message = await super().interact(sub, arg)
         return f"The turtle swims happily!\n{photo_message}"
     
     async def deathrattle(self):
