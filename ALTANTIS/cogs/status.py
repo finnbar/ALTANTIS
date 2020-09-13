@@ -18,7 +18,7 @@ class Status(commands.Cog):
     All commands that get the status of your submarine and its local environment.
     """
     @commands.command()
-    @commands.has_any_role(CAPTAIN, CONTROL_ROLE)
+    @commands.has_any_role(CAPTAIN, ENGINEER, SCIENTIST, CONTROL_ROLE)
     async def map(self, ctx):
         """
         Shows a map of the world, including your submarine!
