@@ -69,7 +69,7 @@ class NPC(Entity):
                     bury_treasure_at(treasure, (self.x, self.y))
                 await notify_control(f"**{self.full_name()}** took a total of {self.damage_to_apply} damage and **died**!")
                 await self.deathrattle()
-                kill_npc(self.id)
+                await kill_npc(self.id)
             else:
                 await notify_control(f"**{self.full_name()}** took a total of {self.damage_to_apply} damage!")
             self.damage_to_apply = 0
