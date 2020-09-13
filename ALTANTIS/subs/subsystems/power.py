@@ -226,6 +226,7 @@ class PowerManager():
                 await notify_control(f"**{self.sub.name()}'s** ticking exploded for two damage!")
         self.scheduled_damage = []
         if self.total_power <= 0:
+            self.total_power = 0
             await self.deathrattle()
         return damage_message
     

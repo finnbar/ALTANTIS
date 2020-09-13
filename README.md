@@ -1,11 +1,20 @@
 # ALTANTIS
-A possible bot for an upcoming Megagame run by Warwick Tabletop.
+Man, fuck Python.
 
-**If you are planning to play in the Megagame, I recommend that you do not read the source code. Most spoilers aren't tracked by Git so won't appear here, but some parts of the code are inherently spoilery.**
+## A Precautionary Opening
+This is a bot for the Warwick Tabletop Games and Roleplaying Society's "The Depths" Megagame - a game about people in submarines and the bad things that happen with them. We ran this game on the 13th September 2020 with forty people using the bot (ten submarines, a news team and a control team). I must be honest here and open with the fact that it dramatically crashed multiple times during the first two hours of the event - most of the bugs arising seem to have been fixed, but some have not. Like most open source software, this is provided with no warranty. The word "no" is doing a lot of work in that sentence, needless to say.
+
+(I'd also like to note while I will always readily admit that I'm a bad programmer, Python was against me here - I essentially applied as much verification as I could to the code, and even then bugs that would be picked up by type-safe languages were just missed altogether. I'm not looking for recommendations of ways to make Python "better", as I genuinely think it was the wrong tool for this job.)
+
+I would post the rest of the games resources along with this, however we're hoping to take the issues found during its first running and make the game even better. We've had an amazing discussion with the players of the game and found a variety of ways to improve it, and I will be working on a new implementation written in a safer language in order to live up to the improvements we've discussed. As a result, this version of the code is final and likely won't ever be touched again. I'm incredibly thankful to control and all of the players of the megagame for their thoughts, comments and support - especially during the incredibly low point of the first two hours of the running of this game, or rather, the crashing of this game. I really hope the new version can make up for the first version's issues, and we can make an amazing game! This repo will not hold any of this new implementation however - keep an eye out for that in a different repo!
+
+With that, let's get onto the README for this particular bot.
 
 ## README
+
 You'll need to do a few things to run this bot. In no particular order:
 
+* Install `requirements.txt`. `pip3 -r requirements.txt` is your friend.
 * Create a directory called `/puzzles` and fill it with puzzles (each a single file). Discord will upload these, so they must fit into Discord's upload limits. These will be presented to the players in the order provided in the answers file, so you can present beginner puzzles earlier on. You should also have an `answers.json` file in there with a filename-answer mapping like so:
 
 ```json
@@ -15,83 +24,39 @@ You'll need to do a few things to run this bot. In no particular order:
 }
 ```
 
-## Feature list
+* Create a directory `/weather` that contains `txt` files of ASCII maps of the world made up of 's' (stormy), 'c' (calm), 'r' (rough) and '.' characters. These can be used to apply weather to all squares simultaneously.
+* Create a `.env` file with the following:
+    * A Discord API token (`DISCORD_TOKEN`). At the time of writing, the bot needs the permissions given by integer `268561488`. If you're lazy you can just give it Administrator, but I expect anyone with an inkling of security knowledge may not be entirely happy with that idea.
+    * A website for it to request maps from. Feel free to contact me about this and I'll try my best to set you up. (This should be a `MAP_TOKEN` and a `MAP_DOMAIN`.)
+* Look through the const files (`/ALTANTIS/utils/consts.py` and `/ALTANTIS/world/consts.py`) and add your own constants. Most of these are self-explanatory.
 
-Important features:
-- [x] Can have submarines, which move.
-- [x] Has a map with obstacles.
-- [x] Can turn the sub off and on. (Allowing players to dock.)
-- [x] Submarines can travel at multiple speeds.
-- [x] Full power management. Can power systems, but has a power cap (which can be increased by control).
-- [x] Pretty power management (!status will tell you about upcoming power changes.)
-- [x] Can broadcast messages to all in range (via Comms system, which garbles longer-distance messages). Messages have a cooldown.
-- [x] A channel per person, so that role-specific info can be broadcast (engineers only get puzzles, end-of-turn, scientists only gets scanners).
-- [x] Can activate scanners, and inform players when they hover over things (level 1), are near things and other named subs (level 2), and further afield (level 3). Identify things via direction.
-- [x] Control can drop items on the seafloor. (!bury for control)
-- [x] Can shout at an engineer - control gives a question and answer, and then the engineer has to give a response. Ship takes more damage if the engineer gets it wrong.
-- [x] Basic inventory management. (!give for control, !remove for control, no !drop as that's littering)
-- [x] Trading between players (see Discord discussion for model).
-- [x] The Crane.
-- [x] Better map squares, including the ability for other types of square to have things in them, and "treasure chests". (Basically items that look like one thing but appear in the inventory as another.) Also update The Crane to work with these.
-- [x] Weapons, oh my.
-- [x] !death, so you can die.
+## What's it do?
 
-Important non-gameplay features:
-- [x] Save bot state to disk with each game loop, as to avoid any issues.
-- [x] Deal with locking/unlocking of the main thread, if possible. (Could have issues if someone does something during game turn execution.) I don't believe this is actually necessary, as async is still single-threaded.
-- [x] Possible minor refactor of submarine, encapsulating the power system into its own thing (with damage/healing) and navigation, communications, inventory and puzzles into their own things.
-- [x] Sort commands by functionality.
-- [x] Type annotations if possible, to make debugging significantly easier. Not sure how to structure.
-- [x] Multiple saves. (~10 turns back, probably just use loop saving.)
-- [ ] Complete README.
+The ALTANTIS bot deals with the organisation of three entities - the *state*, which contains submarines, *npcs* which contains non-Submarine objects, and *world* which contains a map. These work together to allow you to have a map filled with sea creatures, treasure that can be picked up, and submarines. These submarines are what the players navigate the world with, and those are what you really need to know about.
 
-New features:
-- [x] Control alerts, which inform control about events such as: puzzle fails, treasure pickup, sub damage.
-- [x] Turn tracker should always be visible even when deactivated. (Maybe add an extra message.)
-- [x] Add !scan to recall previous scan command.
-- [x] !drop item. Cannot drop Key Items (ending in *), which is a check that needs to be included.
-- [x] NPCs/Structures in their own state dictionary (likely just a list - it's fine if this is a little slow, as it's called every few minutes). These NPCs have health, a treasure drop, and an optional `on_tick` ability which fires every turn.
-- [x] NPCs/Structures can receive messages. (Effectively bringing them to submarine power levels, but without `power`, `puzzles`, message sending, only limited movement, `weapons`, `inventory` or `scanning`.)
-- [x] Squares should be able to hold multiple treasures, with cranes "lucky dipping" to pick n treasures (n power).
-- [x] Weapons messages should tell you if you did a murder.
-- [x] !explode, which explodes (x,y) with a range and amount of damage.
-- [x] See the list of keywords pinned in #spoilers and implement them. See if this can be done with class heirarchy stuff, but I am very slightly lost in that regard. (It will likely have to be on a keyword by keyword basis, tres sad.)
-- [x] Save NPCs to file!
-- [x] Automatic Discord server set up.
-- [x] Docking stations assign a role `at-base-{name}` which does as it says. (see notes in #bot-impl.)
-- [x] NPCs can trade. This is implemented by an `!interact` command, which does some command with NPCs.
-- [x] Move NPCs to an integer ID system, and allow for deletion by ID. (Thus relaxing the identical name constraint.) Also movement by ID. Just generally getting control of NPCs by ID.
-- [x] Allow control to remove the engineering puzzles part of a submarine (for if someone urgently needs to leave). Can be done as a keyword.
-- [x] Implement "ticking" - if you take damage, shit might explode.
-- [x] Resource-rich squares that scanners can pick up.
-- [x] Ruins use letter A now
-- [x] Ruins slow subs down
-- [x] Biocamoflage - make Sea Urchins and (coughthulu cough) ignore it.
-- [x] Varied shark NPCs (see pin in #spoilers)
-- [x] Animal photos
-- [x] Weather. Implement as an "overlay setting" that applies an attribute to all coordinates in a given file. Input: an ASCII map of only (c,s,.); Output: apply c, s or . to each square.
-- [x] Team-specific mechanics.
-- [x] Stormy boi
-- [x] Animals can move through walls etc. (but you can summon animals in walls)
-- [x] Should only be able to interact things which you can see.
-- [x] Docking at the start of a game. (Not a bug! If you summon a submarine at a docking station, it'll be deactivated as subs start deactivated and you can !exit_sub as normal.)
-- [x] Multiple sub types (via keyword to !register/!make_sub).
-- [ ] Random resource drops seem incredibly common. [Temporarily on hold as yet to be reproduced.]
+### Submarines
+The actions of submarines can be found in `docs/ALTANTIS and You....pdf`, a helpful document provided to the players. To give a summary of the sort of things submarines can do:
 
-Quality of life things:
-- [x] If the loop hasn't started, only control commands work. Do this by modifying our `perform` and `perform_async` functions to check loop state. I might be able to unify `perform` and `perform_async` into just `perform` if we can await a non-async function - but I genuinely don't know if this works.
-- [x] Default to lowercase for all inputs.
-- [x] Emoji map.
-- [x] !save (determine if this is a safe command to add)
+* They exist on the world and move around it based on their engine power.
+* They have an FTL-based power system, where you can shift power around your subsystems and take damage to your main reactor, reducing its output. Instead of FTL's power and health systems being different, we merge the two together and have your reactor output be your health.
+* They can pick up items from the seafloor using cranes.
+* They can trade items between subs in the same square, using an `!offer` command.
+* They can shoot at other entities (NPCs and other submarines).
+* They can send reports back to control about their actions.
+* They can broadcast messages to other submarines.
+* They can scan their surroundings and report back on the directions and locations of other entities (including buried treasure).
+* They can become worn and rusty and require fixing using puzzles.
+* They can `!interact` with NPCs, including taking photos of them.
+* They can be upgraded both in terms of their power and through additional keywords that allow for more interesting upgrades (`ALTANTIS/subs/subsystems/upgrades.py`).
+* They can dock at docking stations, assigning roles to players and allowing them into secret Discord channels.
 
-Fixes:
-- [x] Trading should cease at movement rather than tick.
-- [x] Remove "focus sash" idea.
-- [x] Fix issues when bot is deleted (causes A Lot).
-- [x] !mapall should also show treasure
-- [x] Sub "is online" should have tick emoji in !status
-- [x] Communicate power ERRORS better (e.g. "x has too much power")
-- [x] Tell _everyone_ when it's activated/deactivated.
-- [x] !zoom, which shouts about the attributes/treasure of a given square (CONTROL)
-- [x] Standardise commands to _team_ _strings_ _coordinates_.
-- [x] Crane with more power can go up/down faster.
+These all operate on a "tick" system - you schedule your actions and then they resolve each minute.
+
+### NPCs
+There is an extensible NPC system. The base NPC class allows you to define entities which act each turn (`npc_tick`), can attack, move towards subs or randomly, and be photographable. There's a bunch of additional functionality which can be seen in the `ALTANTIS/npcs` folder, including the class itself (`npcs.py`) and many examples (`templates.py`).
+
+### Map
+The map system allows you to introduce *attributes* to squares in it, that allow it to do different things. There are attributes for weather (to make sub motion faster/slower), whether it is an obstacle, whether it is a ruin and so on. Unless you want your game to take weeks, I would recommend using a small map size. `ALTANTIS/world` has various functions for these.
+
+## Anyway
+I'm writing this README on the evening after the game, and I think I don't need to write any more. Also I'm tired. So, thank you for reading, and if you played, thank you for playing. And with that, I don't need to touch this cursed codebase any more.
