@@ -106,7 +106,7 @@ async def perform_timestep(counter : int):
         messages = submessages[sub._name]
         if messages["captain"] == "":
             if sub._name not in map(lambda s: s._name, subsubset):
-                if sub.power.total_power == 0:
+                if sub.power.total_power <= 0:
                     messages["captain"] = "Your submarine is **dead** so nothing happened.\n"
                 else:
                     messages["captain"] = "Your submarine is deactivated so nothing happened.\n"
