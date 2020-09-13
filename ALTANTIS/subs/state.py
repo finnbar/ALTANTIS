@@ -6,6 +6,7 @@ from ALTANTIS.subs.sub import sub_from_dict, Submarine
 from ALTANTIS.utils.actions import DiscordAction
 
 from typing import Dict, List, Any, Callable, Awaitable, Optional
+from copy import deepcopy
 import discord
 
 state : Dict[str, Submarine] = {}
@@ -76,9 +77,10 @@ def state_to_dict() -> Dict[str, Dict[str, Any]]:
     Convert our state to a dictionary. This just runs to_dict on each member of
     the state.
     """
+    temp_state = deepcopy(state)
     state_dict = {}
-    for subname in state:
-        state_dict[subname] = state[subname].to_dict()
+    for subname in temp_state:
+        state_dict[subname] = temp_state[subname].to_dict()
     return state_dict
 
 def state_from_dict(dictionary : Dict[str, Dict[str, Any]], client : discord.Client):

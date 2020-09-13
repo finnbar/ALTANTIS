@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 """
 Deals with NPCs in general, and how they operate.
 (Individual NPCs will be put elsewhere.)
@@ -241,9 +242,10 @@ def add_npc(npctype : str, x : int, y : int, sub : Optional[str]):
 
 def npcs_to_json() -> Dict[str, Union[List[Dict[str, Any]], int]]:
     npcs_list = []
-    for npc in npcs:
-        npcs_list.append(npcs[npc].__dict__.copy())
-        npcs_list[-1]["classname"] = npcs[npc].classname
+    npcs_temp = deepcopy(npcs)
+    for npc in npcs_temp:
+        npcs_list.append(npcs_temp[npc].__dict__.copy())
+        npcs_list[-1]["classname"] = npcs_temp[npc].classname
     return {"npcs": npcs_list, "counter": npc_max_id}
 
 def npcs_from_json(json : Dict[str, Any]):

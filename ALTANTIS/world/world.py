@@ -3,6 +3,7 @@ Deals with the world map, which submarines explore.
 """
 import string
 from functools import reduce
+from copy import deepcopy
 
 from ALTANTIS.utils.text import list_to_and_separated
 from ALTANTIS.utils.direction import reverse_dir, directions
@@ -280,9 +281,10 @@ def map_to_dict() -> Dict[str, Any]:
     We also append a class identifier so they can be recreated correctly.
     """
     undersea_map_dicts : List[List[Dict[str, Any]]] = [[{} for _ in range(Y_LIMIT)] for _ in range(X_LIMIT)]
+    undersea_map_temp = deepcopy(undersea_map)
     for i in range(X_LIMIT):
         for j in range(Y_LIMIT):
-            undersea_map_dicts[i][j] = undersea_map[i][j]._to_dict()
+            undersea_map_dicts[i][j] = undersea_map_temp[i][j]._to_dict()
     return {"map": undersea_map_dicts, "x_limit": X_LIMIT, "y_limit": Y_LIMIT}
 
 def map_from_dict(dictionary: Dict[str, Any]):
