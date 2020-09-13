@@ -141,5 +141,8 @@ def get_status(team : str, loop) -> DiscordAction:
 
 def get_scan(team : str) -> DiscordAction:
     def do_scan(sub):
-        return Message(sub.scan.previous_scan())
+        message = sub.scan.previous_scan()
+        if message != "":
+            return Message(message)
+        return Message("No scan done yet!")
     return with_sub(team, do_scan, FAIL_REACT)

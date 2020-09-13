@@ -100,7 +100,10 @@ class MovementControls():
             if loop and loop.next_iteration:
                 time_until_next = loop.next_iteration.timestamp() - datetime.datetime.now().timestamp()
             threshold = self.get_square().difficulty()
-            turns_until_move = math.ceil(max(threshold - self.movement_progress, 0) / power_system.get_power("engines"))
+            # TODO: FIx this properly
+            turns_until_move = 1
+            if power_system.get_power("engines") > 0:
+                turns_until_move = math.ceil(max(threshold - self.movement_progress, 0) / power_system.get_power("engines"))
             turns_plural = "turns" if turns_until_move > 1 else "turn"
             time_until_move = time_until_next + GAME_SPEED * (turns_until_move - 1)
             message += f"Submarine is currently online. {TICK}\n"
