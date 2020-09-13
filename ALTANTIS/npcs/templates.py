@@ -422,18 +422,18 @@ class Trader(NPC):
     async def on_tick(self):
         await super().on_tick()
         for sub in self.all_subs_in_square():
-            await sub.send_message(f"{self.name()} here! Use `!interact 1` to pay 2 Gold for one {self.resource.title()}, or `!interact 2` to pay one {self.resource.title()} for 2 Gold.", "captain")
+            await sub.send_message(f"{self.name()} here! Use `!interact 1` to pay 2 {CURRENCY_NAME} for one {self.resource.title()}, or `!interact 2` to pay one {self.resource.title()} for 2 {CURRENCY_NAME}.", "captain")
 
     async def interact(self, sub, option):
         if option == "1":
-            if sub.inventory.remove("gold", 2):
+            if sub.inventory.remove(CURRENCY_NAME, 2):
                 sub.inventory.add(self.resource, 1)
-                return f"Traded two Gold for one {self.resource.title()}!"
+                return f"Traded two {CURRENCY_NAME} for one {self.resource.title()}!"
             return "Could not perform that trade!"
         elif option == "2":
             if sub.inventory.remove(self.resource, 1):
-                sub.inventory.add("gold", 2)
-                return f"Traded one {self.resource.title()} for two Gold!"
+                sub.inventory.add(CURRENCY_NAME, 2)
+                return f"Traded one {self.resource.title()} for two {CURRENCY_NAME}!"
             return "Could not perform that trade!"
         return "Invalid option."
 
