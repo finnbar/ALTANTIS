@@ -255,8 +255,8 @@ class Urchin(PhotographableNPC):
     async def attack(self):
         new_visited = []
         for sub in self.all_subs_in_square():
-            new_visited.append(sub.name)
-            if sub.name not in self.visited:
+            new_visited.append(sub._name)
+            if sub._name not in self.visited:
                 await self.do_attack(sub, 1, f"{self.name()} jumped out from hiding and did 1 damage on your arrival!")
         self.visited = new_visited
 
