@@ -164,7 +164,7 @@ class MantaRay(PhotographableNPC):
         self.photo += "manta-ray.png"
     
     async def interact(self, sub, arg):
-        photo_message = super().interact(sub, arg)
+        photo_message = await super().interact(sub, arg)
         return f"The manta ray swims happily!\n{photo_message}"
     
     async def deathrattle(self):
@@ -340,7 +340,7 @@ class NewsBuoy(NPC):
         self.health = 5
 
     async def send_message(self, content, _):
-        await notify_news(content)
+        await notify_news(f"{self.x}, {self.y}: {content}")
 
 class Mine(NPC):
     classname = "mine"
