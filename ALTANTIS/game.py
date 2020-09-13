@@ -128,21 +128,24 @@ def save_game():
     This must be called at the end of the loop, as to guarantee that we're
     not about to overwrite important data being written during it.
     """
-    if NO_SAVE:
-        print("SAVE FAILED")
-        return False
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    state_dict = state_to_dict()
-    map_dict = map_to_dict()
-    npcs_dict = npcs_to_json()
-    # Write a new save at this timestamp.
-    with gzip.open(f"saves/state/{timestamp}.json.gz", "wt") as state_file:
-        json.dump(state_dict, state_file)
-    with gzip.open(f"saves/map/{timestamp}.json.gz", "wt") as map_file:
-        json.dump(map_dict, map_file)
-    with gzip.open(f"saves/npc/{timestamp}.json.gz", "wt") as npcs_file:
-        json.dump(npcs_dict, npcs_file)
-    return True
+    try:
+        if NO_SAVE:
+            print("SAVE FAILED")
+            return False
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        state_dict = state_to_dict()
+        map_dict = map_to_dict()
+        npcs_dict = npcs_to_json()
+        # Write a new save at this timestamp.
+        with gzip.open(f"saves/state/{timestamp}.json.gz", "wt") as state_file:
+            json.dump(state_dict, state_file)
+        with gzip.open(f"saves/map/{timestamp}.json.gz", "wt") as map_file:
+            json.dump(map_dict, map_file)
+        with gzip.open(f"saves/npc/{timestamp}.json.gz", "wt") as npcs_file:
+            json.dump(npcs_dict, npcs_file)
+        return True
+    except Exception as e:
+        print(e)
 
 def load_game(which : str, offset : int, bot):
     """
