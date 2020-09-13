@@ -196,7 +196,8 @@ async def kill_npc(id : int, rattle : bool = True) -> bool:
     return False
 
 async def npc_tick():
-    for npc in npcs:
+    all_npcs = list(npcs.keys())
+    for npc in all_npcs:
         await npcs[npc].on_tick()
 
 def filtered_npcs(pred : Callable[[NPC], bool]) -> List[NPC]:
